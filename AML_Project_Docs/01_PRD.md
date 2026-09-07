@@ -1,7 +1,7 @@
 # Product Requirements Document (PRD)
 
 **Product:** An Explainable Graph-Enhanced Machine Learning Framework for Adaptive Anti-Money Laundering Detection
-**Author:** Ankush Pratham (24BCE1937) — Document generated from SDLC/SRS source
+**Author:** Ankush Pratham (24BCE1937)  Document generated from SDLC/SRS source
 **Version:** 1.0
 **Date:** 2 September 2026
 **Related documents:** [TRD](./02_TRD.md) · [Backend Schema](./03_Backend_Schema.md) · [Design Scheme](./04_Design_Scheme.md) · [Implementation Plan](./05_Implementation_Plan.md)
