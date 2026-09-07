@@ -1,0 +1,65 @@
+"use client";
+
+import { useState, type FormEvent } from "react";
+
+import { createClient } from "@/lib/supabase/client";
+
+export function ForgotPasswordForm() {
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<
+    "idle" | "submitting" | "sent" | "error"
+  >("idle");
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setStatus("submitting");
+
+    const supabase = createClient();
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/login`,
+    });
+
+    setStatus(error ? "error" : "sent");
+  }
+
+  if (status === "sent") {
+    return (
+      <p className="text-body text-text-primary">
+        If an account exists for that email, a reset link has been sent.
+      </p>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1.5">
+        <label htmlFor="email" className="text-label text-text-secondary">
+          Email
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          autoComplete="email"
+          required
+          value={email}
+          onChange={(event) => setEmail(event.target.value)}
+          className="text-body border-border bg-surface text-text-primary focus:border-accent rounded-md border px-3 py-2 outline-none"
+        />
+        {status === "error" && (
+          <p role="alert" className="text-caption text-risk-high">
+            Something went wrong. Please try again.
+          </p>
+        )}
+      </div>
+
+      <button
+        type="submit"
+        disabled={status === "submitting"}
+        className="text-body bg-accent mt-2 rounded-md px-4 py-2 font-medium text-white transition-opacity disabled:opacity-60"
+      >
+        {status === "submitting" ? "Sending…" : "Send reset link"}
+      </button>
+    </form>
+  );
+}

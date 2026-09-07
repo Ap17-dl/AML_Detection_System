@@ -1,0 +1,119 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — mirrors 04_Design_Scheme.md §2 exactly (colors, radii, elevation).
+ * Light values live on :root; dark values apply automatically via prefers-color-scheme,
+ * or explicitly via [data-theme="dark"]/[data-theme="light"] once a user picks a theme
+ * from the topbar (see src/lib/theme.ts) — mirrors the artifact theming convention so the
+ * app respects OS preference by default but can be overridden and persisted.
+ */
+:root {
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --border: #e2e5ea;
+  --text-primary: #14161a;
+  --text-secondary: #5b6270;
+  --accent: #2e5aac;
+  --risk-low: #1e8e5a;
+  --risk-medium: #b8791a;
+  --risk-high: #c23b3b;
+  --status-open: #5b6270;
+  --status-in-progress: #2e5aac;
+  --status-closed: #1e8e5a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115;
+    --surface: #1a1d23;
+    --border: #2a2e37;
+    --text-primary: #edeff2;
+    --text-secondary: #9ba1ac;
+    --accent: #5b86d9;
+    --risk-low: #3fbe86;
+    --risk-medium: #e0a93c;
+    --risk-high: #e5615f;
+    --status-open: #9ba1ac;
+    --status-in-progress: #5b86d9;
+    --status-closed: #3fbe86;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f1115;
+  --surface: #1a1d23;
+  --border: #2a2e37;
+  --text-primary: #edeff2;
+  --text-secondary: #9ba1ac;
+  --accent: #5b86d9;
+  --risk-low: #3fbe86;
+  --risk-medium: #e0a93c;
+  --risk-high: #e5615f;
+  --status-open: #9ba1ac;
+  --status-in-progress: #5b86d9;
+  --status-closed: #3fbe86;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-accent: var(--accent);
+  --color-risk-low: var(--risk-low);
+  --color-risk-medium: var(--risk-medium);
+  --color-risk-high: var(--risk-high);
+  --color-status-open: var(--status-open);
+  --color-status-in-progress: var(--status-in-progress);
+  --color-status-closed: var(--status-closed);
+
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
+
+  /* Radius scale (§2.4): 6px inputs/buttons is Tailwind's default `rounded-md`, 12px
+     modals is the default `rounded-xl` — only the 10px card radius needs a custom token. */
+  --radius-card: 10px;
+}
+
+body {
+  background: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: var(--font-sans), system-ui, sans-serif;
+}
+
+/* Typography scale (§2.2) — named to match the Design Scheme's own token names. */
+@layer utilities {
+  .text-display {
+    font-size: 28px;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+  .text-h2 {
+    font-size: 20px;
+    font-weight: 600;
+    line-height: 1.3;
+  }
+  .text-h3 {
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+  .text-body {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.5;
+  }
+  .text-caption {
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.4;
+  }
+  .text-label {
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.3;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+}
