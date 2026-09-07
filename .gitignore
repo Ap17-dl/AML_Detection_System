@@ -19,6 +19,10 @@ frontend/coverage/
 frontend/*.tsbuildinfo
 frontend/next-env.d.ts
 
+# Locally-installed agent skills (e.g. `npx skills add`) — not part of the app
+.agents/
+.claude/
+
 # Env files — never commit secrets
 .env
 .env.*
