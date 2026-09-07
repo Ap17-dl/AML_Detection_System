@@ -38,7 +38,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
         <button
           type="button"
           onClick={handleSignOut}
-          className="text-body border-border text-text-primary hover:bg-bg rounded-md border px-3 py-1.5"
+          className="text-body border-border text-text-primary hover:bg-bg focus-visible:ring-accent rounded-md border px-3 py-1.5 transition-all duration-150 ease-out hover:-translate-y-px hover:shadow-sm focus:outline-none focus-visible:ring-2"
         >
           Sign out
         </button>

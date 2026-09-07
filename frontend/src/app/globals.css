@@ -82,6 +82,25 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+/* Subtle entrance for cards/alerts. Guarded by prefers-reduced-motion so it's opt-in only when
+   the user hasn't asked the OS to reduce motion — no JS feature-detection needed. */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-slide-up {
+    animation: fade-slide-up 350ms ease-out both;
+  }
+}
+
 /* Typography scale (§2.2) — named to match the Design Scheme's own token names. */
 @layer utilities {
   .text-display {

@@ -23,7 +23,7 @@ export function Sidebar({ role }: { role: Role }) {
           <Link
             key={item.label}
             href={item.href}
-            className={`text-body rounded-md px-3 py-2 transition-colors ${
+            className={`text-body focus-visible:ring-accent rounded-md px-3 py-2 transition-colors outline-none focus-visible:ring-2 ${
               pathname === item.href
                 ? "bg-accent/10 text-accent font-medium"
                 : "text-text-primary hover:bg-bg"

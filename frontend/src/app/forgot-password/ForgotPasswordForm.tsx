@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 
+import { Spinner } from "@/components/ui/icons";
 import { createClient } from "@/lib/supabase/client";
 
 export function ForgotPasswordForm() {
@@ -24,7 +25,7 @@ export function ForgotPasswordForm() {
 
   if (status === "sent") {
     return (
-      <p className="text-body text-text-primary">
+      <p className="animate-fade-slide-up text-body text-text-primary">
         If an account exists for that email, a reset link has been sent.
       </p>
     );
@@ -44,10 +45,13 @@ export function ForgotPasswordForm() {
           required
           value={email}
           onChange={(event) => setEmail(event.target.value)}
-          className="text-body border-border bg-surface text-text-primary focus:border-accent rounded-md border px-3 py-2 outline-none"
+          className="text-body border-border bg-surface text-text-primary focus:border-accent focus:ring-accent/30 rounded-md border px-3 py-2 transition-colors outline-none focus:ring-2"
         />
         {status === "error" && (
-          <p role="alert" className="text-caption text-risk-high">
+          <p
+            role="alert"
+            className="animate-fade-slide-up text-caption text-risk-high"
+          >
             Something went wrong. Please try again.
           </p>
         )}
@@ -56,8 +60,9 @@ export function ForgotPasswordForm() {
       <button
         type="submit"
         disabled={status === "submitting"}
-        className="text-body bg-accent mt-2 rounded-md px-4 py-2 font-medium text-white transition-opacity disabled:opacity-60"
+        className="text-body bg-accent focus-visible:ring-accent focus-visible:ring-offset-surface mt-2 flex items-center justify-center gap-2 rounded-md px-4 py-2 font-medium text-white transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 hover:enabled:-translate-y-px hover:enabled:shadow-md active:enabled:translate-y-0 disabled:opacity-60"
       >
+        {status === "submitting" && <Spinner className="size-4" />}
         {status === "submitting" ? "Sending…" : "Send reset link"}
       </button>
     </form>
