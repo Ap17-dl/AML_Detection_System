@@ -1,0 +1,333 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import Link from "next/link";
+
+import type { IngestionReport } from "@/types/data";
+
+/**
+ * CSV Import flow — Design Scheme §4.3 (AML-FR-04/05/06).
+ *
+ * Drag-and-drop → upload → progress → ingestion report (accepted/rejected + errors).
+ */
+
+interface ImportClientProps {
+  accessToken: string;
+  apiBaseUrl: string;
+}
+
+export default function ImportClient({
+  accessToken,
+  apiBaseUrl,
+}: ImportClientProps) {
+  const [isDragging, setIsDragging] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [report, setReport] = useState<IngestionReport | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleDrop = useCallback(
+    (e: React.DragEvent) => {
+      e.preventDefault();
+      setIsDragging(false);
+      const droppedFile = e.dataTransfer.files[0];
+      if (droppedFile?.name.endsWith(".csv")) {
+        setFile(droppedFile);
+        setReport(null);
+        setError(null);
+      } else {
+        setError("Only .csv files are accepted.");
+      }
+    },
+    [],
+  );
+
+  const handleFileSelect = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const selectedFile = e.target.files?.[0];
+      if (selectedFile) {
+        setFile(selectedFile);
+        setReport(null);
+        setError(null);
+      }
+    },
+    [],
+  );
+
+  async function handleUpload() {
+    if (!file) return;
+    setUploading(true);
+    setProgress(20);
+    setError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      setProgress(50);
+      const res = await fetch(`${apiBaseUrl}/api/v1/transactions/import`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body: formData,
+      });
+
+      setProgress(90);
+
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        throw new Error(
+          body?.error?.message ?? `Upload failed (${res.status})`,
+        );
+      }
+
+      const result: IngestionReport = await res.json();
+      setReport(result);
+      setProgress(100);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Upload failed.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  return (
+    <div className="mx-auto max-w-3xl space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-display text-text-primary">Import Transactions</h1>
+          <p className="text-body text-text-secondary mt-1">
+            Upload a CSV file to ingest transaction data.
+          </p>
+        </div>
+        <Link
+          href="/transactions"
+          className="text-body text-accent hover:text-accent/80 transition-colors"
+        >
+          ← Back to Transactions
+        </Link>
+      </div>
+
+      {/* Drop zone */}
+      {!report && (
+        <div
+          onDragOver={(e) => {
+            e.preventDefault();
+            setIsDragging(true);
+          }}
+          onDragLeave={() => setIsDragging(false)}
+          onDrop={handleDrop}
+          className={`border-border bg-surface flex flex-col items-center justify-center gap-4 rounded-[var(--radius-card)] border-2 border-dashed p-12 transition-colors ${
+            isDragging
+              ? "border-accent bg-accent/5"
+              : "hover:border-accent/50"
+          }`}
+        >
+          <div className="text-4xl">📂</div>
+          <p className="text-body text-text-primary">
+            {file ? file.name : "Drag & drop a CSV file here"}
+          </p>
+          <p className="text-caption text-text-secondary">
+            {file
+              ? `${(file.size / 1024).toFixed(1)} KB`
+              : "or click to browse"}
+          </p>
+          {!file && (
+            <label className="bg-accent/10 text-accent text-body cursor-pointer rounded-md px-4 py-2 font-medium transition-colors hover:bg-accent/20">
+              Browse files
+              <input
+                type="file"
+                accept=".csv"
+                onChange={handleFileSelect}
+                className="hidden"
+              />
+            </label>
+          )}
+          {file && !uploading && (
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={handleUpload}
+                className="bg-accent hover:bg-accent/90 text-white text-body rounded-md px-6 py-2 font-medium transition-all duration-150 hover:-translate-y-px hover:shadow-md"
+              >
+                Upload & Import
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setFile(null);
+                  setError(null);
+                }}
+                className="text-body text-text-secondary hover:text-text-primary transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Progress bar */}
+      {uploading && (
+        <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6">
+          <p className="text-body text-text-primary mb-3">
+            Uploading and validating…
+          </p>
+          <div className="bg-border h-2 overflow-hidden rounded-full">
+            <div
+              className="bg-accent h-full rounded-full transition-all duration-500"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {error && (
+        <div className="bg-risk-high/10 border-risk-high/30 text-risk-high rounded-[var(--radius-card)] border p-4">
+          <p className="text-body font-medium">Import failed</p>
+          <p className="text-caption mt-1">{error}</p>
+        </div>
+      )}
+
+      {/* Ingestion report */}
+      {report && (
+        <div className="space-y-4">
+          <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
+            <h2 className="text-h2 text-text-primary mb-4">
+              Ingestion Report
+            </h2>
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-bg rounded-md p-4 text-center">
+                <p className="text-display text-text-primary">
+                  {report.total_rows}
+                </p>
+                <p className="text-caption text-text-secondary mt-1">
+                  Total Rows
+                </p>
+              </div>
+              <div className="bg-risk-low/10 rounded-md p-4 text-center">
+                <p className="text-display text-risk-low">
+                  {report.accepted_rows}
+                </p>
+                <p className="text-caption text-text-secondary mt-1">
+                  Accepted
+                </p>
+              </div>
+              <div className="bg-risk-high/10 rounded-md p-4 text-center">
+                <p className="text-display text-risk-high">
+                  {report.rejected_rows}
+                </p>
+                <p className="text-caption text-text-secondary mt-1">
+                  Rejected
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Error details */}
+          {report.errors.length > 0 && (
+            <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
+              <h3 className="text-h3 text-text-primary mb-3">
+                Validation Errors ({report.errors.length})
+              </h3>
+              <div className="max-h-80 overflow-y-auto">
+                <table className="w-full text-left">
+                  <thead>
+                    <tr className="border-border border-b">
+                      <th className="text-label text-text-secondary px-3 py-2">
+                        Row
+                      </th>
+                      <th className="text-label text-text-secondary px-3 py-2">
+                        Field
+                      </th>
+                      <th className="text-label text-text-secondary px-3 py-2">
+                        Error
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {report.errors.map((err, i) => (
+                      <tr
+                        key={i}
+                        className="border-border border-b last:border-b-0"
+                      >
+                        <td className="text-caption font-mono px-3 py-2">
+                          {err.row}
+                        </td>
+                        <td className="text-caption font-mono text-accent px-3 py-2">
+                          {err.field}
+                        </td>
+                        <td className="text-caption text-text-secondary px-3 py-2">
+                          {err.message}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Actions */}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/transactions"
+              className="bg-accent hover:bg-accent/90 text-white text-body rounded-md px-4 py-2 font-medium transition-all duration-150"
+            >
+              View Transactions
+            </Link>
+            <button
+              type="button"
+              onClick={() => {
+                setReport(null);
+                setFile(null);
+                setProgress(0);
+              }}
+              className="border-border text-body text-text-primary hover:bg-bg rounded-md border px-4 py-2 transition-colors"
+            >
+              Import Another
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* CSV format guide */}
+      {!report && (
+        <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
+          <h3 className="text-h3 text-text-primary mb-3">
+            Expected CSV Format
+          </h3>
+          <p className="text-body text-text-secondary mb-3">
+            Required columns:{" "}
+            <code className="bg-bg text-accent rounded px-1.5 py-0.5 font-mono text-xs">
+              origin_account
+            </code>
+            ,{" "}
+            <code className="bg-bg text-accent rounded px-1.5 py-0.5 font-mono text-xs">
+              destination_account
+            </code>
+            ,{" "}
+            <code className="bg-bg text-accent rounded px-1.5 py-0.5 font-mono text-xs">
+              amount
+            </code>
+            ,{" "}
+            <code className="bg-bg text-accent rounded px-1.5 py-0.5 font-mono text-xs">
+              occurred_at
+            </code>
+          </p>
+          <p className="text-caption text-text-secondary">
+            Optional:{" "}
+            <code className="font-mono text-xs">external_ref</code>,{" "}
+            <code className="font-mono text-xs">currency</code>,{" "}
+            <code className="font-mono text-xs">transaction_type</code>,{" "}
+            <code className="font-mono text-xs">channel</code>,{" "}
+            <code className="font-mono text-xs">origin_customer_name</code>,{" "}
+            <code className="font-mono text-xs">destination_customer_name</code>
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}

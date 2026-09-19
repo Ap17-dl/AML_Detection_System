@@ -16,8 +16,13 @@ export function Topbar({ user }: { user: CurrentUser }) {
   const router = useRouter();
 
   async function handleSignOut() {
-    const supabase = createClient();
-    await supabase.auth.signOut();
+    document.cookie = "aml_dev_token=; path=/; max-age=0";
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+    } catch {
+      // Supabase remote unreachable
+    }
     router.push("/login");
     router.refresh();
   }

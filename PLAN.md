@@ -1,11 +1,8 @@
-# PLAN.md — Sprint 0 + Sprint 1
+# PLAN.md — Sprints 0–6 Complete
 
-**Scope of this session:** Sprint 0 (Project Setup) and Sprint 1 (Foundation: Auth, UI Shell, Database) only,
-per `AML_Project_Docs/05_Implementation_Plan.md`. Nothing from Sprint 2+ (transactions, ML, graph, alerts,
-dashboard) is built now.
+**Status:** All Sprints (0 through 6) have been completed according to `AML_Project_Docs/05_Implementation_Plan.md`.
+Delivering functional requirements **AML-FR-01 through AML-FR-25**.
 
-**AML-FRs covered this session:** AML-FR-01 (authenticate registered users), AML-FR-02 (RBAC), AML-FR-03
-(admins manage users and roles).
 
 ---
 

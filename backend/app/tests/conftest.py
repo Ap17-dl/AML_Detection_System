@@ -58,6 +58,12 @@ class FakeResult:
     def scalar_one_or_none(self):
         return self._scalar
 
+    def scalar(self):
+        return self._scalar
+
+    def scalars(self):
+        return self
+
 
 class FakeSession:
     """Scripted stand-in for AsyncSession: queue up results before each call under test."""
@@ -76,6 +82,9 @@ class FakeSession:
 
     def add(self, obj) -> None:
         self.added.append(obj)
+
+    async def flush(self) -> None:
+        pass
 
     async def commit(self) -> None:
         self.committed = True

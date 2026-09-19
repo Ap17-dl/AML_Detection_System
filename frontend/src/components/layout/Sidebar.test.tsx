@@ -12,7 +12,8 @@ describe("Sidebar", () => {
     render(<Sidebar role="administrator" />);
     const link = screen.getByRole("link", { name: "Dashboard" });
     expect(link).toHaveAttribute("href", "/dashboard");
-    expect(screen.getByText("Administration").tagName).not.toBe("A");
+    const adminLink = screen.getByRole("link", { name: "Administration" });
+    expect(adminLink).toHaveAttribute("href", "/admin");
   });
 
   it("omits Administration entirely from the sidebar for a data operator's view", () => {

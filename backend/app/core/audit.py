@@ -11,7 +11,7 @@ async def record_audit_log(
     actor_user_id: uuid.UUID,
     action: str,
     entity_type: str,
-    entity_id: uuid.UUID,
+    entity_id: uuid.UUID | None = None,
     details: dict | None = None,
 ) -> None:
     """Writes one immutable audit trail row. Callers commit as part of their own transaction.

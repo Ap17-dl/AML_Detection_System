@@ -1,11 +1,29 @@
-export default function DashboardPage() {
+import { redirect } from "next/navigation";
+
+import DashboardClient from "@/components/dashboard/DashboardClient";
+import { fetchCurrentUser } from "@/lib/api";
+import { env } from "@/lib/env";
+import { createClient } from "@/lib/supabase/server";
+
+export default async function DashboardPage() {
+  const supabase = await createClient();
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  if (!session) {
+    redirect("/login");
+  }
+
+  const user = await fetchCurrentUser(session.access_token);
+
   return (
-    <div className="flex h-full flex-col items-center justify-center gap-2 text-center">
-      <p className="text-h2 text-text-primary">Dashboard</p>
-      <p className="text-body text-text-secondary max-w-sm">
-        Transaction volumes, alert counts, and risk distribution will appear
-        here once ingestion and alerting are built (Sprint 6).
-      </p>
+    <div className="p-6">
+      <DashboardClient
+        accessToken={session.access_token}
+        apiBaseUrl={env.apiBaseUrl}
+        role={user.role}
+      />
     </div>
   );
 }

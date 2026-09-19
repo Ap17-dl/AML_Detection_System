@@ -1,0 +1,30 @@
+{
+  "model_version": "xgb_v1.0.0",
+  "algorithm": "XGBoost",
+  "trained_at": "2026-09-19T16:59:48.549021+00:00",
+  "training_dataset": "synthetic_aml_5000",
+  "precision_score": 1.0,
+  "recall_score": 1.0,
+  "f1_score": 1.0,
+  "pr_auc": 1.0,
+  "roc_auc": 1.0,
+  "false_positive_rate": 0.0,
+  "false_negative_rate": 0.0,
+  "threshold_low_max": 0.3,
+  "threshold_medium_max": 0.7,
+  "feature_names": [
+    "amount",
+    "log_amount",
+    "hour_of_day",
+    "day_of_week",
+    "is_weekend",
+    "is_night",
+    "is_round_amount",
+    "channel_online",
+    "channel_branch",
+    "channel_atm",
+    "channel_wire",
+    "txn_velocity_24h",
+    "amount_to_avg_ratio"
+  ]
+}

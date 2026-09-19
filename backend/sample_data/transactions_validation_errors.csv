@@ -1,0 +1,6 @@
+external_ref,origin_account,destination_account,amount,currency,transaction_type,channel,occurred_at,origin_customer_name,destination_customer_name,origin_customer_country,destination_customer_country
+TXN-VALID-01,ACC-VALID-01,ACC-VALID-02,500.00,USD,transfer,online,2026-03-01T12:00:00Z,John Doe,Jane Doe,US,US
+TXN-ERR-MISSING-DEST,ACC-VALID-01,,1200.00,USD,transfer,online,2026-03-01T12:05:00Z,John Doe,,US,US
+TXN-ERR-NEG-AMOUNT,ACC-VALID-01,ACC-VALID-02,-450.00,USD,transfer,online,2026-03-01T12:10:00Z,John Doe,Jane Doe,US,US
+TXN-ERR-BAD-DATE,ACC-VALID-01,ACC-VALID-02,300.00,USD,transfer,online,not-a-valid-date-time,John Doe,Jane Doe,US,US
+TXN-ERR-SELF-TRANSFER,ACC-SAME-01,ACC-SAME-01,250.00,USD,transfer,online,2026-03-01T12:20:00Z,John Doe,John Doe,US,US

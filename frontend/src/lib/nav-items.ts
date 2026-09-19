@@ -12,12 +12,12 @@ const ANALYST_AND_ADMIN: Role[] = ["administrator", "aml_analyst"];
 
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", roles: ALL_STAFF },
-  { label: "Transactions", roles: ALL_STAFF },
-  { label: "Alerts", roles: ANALYST_AND_ADMIN },
-  { label: "Customers", roles: ANALYST_AND_ADMIN },
-  { label: "Network Explorer", roles: ANALYST_AND_ADMIN },
-  { label: "Reports", roles: ANALYST_AND_ADMIN },
-  { label: "Administration", roles: ["administrator"] },
+  { label: "Transactions", href: "/transactions", roles: ALL_STAFF },
+  { label: "Alerts", href: "/alerts", roles: ANALYST_AND_ADMIN },
+  { label: "Customers", href: "/customers", roles: ANALYST_AND_ADMIN },
+  { label: "Network Explorer", href: "/network", roles: ANALYST_AND_ADMIN },
+  { label: "Reports", href: "/reports", roles: ANALYST_AND_ADMIN },
+  { label: "Administration", href: "/admin", roles: ["administrator"] },
 ];
 
 export function navItemsForRole(role: Role): NavItem[] {
