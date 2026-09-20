@@ -10,6 +10,9 @@ const { redirect, getUser, getSession, fetchCurrentUser } = vi.hoisted(() => ({
 }));
 
 vi.mock("next/navigation", () => ({ redirect }));
+vi.mock("next/headers", () => ({
+  cookies: async () => ({ get: () => undefined }),
+}));
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({ auth: { getUser, getSession } }),
 }));

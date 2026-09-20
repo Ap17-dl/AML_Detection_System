@@ -1,7 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+import { RequestAdminModal } from "@/components/layout/RequestAdminModal";
 import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import { createClient } from "@/lib/supabase/client";
 import type { CurrentUser, Role } from "@/types/auth";
@@ -14,6 +16,7 @@ const ROLE_LABELS: Record<Role, string> = {
 
 export function Topbar({ user }: { user: CurrentUser }) {
   const router = useRouter();
+  const [showAdminModal, setShowAdminModal] = useState(false);
 
   async function handleSignOut() {
     document.cookie = "aml_dev_token=; path=/; max-age=0";
@@ -33,6 +36,15 @@ export function Topbar({ user }: { user: CurrentUser }) {
         {process.env.NODE_ENV === "production" ? "Production" : "Development"}
       </span>
       <div className="flex items-center gap-4">
+        {user.role !== "administrator" && (
+          <button
+            type="button"
+            onClick={() => setShowAdminModal(true)}
+            className="text-caption font-medium text-accent hover:text-white border border-accent/40 bg-accent/10 hover:bg-accent rounded-md px-3 py-1.5 transition-all shadow-sm"
+          >
+            Request Admin Access
+          </button>
+        )}
         <ThemeToggle />
         <div className="text-body text-right">
           <p className="text-text-primary">{user.full_name ?? user.email}</p>
@@ -48,6 +60,12 @@ export function Topbar({ user }: { user: CurrentUser }) {
           Sign out
         </button>
       </div>
+
+      <RequestAdminModal
+        user={user}
+        isOpen={showAdminModal}
+        onClose={() => setShowAdminModal(false)}
+      />
     </header>
   );
 }

@@ -177,12 +177,20 @@ export function LoginForm() {
           {isSubmitting ? "Signing in…" : "Sign in"}
         </button>
 
-        <Link
-          href="/forgot-password"
-          className="text-caption text-text-secondary hover:text-accent self-center transition-colors"
-        >
-          Forgot password?
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link
+            href="/forgot-password"
+            className="text-caption text-text-secondary hover:text-accent transition-colors"
+          >
+            Forgot password?
+          </Link>
+          <Link
+            href="/signup"
+            className="text-caption font-medium text-accent hover:underline transition-colors"
+          >
+            Create account →
+          </Link>
+        </div>
       </form>
 
       {/* Demo Personas for Quick Access */}

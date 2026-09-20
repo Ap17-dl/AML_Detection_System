@@ -86,9 +86,56 @@ async def get_current_user(
     )
     row = result.first()
     if row is None:
-        raise ApiError(
-            401, "unknown_user", "Token is valid but no matching user profile was found."
-        )
+        # User authenticated via Supabase Auth but profile not yet synced to local database.
+        # Auto-provision user in auth.users and public.users.
+        email = claims.get("email") or ""
+        metadata = claims.get("user_metadata") or {}
+        full_name = metadata.get("full_name") or (email.split("@")[0] if email else "User")
+        try:
+            role_id = int(metadata.get("role_id") or 2)
+        except (ValueError, TypeError):
+            role_id = 2
+        # Disallow role 1 (administrator) via signup; only analyst (2) or operator (3) allowed.
+        if role_id not in (2, 3):
+            role_id = 2
+
+        try:
+            from sqlalchemy import text
+
+            await db.execute(
+                text("""
+                    INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data)
+                    VALUES (:uid, :email, json_build_object('full_name', cast(:full_name as text))::jsonb, json_build_object('role_id', cast(:role_id as int))::jsonb)
+                    ON CONFLICT (id) DO NOTHING
+                """),
+                {"uid": user_id, "email": email, "full_name": full_name, "role_id": role_id},
+            )
+            await db.execute(
+                text("""
+                    INSERT INTO public.users (user_id, email, full_name, role_id)
+                    VALUES (:uid, :email, :full_name, :role_id)
+                    ON CONFLICT (user_id) DO UPDATE SET
+                        email = EXCLUDED.email,
+                        full_name = COALESCE(EXCLUDED.full_name, public.users.full_name)
+                """),
+                {"uid": user_id, "email": email, "full_name": full_name, "role_id": role_id},
+            )
+            await db.commit()
+
+            result = await db.execute(
+                select(User, Role.role_name)
+                .join(Role, User.role_id == Role.role_id)
+                .where(User.user_id == user_id)
+            )
+            row = result.first()
+        except Exception:
+            await db.rollback()
+            row = None
+
+        if row is None:
+            raise ApiError(
+                401, "unknown_user", "Token is valid but no matching user profile was found."
+            )
 
     user, role_name = row
     if not user.is_active:

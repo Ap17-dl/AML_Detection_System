@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/AppShell";
@@ -10,30 +11,39 @@ import { createClient } from "@/lib/supabase/server";
  * users are blocked). Runs server-side before any page content streams to the client.
  */
 export default async function AppLayout({ children }: { children: ReactNode }) {
-  const supabase = await createClient();
+  const cookieStore = await cookies();
+  const devToken = cookieStore.get("aml_dev_token")?.value;
 
-  // getUser() re-validates the JWT against Supabase Auth (unlike getSession(), which only reads
-  // the local cookie) — the stronger check to gate on before trusting the session at all.
-  const {
-    data: { user: authUser },
-    error: authError,
-  } = await supabase.auth.getUser();
+  let accessToken = devToken;
 
-  if (authError || !authUser) {
-    redirect("/login");
-  }
+  if (!accessToken) {
+    const supabase = await createClient();
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+    // getUser() re-validates the JWT against Supabase Auth (unlike getSession(), which only reads
+    // the local cookie) — the stronger check to gate on before trusting the session at all.
+    const {
+      data: { user: authUser },
+      error: authError,
+    } = await supabase.auth.getUser();
 
-  if (!session) {
-    redirect("/login");
+    if (authError || !authUser) {
+      redirect("/login");
+    }
+
+    const {
+      data: { session },
+    } = await supabase.auth.getSession();
+
+    if (!session) {
+      redirect("/login");
+    }
+
+    accessToken = session.access_token;
   }
 
   let currentUser;
   try {
-    currentUser = await fetchCurrentUser(session.access_token);
+    currentUser = await fetchCurrentUser(accessToken);
   } catch {
     return (
       <div className="bg-bg flex min-h-screen items-center justify-center p-8">

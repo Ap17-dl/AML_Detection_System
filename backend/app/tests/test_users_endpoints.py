@@ -115,3 +115,32 @@ async def test_update_user_role_404_for_unknown_user(fake_session):
 
     assert response.status_code == 404
     assert response.json()["error"]["code"] == "user_not_found"
+
+
+async def test_request_admin_access_by_non_admin(fake_session):
+    async with api_client(current_user=ANALYST, fake_session=fake_session) as client:
+        response = await client.post(
+            "/api/v1/users/request-admin",
+            json={"reason": "Need admin access for audits."},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "submitted"
+    assert data["host_notified"] is True
+    assert fake_session.committed
+    assert len(fake_session.added) == 1  # audit log entry
+
+
+async def test_request_admin_access_by_existing_admin(fake_session):
+    async with api_client(current_user=ADMIN, fake_session=fake_session) as client:
+        response = await client.post(
+            "/api/v1/users/request-admin",
+            json={"reason": "Already admin test."},
+        )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "already_admin"
+    assert data["host_notified"] is False
+

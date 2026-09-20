@@ -7,12 +7,19 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.deps import resolve_role_id
 from app.core.audit import record_audit_log
 from app.core.errors import ApiError
-from app.core.security import CurrentUser, require_role
+from app.core.security import CurrentUser, get_current_user, require_role
 from app.core.supabase_admin import SupabaseAdminClient, get_supabase_admin_client
 from app.db.session import get_db
 from app.models.role import Role, RoleName
 from app.models.user import User
-from app.schemas.user import UserInviteRequest, UserOut, UserRoleUpdateRequest
+from app.schemas.user import (
+    AdminAccessRequestIn,
+    AdminAccessRequestOut,
+    UserInviteRequest,
+    UserOut,
+    UserRoleUpdateRequest,
+)
+from app.services.email import send_admin_request_email
 
 router = APIRouter(prefix="/users", tags=["users"])
 
@@ -107,3 +114,53 @@ async def update_user_role(
         created_at=target.created_at,
         last_login_at=target.last_login_at,
     )
+
+
+@router.post("/request-admin", response_model=AdminAccessRequestOut)
+async def request_admin_access(
+    payload: AdminAccessRequestIn,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(get_current_user),
+) -> AdminAccessRequestOut:
+    """Submits an administrator access request from an authenticated staff member.
+
+    Sends an email notification to the platform host via the Resend API and records an audit log.
+    """
+    if current_user.role_name == RoleName.ADMINISTRATOR:
+        return AdminAccessRequestOut(
+            status="already_admin",
+            message="You already have Administrator privileges.",
+            host_notified=False,
+        )
+
+    # 1. Record in immutable audit logs
+    await record_audit_log(
+        db,
+        actor_user_id=current_user.user_id,
+        action="admin_access_requested",
+        entity_type="user",
+        entity_id=current_user.user_id,
+        details={
+            "requested_by": current_user.email,
+            "current_role": current_user.role_name,
+            "reason": payload.reason,
+        },
+    )
+    await db.commit()
+
+    # 2. Send email to host via Resend API
+    email_result = await send_admin_request_email(
+        applicant_email=current_user.email,
+        applicant_name=current_user.full_name or current_user.email.split("@")[0],
+        current_role=current_user.role_name,
+        reason=payload.reason,
+        user_id=str(current_user.user_id),
+    )
+
+    return AdminAccessRequestOut(
+        status="submitted",
+        message="Your request for Administrator access has been submitted to the platform host.",
+        host_notified=email_result.get("sent", False),
+        email_delivery=email_result,
+    )
+

@@ -13,6 +13,9 @@ class Settings(BaseSettings):
     supabase_service_role_key: str = ""
     database_url: str = ""
     cors_allow_origins: str = "http://localhost:3000"
+    resend_api_key: str = ""
+    host_email: str = "ankushprathamswe@gmail.com"
+    resend_from_email: str = "AML Detection System <onboarding@resend.dev>"
 
     @property
     def cors_origins(self) -> list[str]:

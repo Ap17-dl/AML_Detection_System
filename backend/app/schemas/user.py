@@ -32,3 +32,15 @@ class UserInviteRequest(BaseModel):
 
 class UserRoleUpdateRequest(BaseModel):
     role: str = Field(description="One of: administrator, aml_analyst, data_operator")
+
+
+class AdminAccessRequestIn(BaseModel):
+    reason: str = Field(default="", max_length=1000, description="Justification for requesting admin access")
+
+
+class AdminAccessRequestOut(BaseModel):
+    status: str
+    message: str
+    host_notified: bool
+    email_delivery: dict | None = None
+
