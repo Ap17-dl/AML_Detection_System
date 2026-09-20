@@ -1,7 +1,6 @@
 """Prediction endpoints for transaction AML risk scoring (AML-FR-07, AML-FR-08, AML-FR-09)."""
 
 import uuid
-from decimal import Decimal
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy import select
@@ -70,8 +69,6 @@ async def list_models(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ) -> list[ModelMetadataOut]:
-    result = await db.execute(
-        select(ModelMetadata).order_by(ModelMetadata.created_at.desc())
-    )
+    result = await db.execute(select(ModelMetadata).order_by(ModelMetadata.created_at.desc()))
     models = result.scalars().all()
     return [ModelMetadataOut.model_validate(m) for m in models]

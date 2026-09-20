@@ -27,21 +27,18 @@ export default function ImportClient({
   const [report, setReport] = useState<IngestionReport | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const handleDrop = useCallback(
-    (e: React.DragEvent) => {
-      e.preventDefault();
-      setIsDragging(false);
-      const droppedFile = e.dataTransfer.files[0];
-      if (droppedFile?.name.endsWith(".csv")) {
-        setFile(droppedFile);
-        setReport(null);
-        setError(null);
-      } else {
-        setError("Only .csv files are accepted.");
-      }
-    },
-    [],
-  );
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const droppedFile = e.dataTransfer.files[0];
+    if (droppedFile?.name.endsWith(".csv")) {
+      setFile(droppedFile);
+      setReport(null);
+      setError(null);
+    } else {
+      setError("Only .csv files are accepted.");
+    }
+  }, []);
 
   const handleFileSelect = useCallback(
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -96,7 +93,9 @@ export default function ImportClient({
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-display text-text-primary">Import Transactions</h1>
+          <h1 className="text-display text-text-primary">
+            Import Transactions
+          </h1>
           <p className="text-body text-text-secondary mt-1">
             Upload a CSV file to ingest transaction data.
           </p>
@@ -119,9 +118,7 @@ export default function ImportClient({
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
           className={`border-border bg-surface flex flex-col items-center justify-center gap-4 rounded-[var(--radius-card)] border-2 border-dashed p-12 transition-colors ${
-            isDragging
-              ? "border-accent bg-accent/5"
-              : "hover:border-accent/50"
+            isDragging ? "border-accent bg-accent/5" : "hover:border-accent/50"
           }`}
         >
           <div className="text-4xl">📂</div>
@@ -134,7 +131,7 @@ export default function ImportClient({
               : "or click to browse"}
           </p>
           {!file && (
-            <label className="bg-accent/10 text-accent text-body cursor-pointer rounded-md px-4 py-2 font-medium transition-colors hover:bg-accent/20">
+            <label className="bg-accent/10 text-accent text-body hover:bg-accent/20 cursor-pointer rounded-md px-4 py-2 font-medium transition-colors">
               Browse files
               <input
                 type="file"
@@ -149,7 +146,7 @@ export default function ImportClient({
               <button
                 type="button"
                 onClick={handleUpload}
-                className="bg-accent hover:bg-accent/90 text-white text-body rounded-md px-6 py-2 font-medium transition-all duration-150 hover:-translate-y-px hover:shadow-md"
+                className="bg-accent hover:bg-accent/90 text-body rounded-md px-6 py-2 font-medium text-white transition-all duration-150 hover:-translate-y-px hover:shadow-md"
               >
                 Upload & Import
               </button>
@@ -195,9 +192,7 @@ export default function ImportClient({
       {report && (
         <div className="space-y-4">
           <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
-            <h2 className="text-h2 text-text-primary mb-4">
-              Ingestion Report
-            </h2>
+            <h2 className="text-h2 text-text-primary mb-4">Ingestion Report</h2>
             <div className="grid grid-cols-3 gap-4">
               <div className="bg-bg rounded-md p-4 text-center">
                 <p className="text-display text-text-primary">
@@ -253,10 +248,10 @@ export default function ImportClient({
                         key={i}
                         className="border-border border-b last:border-b-0"
                       >
-                        <td className="text-caption font-mono px-3 py-2">
+                        <td className="text-caption px-3 py-2 font-mono">
                           {err.row}
                         </td>
-                        <td className="text-caption font-mono text-accent px-3 py-2">
+                        <td className="text-caption text-accent px-3 py-2 font-mono">
                           {err.field}
                         </td>
                         <td className="text-caption text-text-secondary px-3 py-2">
@@ -274,7 +269,7 @@ export default function ImportClient({
           <div className="flex items-center gap-3">
             <Link
               href="/transactions"
-              className="bg-accent hover:bg-accent/90 text-white text-body rounded-md px-4 py-2 font-medium transition-all duration-150"
+              className="bg-accent hover:bg-accent/90 text-body rounded-md px-4 py-2 font-medium text-white transition-all duration-150"
             >
               View Transactions
             </Link>
@@ -318,8 +313,7 @@ export default function ImportClient({
             </code>
           </p>
           <p className="text-caption text-text-secondary">
-            Optional:{" "}
-            <code className="font-mono text-xs">external_ref</code>,{" "}
+            Optional: <code className="font-mono text-xs">external_ref</code>,{" "}
             <code className="font-mono text-xs">currency</code>,{" "}
             <code className="font-mono text-xs">transaction_type</code>,{" "}
             <code className="font-mono text-xs">channel</code>,{" "}

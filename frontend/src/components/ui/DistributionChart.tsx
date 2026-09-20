@@ -1,19 +1,29 @@
 "use client";
 
-import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+  ResponsiveContainer,
+  Legend,
+} from "recharts";
 
 interface DistributionChartProps {
   data: { name: string; value: number; color: string }[];
   height?: number;
 }
 
-export function DistributionChart({ data, height = 240 }: DistributionChartProps) {
+export function DistributionChart({
+  data,
+  height = 240,
+}: DistributionChartProps) {
   const total = data.reduce((sum, d) => sum + d.value, 0);
 
   if (total === 0) {
     return (
       <div
-        className="flex items-center justify-center rounded-lg border border-border bg-bg text-caption text-text-secondary"
+        className="border-border bg-bg text-caption text-text-secondary flex items-center justify-center rounded-lg border"
         style={{ height }}
       >
         No activity recorded yet.
@@ -42,12 +52,19 @@ export function DistributionChart({ data, height = 240 }: DistributionChartProps
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
                 const item = payload[0].payload;
-                const pct = total > 0 ? ((item.value / total) * 100).toFixed(1) : "0";
+                const pct =
+                  total > 0 ? ((item.value / total) * 100).toFixed(1) : "0";
                 return (
-                  <div className="rounded-md border border-border bg-surface p-2 shadow-md text-xs">
-                    <p className="font-semibold capitalize text-text-primary">{item.name}</p>
+                  <div className="border-border bg-surface rounded-md border p-2 text-xs shadow-md">
+                    <p className="text-text-primary font-semibold capitalize">
+                      {item.name}
+                    </p>
                     <p className="text-text-secondary mt-0.5">
-                      Count: <span className="font-mono font-medium">{item.value}</span> ({pct}%)
+                      Count:{" "}
+                      <span className="font-mono font-medium">
+                        {item.value}
+                      </span>{" "}
+                      ({pct}%)
                     </p>
                   </div>
                 );
@@ -59,7 +76,9 @@ export function DistributionChart({ data, height = 240 }: DistributionChartProps
             verticalAlign="bottom"
             height={36}
             formatter={(value) => (
-              <span className="text-xs text-text-secondary capitalize">{value}</span>
+              <span className="text-text-secondary text-xs capitalize">
+                {value}
+              </span>
             )}
           />
         </PieChart>

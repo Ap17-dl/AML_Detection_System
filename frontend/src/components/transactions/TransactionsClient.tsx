@@ -61,7 +61,17 @@ export default function TransactionsClient({
     } finally {
       setLoading(false);
     }
-  }, [accessToken, apiBaseUrl, page, search, dateFrom, dateTo, channel, sortColumn, sortOrder]);
+  }, [
+    accessToken,
+    apiBaseUrl,
+    page,
+    search,
+    dateFrom,
+    dateTo,
+    channel,
+    sortColumn,
+    sortOrder,
+  ]);
 
   useEffect(() => {
     fetchTransactions();
@@ -83,7 +93,7 @@ export default function TransactionsClient({
       label: "Timestamp",
       sortable: true,
       render: (t) => (
-        <span className="font-mono text-caption">
+        <span className="text-caption font-mono">
           {new Date(t.occurred_at).toLocaleString()}
         </span>
       ),
@@ -92,7 +102,7 @@ export default function TransactionsClient({
       key: "origin_account_id",
       label: "Origin",
       render: (t) => (
-        <span className="font-mono text-caption">
+        <span className="text-caption font-mono">
           {t.origin_account_id.slice(0, 8)}…
         </span>
       ),
@@ -101,7 +111,7 @@ export default function TransactionsClient({
       key: "destination_account_id",
       label: "Destination",
       render: (t) => (
-        <span className="font-mono text-caption">
+        <span className="text-caption font-mono">
           {t.destination_account_id.slice(0, 8)}…
         </span>
       ),
@@ -151,9 +161,12 @@ export default function TransactionsClient({
       {/* Top bar */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-page-title text-text-primary">Transaction Monitoring</h1>
+          <h1 className="text-page-title text-text-primary">
+            Transaction Monitoring
+          </h1>
           <p className="text-body text-text-secondary">
-            Inspect live transactions, review ML risk evaluations, and filter by risk category.
+            Inspect live transactions, review ML risk evaluations, and filter by
+            risk category.
           </p>
         </div>
         {canImport && (
@@ -173,14 +186,17 @@ export default function TransactionsClient({
           placeholder="Search by ref or account…"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="border-border bg-bg text-body text-text-primary placeholder:text-text-secondary rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-accent min-w-[200px] flex-1"
+          className="border-border bg-bg text-body text-text-primary placeholder:text-text-secondary focus:ring-accent min-w-[200px] flex-1 rounded-md border px-3 py-2 outline-none focus:ring-2"
         />
         <div className="flex items-center gap-2">
           <label className="text-caption text-text-secondary">From</label>
           <input
             type="date"
             value={dateFrom}
-            onChange={(e) => { setDateFrom(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setDateFrom(e.target.value);
+              setPage(1);
+            }}
             className="border-border bg-bg text-body text-text-primary rounded-md border px-2 py-1.5"
           />
         </div>
@@ -189,13 +205,19 @@ export default function TransactionsClient({
           <input
             type="date"
             value={dateTo}
-            onChange={(e) => { setDateTo(e.target.value); setPage(1); }}
+            onChange={(e) => {
+              setDateTo(e.target.value);
+              setPage(1);
+            }}
             className="border-border bg-bg text-body text-text-primary rounded-md border px-2 py-1.5"
           />
         </div>
         <select
           value={channel}
-          onChange={(e) => { setChannel(e.target.value); setPage(1); }}
+          onChange={(e) => {
+            setChannel(e.target.value);
+            setPage(1);
+          }}
           className="border-border bg-bg text-body text-text-primary rounded-md border px-3 py-2"
         >
           <option value="">All Channels</option>
@@ -230,15 +252,19 @@ export default function TransactionsClient({
       {/* Transaction Detail Drawer */}
       {selectedTxn && (
         <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-sm">
-          <div className="border-border bg-surface flex h-full w-full max-w-lg flex-col border-l p-6 shadow-2xl overflow-y-auto">
+          <div className="border-border bg-surface flex h-full w-full max-w-lg flex-col overflow-y-auto border-l p-6 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-4">
               <div>
-                <h2 className="text-section-title text-text-primary">Transaction Details</h2>
-                <span className="font-mono text-xs text-text-secondary">{selectedTxn.transaction_id}</span>
+                <h2 className="text-section-title text-text-primary">
+                  Transaction Details
+                </h2>
+                <span className="text-text-secondary font-mono text-xs">
+                  {selectedTxn.transaction_id}
+                </span>
               </div>
               <button
                 onClick={() => setSelectedTxn(null)}
-                className="rounded-md p-1.5 text-text-secondary hover:bg-bg hover:text-text-primary"
+                className="text-text-secondary hover:bg-bg hover:text-text-primary rounded-md p-1.5"
               >
                 ✕
               </button>
@@ -246,8 +272,8 @@ export default function TransactionsClient({
 
             <div className="mt-6 flex flex-col gap-6">
               {/* ML Risk Evaluation Card */}
-              <div className="rounded-lg border border-border bg-bg p-4 flex flex-col gap-3">
-                <span className="text-label text-text-secondary uppercase tracking-wider font-semibold">
+              <div className="border-border bg-bg flex flex-col gap-3 rounded-lg border p-4">
+                <span className="text-label text-text-secondary font-semibold tracking-wider uppercase">
                   ML Risk Evaluation
                 </span>
                 <div className="flex items-center justify-between">
@@ -255,32 +281,36 @@ export default function TransactionsClient({
                   <RiskBadge category={selectedTxn.risk_category} />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <div className="flex justify-between text-body text-text-secondary">
+                  <div className="text-body text-text-secondary flex justify-between">
                     <span>Probability of Laundering</span>
-                    <span className="font-mono font-medium text-text-primary">
+                    <span className="text-text-primary font-mono font-medium">
                       {selectedTxn.risk_probability != null
                         ? `${(selectedTxn.risk_probability * 100).toFixed(1)}%`
                         : "Pending evaluation"}
                     </span>
                   </div>
                   {selectedTxn.risk_probability != null && (
-                    <div className="h-2 w-full rounded-full bg-border overflow-hidden">
+                    <div className="bg-border h-2 w-full overflow-hidden rounded-full">
                       <div
                         className={`h-full rounded-full ${
                           selectedTxn.risk_category === "high"
                             ? "bg-red-500"
                             : selectedTxn.risk_category === "medium"
-                            ? "bg-amber-500"
-                            : "bg-emerald-500"
+                              ? "bg-amber-500"
+                              : "bg-emerald-500"
                         }`}
-                        style={{ width: `${Math.min(100, selectedTxn.risk_probability * 100)}%` }}
+                        style={{
+                          width: `${Math.min(100, selectedTxn.risk_probability * 100)}%`,
+                        }}
                       />
                     </div>
                   )}
                 </div>
-                <div className="flex justify-between text-xs text-text-secondary border-t pt-2 mt-1">
+                <div className="text-text-secondary mt-1 flex justify-between border-t pt-2 text-xs">
                   <span>Scoring Model</span>
-                  <span className="font-mono">{selectedTxn.model_version ?? "XGBoost v1.0"}</span>
+                  <span className="font-mono">
+                    {selectedTxn.model_version ?? "XGBoost v1.0"}
+                  </span>
                 </div>
               </div>
 
@@ -293,13 +323,15 @@ export default function TransactionsClient({
 
               {/* Transaction Properties */}
               <div className="flex flex-col gap-3">
-                <span className="text-label text-text-secondary uppercase tracking-wider font-semibold">
+                <span className="text-label text-text-secondary font-semibold tracking-wider uppercase">
                   Transaction Metadata
                 </span>
-                <div className="grid grid-cols-2 gap-4 text-body">
+                <div className="text-body grid grid-cols-2 gap-4">
                   <div>
-                    <span className="text-text-secondary text-caption block">Amount</span>
-                    <span className="font-mono font-semibold text-lg">
+                    <span className="text-text-secondary text-caption block">
+                      Amount
+                    </span>
+                    <span className="font-mono text-lg font-semibold">
                       {Number(selectedTxn.amount).toLocaleString(undefined, {
                         style: "currency",
                         currency: selectedTxn.currency || "USD",
@@ -307,28 +339,42 @@ export default function TransactionsClient({
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary text-caption block">Type</span>
-                    <span className="capitalize">{selectedTxn.transaction_type ?? "Standard Transfer"}</span>
+                    <span className="text-text-secondary text-caption block">
+                      Type
+                    </span>
+                    <span className="capitalize">
+                      {selectedTxn.transaction_type ?? "Standard Transfer"}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary text-caption block">Channel</span>
-                    <span className="capitalize">{selectedTxn.channel ?? "Online"}</span>
+                    <span className="text-text-secondary text-caption block">
+                      Channel
+                    </span>
+                    <span className="capitalize">
+                      {selectedTxn.channel ?? "Online"}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary text-caption block">Timestamp</span>
+                    <span className="text-text-secondary text-caption block">
+                      Timestamp
+                    </span>
                     <span className="text-caption font-mono">
                       {new Date(selectedTxn.occurred_at).toLocaleString()}
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary text-caption block">Origin Account ID</span>
-                    <span className="font-mono text-xs text-text-primary break-all">
+                    <span className="text-text-secondary text-caption block">
+                      Origin Account ID
+                    </span>
+                    <span className="text-text-primary font-mono text-xs break-all">
                       {selectedTxn.origin_account_id}
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary text-caption block">Destination Account ID</span>
-                    <span className="font-mono text-xs text-text-primary break-all">
+                    <span className="text-text-secondary text-caption block">
+                      Destination Account ID
+                    </span>
+                    <span className="text-text-primary font-mono text-xs break-all">
                       {selectedTxn.destination_account_id}
                     </span>
                   </div>

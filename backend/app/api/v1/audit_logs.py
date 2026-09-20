@@ -61,22 +61,22 @@ async def list_audit_logs(
     logs = (await db.execute(query)).scalars().all()
 
     items = []
-    for l in logs:
+    for log_entry in logs:
         user_email = None
-        if l.user_id:
-            u = await db.get(User, l.user_id)
+        if log_entry.user_id:
+            u = await db.get(User, log_entry.user_id)
             user_email = u.email if u else None
 
         items.append(
             AuditLogOut(
-                audit_id=l.audit_id,
-                user_id=l.user_id,
+                audit_id=log_entry.audit_id,
+                user_id=log_entry.user_id,
                 user_email=user_email,
-                action=l.action,
-                entity_type=l.entity_type,
-                entity_id=l.entity_id,
-                details=l.details,
-                created_at=l.created_at,
+                action=log_entry.action,
+                entity_type=log_entry.entity_type,
+                entity_id=log_entry.entity_id,
+                details=log_entry.details,
+                created_at=log_entry.created_at,
             )
         )
 

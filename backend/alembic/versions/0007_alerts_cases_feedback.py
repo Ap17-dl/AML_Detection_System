@@ -149,7 +149,8 @@ def upgrade() -> None:
     # ── Row Level Security ───────────────────────────────────────────────────
     for table in ("alerts", "case_notes", "analyst_feedback"):
         op.execute(f"ALTER TABLE public.{table} ENABLE ROW LEVEL SECURITY;")
-        op.execute(f"""
+        op.execute(
+            f"""
             CREATE POLICY {table}_staff_all ON public.{table}
             FOR ALL
             USING (
@@ -161,13 +162,16 @@ def upgrade() -> None:
                       AND r.role_name IN ('administrator', 'aml_analyst')
                 )
             );
-        """)
-        op.execute(f"""
+        """
+        )
+        op.execute(
+            f"""
             CREATE POLICY {table}_service_write ON public.{table}
             FOR ALL
             USING (auth.jwt() ->> 'role' = 'service_role')
             WITH CHECK (auth.jwt() ->> 'role' = 'service_role');
-        """)
+        """
+        )
 
 
 def downgrade() -> None:

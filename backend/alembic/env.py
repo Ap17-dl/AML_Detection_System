@@ -9,7 +9,15 @@ from app.core.config import get_settings
 from app.db.base import Base
 
 # Import models so their tables register on Base.metadata for autogenerate support.
-from app.models import Account, AuditLog, Customer, IngestionBatch, Role, Transaction, User  # noqa: F401
+from app.models import (  # noqa: F401
+    Account,
+    AuditLog,
+    Customer,
+    IngestionBatch,
+    Role,
+    Transaction,
+    User,
+)
 
 config = context.config
 

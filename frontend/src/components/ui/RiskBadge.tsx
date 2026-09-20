@@ -11,7 +11,10 @@ interface RiskBadgeProps {
   className?: string;
 }
 
-const CONFIG: Record<string, { label: string; dotClass: string; textClass: string }> = {
+const CONFIG: Record<
+  string,
+  { label: string; dotClass: string; textClass: string }
+> = {
   low: {
     label: "Low",
     dotClass: "bg-risk-low",

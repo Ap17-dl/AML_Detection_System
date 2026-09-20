@@ -1,11 +1,10 @@
 """Transaction endpoints — AML-FR-04 (CSV import), AML-FR-05 (validation), AML-FR-06 (search/filter/paginate)."""
 
 import uuid
-
 from typing import Any
 
-from fastapi import APIRouter, Depends, Query, UploadFile, File
-from sqlalchemy import select, func, or_
+from fastapi import APIRouter, Depends, File, Query, UploadFile
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit import record_audit_log
@@ -106,9 +105,6 @@ async def list_transactions(
     if search:
         # Search by external_ref or join to accounts for account_number
         search_pattern = f"%{search}%"
-        origin_acct = select(Account.account_id).where(
-            Account.account_number.ilike(search_pattern)
-        ).scalar_subquery()
         query = query.where(
             or_(
                 Transaction.external_ref.ilike(search_pattern),
@@ -196,9 +192,21 @@ async def list_transactions(
                 ingestion_status=t.ingestion_status,
                 ingestion_error=t.ingestion_error,
                 created_at=t.created_at,
-                risk_category=preds_by_txn[t.transaction_id].risk_category if t.transaction_id in preds_by_txn else None,
-                risk_probability=float(preds_by_txn[t.transaction_id].risk_probability) if t.transaction_id in preds_by_txn else None,
-                model_version=preds_by_txn[t.transaction_id].model_version if t.transaction_id in preds_by_txn else None,
+                risk_category=(
+                    preds_by_txn[t.transaction_id].risk_category
+                    if t.transaction_id in preds_by_txn
+                    else None
+                ),
+                risk_probability=(
+                    float(preds_by_txn[t.transaction_id].risk_probability)
+                    if t.transaction_id in preds_by_txn
+                    else None
+                ),
+                model_version=(
+                    preds_by_txn[t.transaction_id].model_version
+                    if t.transaction_id in preds_by_txn
+                    else None
+                ),
             )
             for t in transactions
         ],

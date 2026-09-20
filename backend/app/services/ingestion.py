@@ -114,9 +114,7 @@ def _validate_row(
         amount = Decimal(amount_raw)
         if amount <= 0:
             errors.append(
-                IngestionRowError(
-                    row=row_number, field="amount", message="Amount must be > 0."
-                )
+                IngestionRowError(row=row_number, field="amount", message="Amount must be > 0.")
             )
     except (InvalidOperation, ValueError):
         errors.append(

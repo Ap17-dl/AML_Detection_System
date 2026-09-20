@@ -51,9 +51,7 @@ def upgrade() -> None:
         ),
         schema="public",
     )
-    op.create_index(
-        "idx_model_metadata_active", "model_metadata", ["is_active"], schema="public"
-    )
+    op.create_index("idx_model_metadata_active", "model_metadata", ["is_active"], schema="public")
 
     # ── Predictions ───────────────────────────────────────────────────────────
     op.create_table(
@@ -94,9 +92,7 @@ def upgrade() -> None:
             "risk_category IN ('low', 'medium', 'high')",
             name="chk_predictions_risk_category",
         ),
-        sa.UniqueConstraint(
-            "transaction_id", "model_version", name="uq_prediction_per_txn_model"
-        ),
+        sa.UniqueConstraint("transaction_id", "model_version", name="uq_prediction_per_txn_model"),
         schema="public",
     )
     op.create_index("idx_predictions_txn", "predictions", ["transaction_id"], schema="public")
@@ -108,7 +104,8 @@ def upgrade() -> None:
     # ── Row Level Security ───────────────────────────────────────────────────
     for table in ("model_metadata", "predictions"):
         op.execute(f"ALTER TABLE public.{table} ENABLE ROW LEVEL SECURITY;")
-        op.execute(f"""
+        op.execute(
+            f"""
             CREATE POLICY {table}_select_staff ON public.{table}
             FOR SELECT
             USING (
@@ -120,13 +117,16 @@ def upgrade() -> None:
                       AND r.role_name IN ('administrator', 'aml_analyst', 'data_operator')
                 )
             );
-        """)
-        op.execute(f"""
+        """
+        )
+        op.execute(
+            f"""
             CREATE POLICY {table}_service_write ON public.{table}
             FOR ALL
             USING (auth.jwt() ->> 'role' = 'service_role')
             WITH CHECK (auth.jwt() ->> 'role' = 'service_role');
-        """)
+        """
+        )
 
 
 def downgrade() -> None:

@@ -163,4 +163,3 @@ async def request_admin_access(
         host_notified=email_result.get("sent", False),
         email_delivery=email_result,
     )
-

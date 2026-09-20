@@ -179,7 +179,9 @@ describe("SignUpForm", () => {
     );
     expect(options.some((text) => text?.includes("Administrator"))).toBe(false);
     expect(
-      screen.getByText(/Need Administrator access\? You can request it from the host after signing in\./i),
+      screen.getByText(
+        /Need Administrator access\? You can request it from the host after signing in\./i,
+      ),
     ).toBeInTheDocument();
   });
 });

@@ -23,7 +23,8 @@ export function LoginForm() {
     setError(null);
     setIsSubmitting(true);
 
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
 
     // If demo account email, authenticate directly via dev-login
     if (email.endsWith("@aml.local")) {
@@ -88,7 +89,8 @@ export function LoginForm() {
   async function handleDemoLogin(demoEmail: string) {
     setError(null);
     setIsSubmitting(true);
-    const apiBase = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
+    const apiBase =
+      process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8000";
     try {
       const res = await fetch(`${apiBase}/api/v1/auth/dev-login`, {
         method: "POST",
@@ -186,7 +188,7 @@ export function LoginForm() {
           </Link>
           <Link
             href="/signup"
-            className="text-caption font-medium text-accent hover:underline transition-colors"
+            className="text-caption text-accent font-medium transition-colors hover:underline"
           >
             Create account →
           </Link>
@@ -194,7 +196,7 @@ export function LoginForm() {
       </form>
 
       {/* Demo Personas for Quick Access */}
-      <div className="border-t border-border pt-4">
+      <div className="border-border border-t pt-4">
         <p className="text-caption text-text-secondary mb-2 text-center">
           Or sign in instantly with a demo role:
         </p>
@@ -203,7 +205,7 @@ export function LoginForm() {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("admin@aml.local")}
-            className="text-caption rounded border border-border bg-bg py-1.5 px-2 font-medium text-text-primary hover:border-accent hover:text-accent transition-colors disabled:opacity-50 text-center"
+            className="text-caption border-border bg-bg text-text-primary hover:border-accent hover:text-accent rounded border px-2 py-1.5 text-center font-medium transition-colors disabled:opacity-50"
           >
             Admin
           </button>
@@ -211,7 +213,7 @@ export function LoginForm() {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("analyst@aml.local")}
-            className="text-caption rounded border border-border bg-bg py-1.5 px-2 font-medium text-text-primary hover:border-accent hover:text-accent transition-colors disabled:opacity-50 text-center"
+            className="text-caption border-border bg-bg text-text-primary hover:border-accent hover:text-accent rounded border px-2 py-1.5 text-center font-medium transition-colors disabled:opacity-50"
           >
             Analyst
           </button>
@@ -219,7 +221,7 @@ export function LoginForm() {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("operator@aml.local")}
-            className="text-caption rounded border border-border bg-bg py-1.5 px-2 font-medium text-text-primary hover:border-accent hover:text-accent transition-colors disabled:opacity-50 text-center"
+            className="text-caption border-border bg-bg text-text-primary hover:border-accent hover:text-accent rounded border px-2 py-1.5 text-center font-medium transition-colors disabled:opacity-50"
           >
             Operator
           </button>

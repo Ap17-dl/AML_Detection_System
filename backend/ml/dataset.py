@@ -7,7 +7,6 @@ from __future__ import annotations
 
 import math
 from datetime import datetime
-from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -51,7 +50,9 @@ def extract_features_single(
     ch_atm = 1.0 if ch == "atm" else 0.0
     ch_wire = 1.0 if ch == "wire" else 0.0
 
-    avg_amt = historical_avg_amount if historical_avg_amount and historical_avg_amount > 0 else 500.0
+    avg_amt = (
+        historical_avg_amount if historical_avg_amount and historical_avg_amount > 0 else 500.0
+    )
     ratio = amt / avg_amt
 
     return np.array(

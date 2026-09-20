@@ -44,7 +44,7 @@ export function ExplanationPanel({
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
-          }
+          },
         );
         if (!res.ok) {
           throw new Error(`Failed to load explanation (${res.status})`);
@@ -55,7 +55,9 @@ export function ExplanationPanel({
         }
       } catch (err: unknown) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "Failed to load explanation");
+          setError(
+            err instanceof Error ? err.message : "Failed to load explanation",
+          );
         }
       } finally {
         if (!cancelled) {
@@ -72,17 +74,17 @@ export function ExplanationPanel({
 
   if (loading) {
     return (
-      <div className="rounded-lg border border-border bg-bg p-4 flex flex-col gap-3 animate-pulse">
-        <div className="h-4 w-32 bg-border rounded" />
-        <div className="h-20 bg-border/60 rounded" />
-        <div className="h-12 bg-border/40 rounded" />
+      <div className="border-border bg-bg flex animate-pulse flex-col gap-3 rounded-lg border p-4">
+        <div className="bg-border h-4 w-32 rounded" />
+        <div className="bg-border/60 h-20 rounded" />
+        <div className="bg-border/40 h-12 rounded" />
       </div>
     );
   }
 
   if (error || !data) {
     return (
-      <div className="rounded-lg border border-border bg-bg p-4 text-caption text-text-secondary">
+      <div className="border-border bg-bg text-caption text-text-secondary rounded-lg border p-4">
         {error || "No explanation data available for this transaction."}
       </div>
     );
@@ -90,21 +92,21 @@ export function ExplanationPanel({
 
   const maxAbsVal = Math.max(
     ...data.top_features.map((f) => Math.abs(f.shap_value)),
-    0.01
+    0.01,
   );
 
   return (
-    <div className="rounded-lg border border-border bg-bg p-4 flex flex-col gap-4">
+    <div className="border-border bg-bg flex flex-col gap-4 rounded-lg border p-4">
       <div className="flex items-center justify-between border-b pb-2">
-        <span className="text-label text-text-secondary uppercase tracking-wider font-semibold">
+        <span className="text-label text-text-secondary font-semibold tracking-wider uppercase">
           Explainable AI (SHAP Factors)
         </span>
-        <span className="text-xs text-text-secondary">TreeExplainer</span>
+        <span className="text-text-secondary text-xs">TreeExplainer</span>
       </div>
 
       {/* Narrative Explanation */}
-      <div className="rounded-md bg-surface border border-border/80 p-3 text-body text-text-primary text-sm leading-relaxed">
-        <p className="font-medium text-text-secondary text-xs uppercase mb-1">
+      <div className="bg-surface border-border/80 text-body text-text-primary rounded-md border p-3 text-sm leading-relaxed">
+        <p className="text-text-secondary mb-1 text-xs font-medium uppercase">
           Automated Narrative
         </p>
         <p>{data.narrative_text}</p>
@@ -112,7 +114,7 @@ export function ExplanationPanel({
 
       {/* Feature Contributions Chart */}
       <div className="flex flex-col gap-2">
-        <span className="text-xs font-medium text-text-secondary">
+        <span className="text-text-secondary text-xs font-medium">
           Top Contributing Risk Indicators
         </span>
         <div className="flex flex-col gap-2.5">
@@ -120,12 +122,12 @@ export function ExplanationPanel({
             const isRisk = feat.direction === "increases_risk";
             const percentWidth = Math.min(
               100,
-              Math.round((Math.abs(feat.shap_value) / maxAbsVal) * 100)
+              Math.round((Math.abs(feat.shap_value) / maxAbsVal) * 100),
             );
 
             return (
               <div key={feat.feature} className="flex flex-col gap-1">
-                <div className="flex items-center justify-between text-caption">
+                <div className="text-caption flex items-center justify-between">
                   <span className="text-text-primary font-medium">
                     {feat.description}
                   </span>
@@ -134,10 +136,12 @@ export function ExplanationPanel({
                       isRisk ? "text-red-500" : "text-emerald-500"
                     }`}
                   >
-                    {isRisk ? `+${feat.shap_value.toFixed(3)}` : feat.shap_value.toFixed(3)}
+                    {isRisk
+                      ? `+${feat.shap_value.toFixed(3)}`
+                      : feat.shap_value.toFixed(3)}
                   </span>
                 </div>
-                <div className="h-2 w-full rounded-full bg-border overflow-hidden">
+                <div className="bg-border h-2 w-full overflow-hidden rounded-full">
                   <div
                     className={`h-full rounded-full transition-all duration-300 ${
                       isRisk ? "bg-red-500" : "bg-emerald-500"

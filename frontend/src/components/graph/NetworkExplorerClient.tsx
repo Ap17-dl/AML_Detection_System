@@ -1,7 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { NetworkGraph, type GraphNodeData, type GraphEdgeData } from "@/components/graph/NetworkGraph";
+import {
+  NetworkGraph,
+  type GraphNodeData,
+  type GraphEdgeData,
+} from "@/components/graph/NetworkGraph";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 
 interface GraphIndicators {
@@ -48,7 +52,7 @@ export default function NetworkExplorerClient({
             headers: {
               Authorization: `Bearer ${accessToken}`,
             },
-          }
+          },
         );
         if (!res.ok) {
           throw new Error(`Account network query failed (${res.status})`);
@@ -57,15 +61,19 @@ export default function NetworkExplorerClient({
         setNodes(data.nodes || []);
         setEdges(data.edges || []);
         setIndicators(data.indicators || null);
-        const match = (data.nodes || []).find((n: GraphNodeData) => n.id === targetId);
+        const match = (data.nodes || []).find(
+          (n: GraphNodeData) => n.id === targetId,
+        );
         if (match) setSelectedNode(match);
       } catch (err: unknown) {
-        setError(err instanceof Error ? err.message : "Failed to load network graph");
+        setError(
+          err instanceof Error ? err.message : "Failed to load network graph",
+        );
       } finally {
         setLoading(false);
       }
     },
-    [apiBaseUrl, accessToken]
+    [apiBaseUrl, accessToken],
   );
 
   useEffect(() => {
@@ -86,9 +94,12 @@ export default function NetworkExplorerClient({
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-page-title text-text-primary">Network Explorer</h1>
+          <h1 className="text-page-title text-text-primary">
+            Network Explorer
+          </h1>
           <p className="text-body text-text-secondary">
-            Inspect transaction topology, fan-in/fan-out structuring, and circular laundering rings.
+            Inspect transaction topology, fan-in/fan-out structuring, and
+            circular laundering rings.
           </p>
         </div>
       </div>
@@ -98,17 +109,19 @@ export default function NetworkExplorerClient({
         onSubmit={handleSearchSubmit}
         className="border-border bg-surface flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border p-4 shadow-sm"
       >
-        <div className="flex-1 min-w-[240px]">
+        <div className="min-w-[240px] flex-1">
           <input
             type="text"
             placeholder="Enter Account ID (UUID) to inspect network…"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            className="w-full border-border bg-bg text-body text-text-primary placeholder:text-text-secondary rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-accent font-mono text-sm"
+            className="border-border bg-bg text-body text-text-primary placeholder:text-text-secondary focus:ring-accent w-full rounded-md border px-3 py-2 font-mono text-sm outline-none focus:ring-2"
           />
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-caption text-text-secondary">Neighborhood Hops</label>
+          <label className="text-caption text-text-secondary">
+            Neighborhood Hops
+          </label>
           <select
             value={hops}
             onChange={(e) => setHops(Number(e.target.value))}
@@ -121,7 +134,7 @@ export default function NetworkExplorerClient({
         </div>
         <button
           type="submit"
-          className="rounded-md bg-accent px-4 py-2 text-sm font-medium text-surface shadow-sm hover:bg-accent/90 transition-colors"
+          className="bg-accent text-surface hover:bg-accent/90 rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors"
         >
           Explore Network
         </button>
@@ -129,29 +142,39 @@ export default function NetworkExplorerClient({
 
       {/* Graph Topological Indicators */}
       {indicators && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="border-border bg-surface rounded-[var(--radius-card)] border p-4 shadow-sm">
-            <span className="text-caption text-text-secondary">Degree Centrality</span>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-2xl font-semibold font-mono">
+            <span className="text-caption text-text-secondary">
+              Degree Centrality
+            </span>
+            <div className="mt-1 flex items-baseline gap-2">
+              <span className="font-mono text-2xl font-semibold">
                 {indicators.in_degree + indicators.out_degree}
               </span>
-              <span className="text-xs text-text-secondary">
+              <span className="text-text-secondary text-xs">
                 (In: {indicators.in_degree} / Out: {indicators.out_degree})
               </span>
             </div>
           </div>
 
           <div className="border-border bg-surface rounded-[var(--radius-card)] border p-4 shadow-sm">
-            <span className="text-caption text-text-secondary">Structuring Ratios</span>
-            <div className="flex items-baseline gap-3 mt-1 font-mono text-sm">
-              <span>Fan-In: <strong>{indicators.fan_in_ratio ?? "—"}</strong></span>
-              <span>Fan-Out: <strong>{indicators.fan_out_ratio ?? "—"}</strong></span>
+            <span className="text-caption text-text-secondary">
+              Structuring Ratios
+            </span>
+            <div className="mt-1 flex items-baseline gap-3 font-mono text-sm">
+              <span>
+                Fan-In: <strong>{indicators.fan_in_ratio ?? "—"}</strong>
+              </span>
+              <span>
+                Fan-Out: <strong>{indicators.fan_out_ratio ?? "—"}</strong>
+              </span>
             </div>
           </div>
 
           <div className="border-border bg-surface rounded-[var(--radius-card)] border p-4 shadow-sm">
-            <span className="text-caption text-text-secondary">Circular Ring / Cycle</span>
+            <span className="text-caption text-text-secondary">
+              Circular Ring / Cycle
+            </span>
             <div className="mt-1">
               {indicators.is_in_cycle ? (
                 <span className="inline-flex items-center gap-1.5 rounded-full bg-red-500/10 px-2.5 py-0.5 text-xs font-semibold text-red-500">
@@ -166,20 +189,24 @@ export default function NetworkExplorerClient({
           </div>
 
           <div className="border-border bg-surface rounded-[var(--radius-card)] border p-4 shadow-sm">
-            <span className="text-caption text-text-secondary">Neighborhood Risk Score</span>
+            <span className="text-caption text-text-secondary">
+              Neighborhood Risk Score
+            </span>
             <div className="mt-1 flex items-center justify-between">
-              <span className="text-2xl font-semibold font-mono">
+              <span className="font-mono text-2xl font-semibold">
                 {indicators.neighborhood_risk_score != null
                   ? `${(indicators.neighborhood_risk_score * 100).toFixed(1)}%`
                   : "—"}
               </span>
               <RiskBadge
                 category={
-                  indicators.neighborhood_risk_score && indicators.neighborhood_risk_score >= 0.70
+                  indicators.neighborhood_risk_score &&
+                  indicators.neighborhood_risk_score >= 0.7
                     ? "high"
-                    : indicators.neighborhood_risk_score && indicators.neighborhood_risk_score >= 0.30
-                    ? "medium"
-                    : "low"
+                    : indicators.neighborhood_risk_score &&
+                        indicators.neighborhood_risk_score >= 0.3
+                      ? "medium"
+                      : "low"
                 }
               />
             </div>
@@ -188,15 +215,16 @@ export default function NetworkExplorerClient({
       )}
 
       {/* Main Canvas & Detail Sidebar */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
         <div className="lg:col-span-3">
           {error ? (
-            <div className="flex h-[450px] items-center justify-center rounded-lg border border-border bg-surface p-6 text-center text-red-500">
+            <div className="border-border bg-surface flex h-[450px] items-center justify-center rounded-lg border p-6 text-center text-red-500">
               {error}
             </div>
           ) : nodes.length === 0 && !loading ? (
-            <div className="flex h-[450px] items-center justify-center rounded-lg border border-border bg-surface p-6 text-center text-text-secondary">
-              Enter an Account ID above to generate and inspect the transactional network graph.
+            <div className="border-border bg-surface text-text-secondary flex h-[450px] items-center justify-center rounded-lg border p-6 text-center">
+              Enter an Account ID above to generate and inspect the
+              transactional network graph.
             </div>
           ) : (
             <NetworkGraph
@@ -209,38 +237,52 @@ export default function NetworkExplorerClient({
         </div>
 
         {/* Node inspector panel */}
-        <div className="border-border bg-surface rounded-[var(--radius-card)] border p-5 shadow-sm flex flex-col gap-4">
+        <div className="border-border bg-surface flex flex-col gap-4 rounded-[var(--radius-card)] border p-5 shadow-sm">
           <h2 className="text-section-title text-text-primary border-b pb-2">
             Selected Entity
           </h2>
           {selectedNode ? (
-            <div className="flex flex-col gap-3 text-body">
+            <div className="text-body flex flex-col gap-3">
               <div>
-                <span className="text-caption text-text-secondary block">Account Number</span>
-                <span className="font-mono font-semibold text-text-primary">
+                <span className="text-caption text-text-secondary block">
+                  Account Number
+                </span>
+                <span className="text-text-primary font-mono font-semibold">
                   {selectedNode.label}
                 </span>
               </div>
               <div>
-                <span className="text-caption text-text-secondary block">Account UUID</span>
-                <span className="font-mono text-xs text-text-secondary break-all">
+                <span className="text-caption text-text-secondary block">
+                  Account UUID
+                </span>
+                <span className="text-text-secondary font-mono text-xs break-all">
                   {selectedNode.id}
                 </span>
               </div>
               <div>
-                <span className="text-caption text-text-secondary block">Risk Classification</span>
+                <span className="text-caption text-text-secondary block">
+                  Risk Classification
+                </span>
                 <div className="mt-1">
                   <RiskBadge category={selectedNode.risk_category} />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-2 border-t pt-3">
                 <div>
-                  <span className="text-caption text-text-secondary block">Incoming Flows</span>
-                  <span className="font-mono font-semibold">{selectedNode.in_degree}</span>
+                  <span className="text-caption text-text-secondary block">
+                    Incoming Flows
+                  </span>
+                  <span className="font-mono font-semibold">
+                    {selectedNode.in_degree}
+                  </span>
                 </div>
                 <div>
-                  <span className="text-caption text-text-secondary block">Outgoing Flows</span>
-                  <span className="font-mono font-semibold">{selectedNode.out_degree}</span>
+                  <span className="text-caption text-text-secondary block">
+                    Outgoing Flows
+                  </span>
+                  <span className="font-mono font-semibold">
+                    {selectedNode.out_degree}
+                  </span>
                 </div>
               </div>
               <button
@@ -248,14 +290,15 @@ export default function NetworkExplorerClient({
                   setAccountId(selectedNode.id);
                   setInputVal(selectedNode.id);
                 }}
-                className="mt-4 w-full rounded-md border border-accent/40 bg-accent/10 px-3 py-2 text-xs font-semibold text-accent hover:bg-accent/20 transition-colors"
+                className="border-accent/40 bg-accent/10 text-accent hover:bg-accent/20 mt-4 w-full rounded-md border px-3 py-2 text-xs font-semibold transition-colors"
               >
                 Center Graph On This Account →
               </button>
             </div>
           ) : (
             <span className="text-caption text-text-secondary">
-              Click any node in the canvas to inspect accounts and counterparty connections.
+              Click any node in the canvas to inspect accounts and counterparty
+              connections.
             </span>
           )}
         </div>

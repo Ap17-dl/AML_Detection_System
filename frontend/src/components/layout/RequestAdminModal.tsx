@@ -114,14 +114,14 @@ export function RequestAdminModal({
             </div>
             <h3
               id="request-admin-title"
-              className="text-h3 font-semibold text-text-primary"
+              className="text-h3 text-text-primary font-semibold"
             >
               Request Dispatched to Host
             </h3>
             <p className="text-body text-text-secondary">
               An email notification has been sent to the platform host via the
-              Resend API with your justification. The host can review and approve
-              your elevation to Administrator privileges.
+              Resend API with your justification. The host can review and
+              approve your elevation to Administrator privileges.
             </p>
             <button
               type="button"
@@ -133,9 +133,9 @@ export function RequestAdminModal({
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-            <div className="flex items-center justify-between border-b border-border pb-3">
+            <div className="border-border flex items-center justify-between border-b pb-3">
               <div className="flex items-center gap-2">
-                <div className="flex size-8 items-center justify-center rounded-md bg-accent/10 text-accent">
+                <div className="bg-accent/10 text-accent flex size-8 items-center justify-center rounded-md">
                   <svg
                     viewBox="0 0 24 24"
                     fill="none"
@@ -173,20 +173,22 @@ export function RequestAdminModal({
               emailed directly to the host for verification.
             </p>
 
-            <div className="rounded-md border border-border bg-bg p-3 text-caption flex flex-col gap-1.5">
+            <div className="border-border bg-bg text-caption flex flex-col gap-1.5 rounded-md border p-3">
               <div className="flex justify-between">
                 <span className="text-text-secondary">Applicant:</span>
-                <span className="font-medium text-text-primary">
+                <span className="text-text-primary font-medium">
                   {user.full_name || user.email}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-text-secondary">Email:</span>
-                <span className="font-mono text-text-primary">{user.email}</span>
+                <span className="text-text-primary font-mono">
+                  {user.email}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-text-secondary">Current Role:</span>
-                <span className="font-medium text-text-primary capitalize">
+                <span className="text-text-primary font-medium capitalize">
                   {ROLE_LABELS[user.role]}
                 </span>
               </div>
@@ -195,7 +197,7 @@ export function RequestAdminModal({
             {error && (
               <div
                 role="alert"
-                className="animate-fade-slide-up rounded-md border border-risk-high/30 bg-risk-high/10 p-2.5 text-caption text-risk-high"
+                className="animate-fade-slide-up border-risk-high/30 bg-risk-high/10 text-caption text-risk-high rounded-md border p-2.5"
               >
                 {error}
               </div>
@@ -216,11 +218,11 @@ export function RequestAdminModal({
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="Explain why administrative privileges are required (e.g. need to manage analyst roles, configure XGBoost thresholds)..."
-                className="text-body border-border bg-surface text-text-primary focus:border-accent focus:ring-accent/30 rounded-md border p-2.5 transition-colors outline-none focus:ring-2 resize-none"
+                className="text-body border-border bg-surface text-text-primary focus:border-accent focus:ring-accent/30 resize-none rounded-md border p-2.5 transition-colors outline-none focus:ring-2"
               />
             </div>
 
-            <div className="flex justify-end gap-3 border-t border-border pt-3">
+            <div className="border-border flex justify-end gap-3 border-t pt-3">
               <button
                 type="button"
                 onClick={handleModalClose}

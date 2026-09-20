@@ -39,13 +39,19 @@ interface AdminClientProps {
   apiBaseUrl: string;
 }
 
-export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProps) {
-  const [activeTab, setActiveTab] = useState<"users" | "models" | "audit">("users");
+export default function AdminClient({
+  accessToken,
+  apiBaseUrl,
+}: AdminClientProps) {
+  const [activeTab, setActiveTab] = useState<"users" | "models" | "audit">(
+    "users",
+  );
 
   // Users state
   const [users, setUsers] = useState<UserItem[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
-  const [selectedUserToChangeRole, setSelectedUserToChangeRole] = useState<UserItem | null>(null);
+  const [selectedUserToChangeRole, setSelectedUserToChangeRole] =
+    useState<UserItem | null>(null);
   const [newRoleVal, setNewRoleVal] = useState<string>("aml_analyst");
 
   // Models state
@@ -113,7 +119,7 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
             "Content-Type": "application/json",
           },
           body: JSON.stringify({ role: newRoleVal }),
-        }
+        },
       );
       if (res.ok) {
         setSelectedUserToChangeRole(null);
@@ -130,7 +136,7 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
       key: "role",
       label: "Role",
       render: (u) => (
-        <span className="capitalize font-medium text-text-primary">
+        <span className="text-text-primary font-medium capitalize">
           {u.role.replace(/_/g, " ")}
         </span>
       ),
@@ -140,8 +146,10 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
       label: "Status",
       render: (u) => (
         <span
-          className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${
-            u.is_active ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-700"
+          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${
+            u.is_active
+              ? "bg-emerald-50 text-emerald-700"
+              : "bg-red-50 text-red-700"
           }`}
         >
           {u.is_active ? "Active" : "Suspended"}
@@ -157,7 +165,7 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
             setSelectedUserToChangeRole(u);
             setNewRoleVal(u.role);
           }}
-          className="text-xs text-accent font-medium hover:underline"
+          className="text-accent text-xs font-medium hover:underline"
         >
           Change Role
         </button>
@@ -169,40 +177,43 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
     <div className="flex flex-col gap-6">
       {/* Header */}
       <div>
-        <h1 className="text-page-title text-text-primary">Platform Administration</h1>
+        <h1 className="text-page-title text-text-primary">
+          Platform Administration
+        </h1>
         <p className="text-body text-text-secondary">
-          Manage staff RBAC roles, review ML model performance thresholds, and inspect immutable audit logs.
+          Manage staff RBAC roles, review ML model performance thresholds, and
+          inspect immutable audit logs.
         </p>
       </div>
 
       {/* Tabs */}
-      <div className="flex border-b border-border gap-6 text-sm font-medium">
+      <div className="border-border flex gap-6 border-b text-sm font-medium">
         <button
           onClick={() => setActiveTab("users")}
-          className={`pb-3 border-b-2 transition-colors ${
+          className={`border-b-2 pb-3 transition-colors ${
             activeTab === "users"
               ? "border-accent text-accent font-semibold"
-              : "border-transparent text-text-secondary hover:text-text-primary"
+              : "text-text-secondary hover:text-text-primary border-transparent"
           }`}
         >
           Staff &amp; RBAC Users ({users.length})
         </button>
         <button
           onClick={() => setActiveTab("models")}
-          className={`pb-3 border-b-2 transition-colors ${
+          className={`border-b-2 pb-3 transition-colors ${
             activeTab === "models"
               ? "border-accent text-accent font-semibold"
-              : "border-transparent text-text-secondary hover:text-text-primary"
+              : "text-text-secondary hover:text-text-primary border-transparent"
           }`}
         >
           Model Governance &amp; Thresholds
         </button>
         <button
           onClick={() => setActiveTab("audit")}
-          className={`pb-3 border-b-2 transition-colors ${
+          className={`border-b-2 pb-3 transition-colors ${
             activeTab === "audit"
               ? "border-accent text-accent font-semibold"
-              : "border-transparent text-text-secondary hover:text-text-primary"
+              : "text-text-secondary hover:text-text-primary border-transparent"
           }`}
         >
           System Audit Trail
@@ -226,48 +237,75 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
 
       {/* Tab 2: Models & Thresholds */}
       {activeTab === "models" && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
           {loadingModels ? (
-            <div className="border border-border bg-surface p-6 rounded-lg text-text-secondary animate-pulse">
+            <div className="border-border bg-surface text-text-secondary animate-pulse rounded-lg border p-6">
               Loading models & governance metadata…
             </div>
           ) : models.length === 0 ? (
-            <div className="border border-border bg-surface p-6 rounded-lg text-text-secondary">
+            <div className="border-border bg-surface text-text-secondary rounded-lg border p-6">
               No active models registered in metadata table.
             </div>
           ) : (
             models.map((m) => (
-              <div key={m.model_version} className="border border-border bg-surface rounded-[var(--radius-card)] p-5 shadow-sm flex flex-col gap-3">
+              <div
+                key={m.model_version}
+                className="border-border bg-surface flex flex-col gap-3 rounded-[var(--radius-card)] border p-5 shadow-sm"
+              >
                 <div className="flex items-center justify-between border-b pb-2">
-                  <span className="font-mono font-bold text-text-primary">{m.model_version}</span>
-                  <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-semibold">
+                  <span className="text-text-primary font-mono font-bold">
+                    {m.model_version}
+                  </span>
+                  <span className="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700">
                     {m.algorithm}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-text-secondary block">Precision Score</span>
-                    <span className="font-mono text-sm font-semibold">{m.precision_score ?? "1.000"}</span>
+                    <span className="text-text-secondary block">
+                      Precision Score
+                    </span>
+                    <span className="font-mono text-sm font-semibold">
+                      {m.precision_score ?? "1.000"}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary block">Recall Score</span>
-                    <span className="font-mono text-sm font-semibold">{m.recall_score ?? "1.000"}</span>
+                    <span className="text-text-secondary block">
+                      Recall Score
+                    </span>
+                    <span className="font-mono text-sm font-semibold">
+                      {m.recall_score ?? "1.000"}
+                    </span>
                   </div>
                   <div>
                     <span className="text-text-secondary block">F1 Score</span>
-                    <span className="font-mono text-sm font-semibold">{m.f1_score ?? "1.000"}</span>
+                    <span className="font-mono text-sm font-semibold">
+                      {m.f1_score ?? "1.000"}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary block">PR-AUC / ROC-AUC</span>
-                    <span className="font-mono text-sm font-semibold">{m.pr_auc ?? "1.00"} / {m.roc_auc ?? "1.00"}</span>
+                    <span className="text-text-secondary block">
+                      PR-AUC / ROC-AUC
+                    </span>
+                    <span className="font-mono text-sm font-semibold">
+                      {m.pr_auc ?? "1.00"} / {m.roc_auc ?? "1.00"}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary block">Low Risk Threshold</span>
-                    <span className="font-mono text-sm font-semibold">&le; {m.threshold_low_max}</span>
+                    <span className="text-text-secondary block">
+                      Low Risk Threshold
+                    </span>
+                    <span className="font-mono text-sm font-semibold">
+                      &le; {m.threshold_low_max}
+                    </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary block">Medium Risk Threshold</span>
-                    <span className="font-mono text-sm font-semibold">&le; {m.threshold_medium_max}</span>
+                    <span className="text-text-secondary block">
+                      Medium Risk Threshold
+                    </span>
+                    <span className="font-mono text-sm font-semibold">
+                      &le; {m.threshold_medium_max}
+                    </span>
                   </div>
                 </div>
               </div>
@@ -278,44 +316,53 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
 
       {/* Tab 3: System Audit Trail */}
       {activeTab === "audit" && (
-        <div className="overflow-x-auto rounded-[var(--radius-card)] border border-border bg-surface shadow-sm">
+        <div className="border-border bg-surface overflow-x-auto rounded-[var(--radius-card)] border shadow-sm">
           <table className="w-full text-left text-sm">
             <thead>
-              <tr className="border-b border-border text-xs text-text-secondary">
-                <th className="py-2.5 px-4">Timestamp</th>
-                <th className="py-2.5 px-4">User</th>
-                <th className="py-2.5 px-4">Action</th>
-                <th className="py-2.5 px-4">Entity Type</th>
+              <tr className="border-border text-text-secondary border-b text-xs">
+                <th className="px-4 py-2.5">Timestamp</th>
+                <th className="px-4 py-2.5">User</th>
+                <th className="px-4 py-2.5">Action</th>
+                <th className="px-4 py-2.5">Entity Type</th>
               </tr>
             </thead>
             <tbody>
               {loadingAudit ? (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-caption text-text-secondary animate-pulse">
+                  <td
+                    colSpan={4}
+                    className="text-caption text-text-secondary animate-pulse py-8 text-center"
+                  >
                     Loading audit trail…
                   </td>
                 </tr>
               ) : auditLogs.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="py-8 text-center text-caption text-text-secondary">
+                  <td
+                    colSpan={4}
+                    className="text-caption text-text-secondary py-8 text-center"
+                  >
                     No audit records logged yet.
                   </td>
                 </tr>
               ) : (
                 auditLogs.map((log) => (
-                  <tr key={log.audit_id} className="border-b border-border last:border-0 hover:bg-bg">
-                    <td className="py-2.5 px-4 font-mono text-xs text-text-secondary">
+                  <tr
+                    key={log.audit_id}
+                    className="border-border hover:bg-bg border-b last:border-0"
+                  >
+                    <td className="text-text-secondary px-4 py-2.5 font-mono text-xs">
                       {new Date(log.created_at).toLocaleString()}
                     </td>
-                    <td className="py-2.5 px-4 font-medium text-text-primary">
+                    <td className="text-text-primary px-4 py-2.5 font-medium">
                       {log.user_email || "System"}
                     </td>
-                    <td className="py-2.5 px-4">
-                      <span className="font-mono text-xs text-accent">
+                    <td className="px-4 py-2.5">
+                      <span className="text-accent font-mono text-xs">
                         {log.action}
                       </span>
                     </td>
-                    <td className="py-2.5 px-4 capitalize text-text-secondary">
+                    <td className="text-text-secondary px-4 py-2.5 capitalize">
                       {log.entity_type || "—"}
                     </td>
                   </tr>
@@ -328,16 +375,19 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
 
       {/* Role Change Modal */}
       {selectedUserToChangeRole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-          <div className="w-full max-w-sm rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-xl flex flex-col gap-4">
-            <h3 className="text-section-title text-text-primary">Update Staff Role</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="border-border bg-surface flex w-full max-w-sm flex-col gap-4 rounded-[var(--radius-card)] border p-6 shadow-xl">
+            <h3 className="text-section-title text-text-primary">
+              Update Staff Role
+            </h3>
             <p className="text-body text-text-secondary text-sm">
-              Change access level for <strong>{selectedUserToChangeRole.email}</strong>.
+              Change access level for{" "}
+              <strong>{selectedUserToChangeRole.email}</strong>.
             </p>
             <select
               value={newRoleVal}
               onChange={(e) => setNewRoleVal(e.target.value)}
-              className="rounded-md border border-border bg-bg p-2 text-sm text-text-primary"
+              className="border-border bg-bg text-text-primary rounded-md border p-2 text-sm"
             >
               <option value="administrator">Administrator</option>
               <option value="aml_analyst">AML Analyst</option>
@@ -346,13 +396,13 @@ export default function AdminClient({ accessToken, apiBaseUrl }: AdminClientProp
             <div className="flex justify-end gap-3 border-t pt-3">
               <button
                 onClick={() => setSelectedUserToChangeRole(null)}
-                className="rounded-md border border-border px-3 py-1.5 text-xs text-text-secondary"
+                className="border-border text-text-secondary rounded-md border px-3 py-1.5 text-xs"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRoleChange}
-                className="rounded-md bg-accent px-3 py-1.5 text-xs font-semibold text-surface"
+                className="bg-accent text-surface rounded-md px-3 py-1.5 text-xs font-semibold"
               >
                 Apply Change
               </button>

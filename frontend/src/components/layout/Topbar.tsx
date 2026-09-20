@@ -40,7 +40,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
           <button
             type="button"
             onClick={() => setShowAdminModal(true)}
-            className="text-caption font-medium text-accent hover:text-white border border-accent/40 bg-accent/10 hover:bg-accent rounded-md px-3 py-1.5 transition-all shadow-sm"
+            className="text-caption text-accent border-accent/40 bg-accent/10 hover:bg-accent rounded-md border px-3 py-1.5 font-medium shadow-sm transition-all hover:text-white"
           >
             Request Admin Access
           </button>

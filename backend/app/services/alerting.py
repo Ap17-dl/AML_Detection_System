@@ -8,9 +8,7 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
-from decimal import Decimal
-from typing import Any
+from datetime import UTC, datetime
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,7 +16,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.audit import record_audit_log
 from app.models.account import Account
 from app.models.alert import Alert, AnalystFeedback, CaseNote
-from app.models.customer import Customer
 from app.models.prediction import Prediction
 from app.models.transaction import Transaction
 from app.services.risk_profile import recalculate_customer_risk
@@ -102,7 +99,7 @@ async def submit_disposition_feedback(
 
     alert.outcome = outcome_label
     alert.status = "closed"
-    alert.closed_at = datetime.now(timezone.utc)
+    alert.closed_at = datetime.now(UTC)
 
     feedback = AnalystFeedback(
         alert_id=alert_id,
@@ -127,7 +124,9 @@ async def submit_disposition_feedback(
     # Recompute customer risk score following investigation conclusion
     if alert.customer_id:
         try:
-            await recalculate_customer_risk(db=db, customer_id=alert.customer_id, reason="alert_outcome")
+            await recalculate_customer_risk(
+                db=db, customer_id=alert.customer_id, reason="alert_outcome"
+            )
         except Exception:
             pass
 

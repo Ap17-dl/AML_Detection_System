@@ -61,7 +61,8 @@ def upgrade() -> None:
 
     # ── Row Level Security ───────────────────────────────────────────────────
     op.execute("ALTER TABLE public.graph_indicators ENABLE ROW LEVEL SECURITY;")
-    op.execute("""
+    op.execute(
+        """
         CREATE POLICY graph_indicators_select_staff ON public.graph_indicators
         FOR SELECT
         USING (
@@ -73,13 +74,16 @@ def upgrade() -> None:
                   AND r.role_name IN ('administrator', 'aml_analyst')
             )
         );
-    """)
-    op.execute("""
+    """
+    )
+    op.execute(
+        """
         CREATE POLICY graph_indicators_service_write ON public.graph_indicators
         FOR ALL
         USING (auth.jwt() ->> 'role' = 'service_role')
         WITH CHECK (auth.jwt() ->> 'role' = 'service_role');
-    """)
+    """
+    )
 
 
 def downgrade() -> None:

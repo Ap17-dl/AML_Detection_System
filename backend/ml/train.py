@@ -8,11 +8,10 @@ from __future__ import annotations
 
 import argparse
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import joblib
-import numpy as np
 import pandas as pd
 from sklearn.metrics import (
     average_precision_score,
@@ -41,7 +40,9 @@ def train_aml_model(
         df = pd.read_csv(data_path)
     else:
         print("Generating synthetic dataset (5000 records, 5% positive)...")
-        df = generate_synthetic_transactions(num_samples=5000, laundering_ratio=0.05, seed=random_state)
+        df = generate_synthetic_transactions(
+            num_samples=5000, laundering_ratio=0.05, seed=random_state
+        )
 
     X = extract_features_dataframe(df)
     y = df["is_laundering"].astype(int).to_numpy()
@@ -82,7 +83,7 @@ def train_aml_model(
     metrics = {
         "model_version": model_version,
         "algorithm": "XGBoost",
-        "trained_at": datetime.now(timezone.utc).isoformat(),
+        "trained_at": datetime.now(UTC).isoformat(),
         "training_dataset": "synthetic_aml_5000",
         "precision_score": round(precision, 4),
         "recall_score": round(recall, 4),
@@ -133,7 +134,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Train XGBoost AML detection model")
     parser.add_argument("--data", type=str, default=None, help="Input CSV path")
     parser.add_argument("--version", type=str, default="xgb_v1.0.0", help="Model version string")
-    parser.add_argument("--artifacts", type=str, default="backend/ml/artifacts", help="Artifacts directory")
+    parser.add_argument(
+        "--artifacts", type=str, default="backend/ml/artifacts", help="Artifacts directory"
+    )
     args = parser.parse_args()
 
     train_aml_model(data_path=args.data, model_version=args.version, artifacts_dir=args.artifacts)

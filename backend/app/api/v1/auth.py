@@ -1,4 +1,5 @@
 import time
+
 import jwt
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel
@@ -77,4 +78,3 @@ async def dev_login(
             role=role_name,
         ),
     )
-

@@ -1,7 +1,7 @@
 """Unit and integration tests for SHAP explanations and customer risk profiling (AML-FR-13..18)."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from app.models.customer import Customer
@@ -10,11 +10,11 @@ from app.models.explanation import Explanation
 from app.models.prediction import Prediction
 from app.models.transaction import Transaction
 from app.services.explainer import explain_transaction
-from app.tests.conftest import ADMIN, ANALYST, OPERATOR, FakeResult, FakeSession, api_client
+from app.tests.conftest import ANALYST, OPERATOR, FakeResult, api_client
 
 
 def test_explain_transaction_outputs_features_and_narrative():
-    now = datetime(2026, 3, 15, 2, 30, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 3, 15, 2, 30, 0, tzinfo=UTC)
     top_features, narrative = explain_transaction(
         amount=12500.0,
         occurred_at=now,
@@ -49,7 +49,7 @@ async def test_explanation_endpoint_allows_analyst(fake_session):
         destination_account_id=uuid.uuid4(),
         amount=Decimal("15000.00"),
         currency="USD",
-        occurred_at=datetime.now(timezone.utc),
+        occurred_at=datetime.now(UTC),
     )
     pred = Prediction(
         prediction_id=pred_id,
@@ -57,7 +57,7 @@ async def test_explanation_endpoint_allows_analyst(fake_session):
         model_version="xgb_v1.0.0",
         risk_probability=Decimal("0.92000"),
         risk_category="high",
-        predicted_at=datetime.now(timezone.utc),
+        predicted_at=datetime.now(UTC),
     )
     explanation = Explanation(
         explanation_id=uuid.uuid4(),
@@ -71,7 +71,7 @@ async def test_explanation_endpoint_allows_analyst(fake_session):
             }
         ],
         narrative_text="Flagged primarily due to transfer amount (+0.45).",
-        generated_at=datetime.now(timezone.utc),
+        generated_at=datetime.now(UTC),
     )
 
     fake_session.execute_results.append(FakeResult(scalar=txn))
@@ -94,7 +94,7 @@ async def test_customer_risk_profile_endpoint(fake_session):
         full_name="Jane Doe",
         current_risk_score=Decimal("0.7800"),
         current_risk_category="high",
-        risk_updated_at=datetime.now(timezone.utc),
+        risk_updated_at=datetime.now(UTC),
     )
     hist = CustomerRiskHistory(
         history_id=uuid.uuid4(),
@@ -102,7 +102,7 @@ async def test_customer_risk_profile_endpoint(fake_session):
         risk_score=Decimal("0.7800"),
         risk_category="high",
         reason="manual_request",
-        recorded_at=datetime.now(timezone.utc),
+        recorded_at=datetime.now(UTC),
     )
 
     fake_session.get_results[cust_id] = customer

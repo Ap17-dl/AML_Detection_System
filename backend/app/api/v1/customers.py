@@ -3,7 +3,7 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ApiError
@@ -128,7 +128,9 @@ async def get_customer_risk_profile(
     return CustomerRiskProfileOut(
         customer_id=customer.customer_id,
         full_name=customer.full_name,
-        current_risk_score=float(customer.current_risk_score) if customer.current_risk_score is not None else None,
+        current_risk_score=(
+            float(customer.current_risk_score) if customer.current_risk_score is not None else None
+        ),
         current_risk_category=customer.current_risk_category,
         risk_updated_at=customer.risk_updated_at,
         history=[
@@ -154,7 +156,7 @@ async def trigger_recalculate_risk(
     """Triggers on-demand customer risk recomputation across all linked accounts and transactions."""
     from app.services.risk_profile import recalculate_customer_risk
 
-    customer = await recalculate_customer_risk(db=db, customer_id=customer_id, reason="manual_request")
+    await recalculate_customer_risk(db=db, customer_id=customer_id, reason="manual_request")
     await db.commit()
 
     return await get_customer_risk_profile(customer_id=customer_id, db=db, _=_)

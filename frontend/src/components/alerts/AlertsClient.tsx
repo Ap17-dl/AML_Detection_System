@@ -27,7 +27,10 @@ interface AlertsClientProps {
   apiBaseUrl: string;
 }
 
-export default function AlertsClient({ accessToken, apiBaseUrl }: AlertsClientProps) {
+export default function AlertsClient({
+  accessToken,
+  apiBaseUrl,
+}: AlertsClientProps) {
   const [alerts, setAlerts] = useState<AlertItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -45,9 +48,12 @@ export default function AlertsClient({ accessToken, apiBaseUrl }: AlertsClientPr
       if (statusFilter) params.set("status", statusFilter);
       if (riskFilter) params.set("risk_category", riskFilter);
 
-      const res = await fetch(`${apiBaseUrl}/api/v1/alerts?${params.toString()}`, {
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const res = await fetch(
+        `${apiBaseUrl}/api/v1/alerts?${params.toString()}`,
+        {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
       if (res.ok) {
         const data = await res.json();
         setAlerts(data.items);
@@ -69,7 +75,7 @@ export default function AlertsClient({ accessToken, apiBaseUrl }: AlertsClientPr
       render: (a) => (
         <Link
           href={`/alerts/${a.alert_id}`}
-          className="font-mono text-xs text-accent hover:underline"
+          className="text-accent font-mono text-xs hover:underline"
         >
           {a.alert_id.slice(0, 8)}…
         </Link>
@@ -80,7 +86,7 @@ export default function AlertsClient({ accessToken, apiBaseUrl }: AlertsClientPr
       label: "Triggered",
       sortable: true,
       render: (a) => (
-        <span className="font-mono text-caption text-text-secondary">
+        <span className="text-caption text-text-secondary font-mono">
           {new Date(a.created_at).toLocaleString()}
         </span>
       ),
@@ -89,8 +95,9 @@ export default function AlertsClient({ accessToken, apiBaseUrl }: AlertsClientPr
       key: "customer_name",
       label: "Target Customer",
       render: (a) => (
-        <span className="font-medium text-text-primary">
-          {a.customer_name || (a.customer_id ? a.customer_id.slice(0, 8) + "…" : "—")}
+        <span className="text-text-primary font-medium">
+          {a.customer_name ||
+            (a.customer_id ? a.customer_id.slice(0, 8) + "…" : "—")}
         </span>
       ),
     },
@@ -107,7 +114,12 @@ export default function AlertsClient({ accessToken, apiBaseUrl }: AlertsClientPr
     {
       key: "outcome",
       label: "Outcome",
-      render: (a) => a.outcome ? <StatusPill status={a.outcome} /> : <span className="text-text-secondary text-caption">—</span>,
+      render: (a) =>
+        a.outcome ? (
+          <StatusPill status={a.outcome} />
+        ) : (
+          <span className="text-text-secondary text-caption">—</span>
+        ),
     },
     {
       key: "actions",
@@ -115,7 +127,7 @@ export default function AlertsClient({ accessToken, apiBaseUrl }: AlertsClientPr
       render: (a) => (
         <Link
           href={`/alerts/${a.alert_id}`}
-          className="text-caption font-medium text-accent hover:underline"
+          className="text-caption text-accent font-medium hover:underline"
         >
           Investigate →
         </Link>
@@ -128,9 +140,12 @@ export default function AlertsClient({ accessToken, apiBaseUrl }: AlertsClientPr
       {/* Header */}
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-page-title text-text-primary">Alert Triage Queue</h1>
+          <h1 className="text-page-title text-text-primary">
+            Alert Triage Queue
+          </h1>
           <p className="text-body text-text-secondary">
-            Prioritize and investigate flagged suspicious transactions and customer behavioral anomalies.
+            Prioritize and investigate flagged suspicious transactions and
+            customer behavioral anomalies.
           </p>
         </div>
       </div>

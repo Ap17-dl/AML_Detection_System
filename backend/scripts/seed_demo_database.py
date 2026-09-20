@@ -3,21 +3,20 @@
 
 import asyncio
 import uuid
+from datetime import UTC
 from pathlib import Path
 
-import jwt
 from sqlalchemy import select, text
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
+from app.models.account import Account
+from app.models.customer import Customer
 from app.models.model_metadata import ModelMetadata
-from app.models.role import Role
 from app.models.user import User
+from app.services.graph_engine import build_account_subgraph
 from app.services.ingestion import ingest_csv
 from app.services.risk_profile import recalculate_customer_risk
-from app.services.graph_engine import build_account_subgraph
-from app.models.customer import Customer
-from app.models.account import Account
 
 
 async def seed():
@@ -41,12 +40,14 @@ async def seed():
                 user_uid = uuid.uuid4()
                 # Insert into auth.users (triggers public.users via handle_new_user)
                 await db.execute(
-                    text("""
+                    text(
+                        """
                         INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data)
                         VALUES (:uid, :email, json_build_object('full_name', cast(:full_name as text))::jsonb, json_build_object('role_id', cast(:role_id as int))::jsonb)
                         ON CONFLICT (id) DO NOTHING
-                    """),
-                    {"uid": user_uid, "email": email, "full_name": full_name, "role_id": role_id}
+                    """
+                    ),
+                    {"uid": user_uid, "email": email, "full_name": full_name, "role_id": role_id},
                 )
                 await db.commit()
                 print(f"Created user: {email} (Role ID {role_id})")
@@ -56,11 +57,12 @@ async def seed():
             select(ModelMetadata).where(ModelMetadata.model_version == "xgb_v1.0.0")
         )
         if not res.scalar_one_or_none():
-            from datetime import timezone, datetime
+            from datetime import datetime
+
             model_record = ModelMetadata(
                 model_version="xgb_v1.0.0",
                 algorithm="XGBoost",
-                trained_at=datetime.now(timezone.utc),
+                trained_at=datetime.now(UTC),
                 training_dataset="synthetic_aml_v1",
                 precision_score=0.9850,
                 recall_score=0.9620,
@@ -98,7 +100,9 @@ async def seed():
                 filename=standard_csv.name,
                 uploaded_by=operator_id,
             )
-            print(f"Standard batch ingested: {batch.accepted_rows} accepted, {batch.rejected_rows} rejected.")
+            print(
+                f"Standard batch ingested: {batch.accepted_rows} accepted, {batch.rejected_rows} rejected."
+            )
 
         if suspicious_csv.exists():
             print(f"Ingesting suspicious patterns batch: {suspicious_csv}")
@@ -109,7 +113,9 @@ async def seed():
                 filename=suspicious_csv.name,
                 uploaded_by=operator_id,
             )
-            print(f"Suspicious batch ingested: {batch.accepted_rows} accepted, {batch.rejected_rows} rejected.")
+            print(
+                f"Suspicious batch ingested: {batch.accepted_rows} accepted, {batch.rejected_rows} rejected."
+            )
 
         # 4. Compute graph indicators and customer risk profiles
         res = await db.execute(select(Customer.customer_id))
@@ -118,7 +124,7 @@ async def seed():
         for cid in customer_ids:
             try:
                 await recalculate_customer_risk(db, cid)
-            except Exception as e:
+            except Exception:
                 pass
 
         res = await db.execute(select(Account.account_id))
@@ -127,7 +133,7 @@ async def seed():
         for aid in account_ids:
             try:
                 await build_account_subgraph(db, aid)
-            except Exception as e:
+            except Exception:
                 pass
 
         await db.commit()

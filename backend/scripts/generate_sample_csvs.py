@@ -7,14 +7,14 @@ Creates:
 
 import csv
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 
 def generate_sample_datasets():
     out_dir = Path("sample_data")
     out_dir.mkdir(parents=True, exist_ok=True)
-    base_time = datetime(2026, 3, 1, 9, 0, 0, tzinfo=timezone.utc)
+    base_time = datetime(2026, 3, 1, 9, 0, 0, tzinfo=UTC)
 
     # 1. Standard batch (Normal everyday business & retail transactions)
     standard_rows = []
@@ -47,29 +47,41 @@ def generate_sample_datasets():
         )
         amount = round(random.uniform(25.0, 3500.0), 2)
         channel = random.choice(["online", "branch", "atm", "wire"])
-        txn_type = "wire" if channel == "wire" else random.choice(["transfer", "deposit", "withdrawal"])
+        txn_type = (
+            "wire" if channel == "wire" else random.choice(["transfer", "deposit", "withdrawal"])
+        )
 
-        standard_rows.append({
-            "external_ref": f"TXN-NORM-{i:05d}",
-            "origin_account": orig_acc,
-            "destination_account": dest_acc,
-            "amount": f"{amount:.2f}",
-            "currency": "USD",
-            "transaction_type": txn_type,
-            "channel": channel,
-            "occurred_at": dt.isoformat(),
-            "origin_customer_name": orig_cust,
-            "destination_customer_name": dest_cust,
-            "origin_customer_country": orig_country,
-            "destination_customer_country": dest_country,
-        })
+        standard_rows.append(
+            {
+                "external_ref": f"TXN-NORM-{i:05d}",
+                "origin_account": orig_acc,
+                "destination_account": dest_acc,
+                "amount": f"{amount:.2f}",
+                "currency": "USD",
+                "transaction_type": txn_type,
+                "channel": channel,
+                "occurred_at": dt.isoformat(),
+                "origin_customer_name": orig_cust,
+                "destination_customer_name": dest_cust,
+                "origin_customer_country": orig_country,
+                "destination_customer_country": dest_country,
+            }
+        )
 
     # Save standard batch
     fieldnames = [
-        "external_ref", "origin_account", "destination_account", "amount",
-        "currency", "transaction_type", "channel", "occurred_at",
-        "origin_customer_name", "destination_customer_name",
-        "origin_customer_country", "destination_customer_country"
+        "external_ref",
+        "origin_account",
+        "destination_account",
+        "amount",
+        "currency",
+        "transaction_type",
+        "channel",
+        "occurred_at",
+        "origin_customer_name",
+        "destination_customer_name",
+        "origin_customer_country",
+        "destination_customer_country",
     ]
     with open(out_dir / "transactions_standard_batch.csv", "w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
@@ -83,26 +95,28 @@ def generate_sample_datasets():
     # C. Night Anomaly & High-Value Offshore Wire ($125,000 at 3:15 AM to high-risk jurisdiction)
     # D. Rapid Movement / Layering (Fan-in then fan-out)
     suspicious_rows = []
-    
+
     # A: Structuring
     structuring_account = "ACC-SUSP-99001"
     structuring_cust = "Victor Vance (Front Corp)"
     for j in range(1, 5):
         dt = base_time + timedelta(days=1, hours=10 + j, minutes=12)
-        suspicious_rows.append({
-            "external_ref": f"TXN-STRUCT-{j:03d}",
-            "origin_account": structuring_account,
-            "destination_account": f"ACC-SHELL-80{j:02d}",
-            "amount": f"{9400.00 + (j * 120.0):.2f}",
-            "currency": "USD",
-            "transaction_type": "transfer",
-            "channel": "branch",
-            "occurred_at": dt.isoformat(),
-            "origin_customer_name": structuring_cust,
-            "destination_customer_name": f"Holding Co {j}",
-            "origin_customer_country": "US",
-            "destination_customer_country": "CY",
-        })
+        suspicious_rows.append(
+            {
+                "external_ref": f"TXN-STRUCT-{j:03d}",
+                "origin_account": structuring_account,
+                "destination_account": f"ACC-SHELL-80{j:02d}",
+                "amount": f"{9400.00 + (j * 120.0):.2f}",
+                "currency": "USD",
+                "transaction_type": "transfer",
+                "channel": "branch",
+                "occurred_at": dt.isoformat(),
+                "origin_customer_name": structuring_cust,
+                "destination_customer_name": f"Holding Co {j}",
+                "origin_customer_country": "US",
+                "destination_customer_country": "CY",
+            }
+        )
 
     # B: Circular Flow: ACC-CYCLE-1 -> ACC-CYCLE-2 -> ACC-CYCLE-3 -> ACC-CYCLE-1
     cycle_time = base_time + timedelta(days=3, hours=14, minutes=0)
@@ -114,54 +128,60 @@ def generate_sample_datasets():
     for step in range(3):
         orig_n = cycle_nodes[step]
         dest_n = cycle_nodes[(step + 1) % 3]
-        suspicious_rows.append({
-            "external_ref": f"TXN-CYCLE-{step+1:02d}",
-            "origin_account": orig_n[0],
-            "destination_account": dest_n[0],
-            "amount": "48500.00",
+        suspicious_rows.append(
+            {
+                "external_ref": f"TXN-CYCLE-{step+1:02d}",
+                "origin_account": orig_n[0],
+                "destination_account": dest_n[0],
+                "amount": "48500.00",
+                "currency": "USD",
+                "transaction_type": "wire",
+                "channel": "wire",
+                "occurred_at": (cycle_time + timedelta(hours=step * 4)).isoformat(),
+                "origin_customer_name": orig_n[1],
+                "destination_customer_name": dest_n[1],
+                "origin_customer_country": orig_n[2],
+                "destination_customer_country": dest_n[2],
+            }
+        )
+
+    # C: Night Anomaly & High-Value Wire
+    suspicious_rows.append(
+        {
+            "external_ref": "TXN-ANOM-NIGHT-01",
+            "origin_account": "ACC-SUSP-77002",
+            "destination_account": "ACC-OFFSHORE-99",
+            "amount": "240000.00",
             "currency": "USD",
             "transaction_type": "wire",
             "channel": "wire",
-            "occurred_at": (cycle_time + timedelta(hours=step * 4)).isoformat(),
-            "origin_customer_name": orig_n[1],
-            "destination_customer_name": dest_n[1],
-            "origin_customer_country": orig_n[2],
-            "destination_customer_country": dest_n[2],
-        })
-
-    # C: Night Anomaly & High-Value Wire
-    suspicious_rows.append({
-        "external_ref": "TXN-ANOM-NIGHT-01",
-        "origin_account": "ACC-SUSP-77002",
-        "destination_account": "ACC-OFFSHORE-99",
-        "amount": "240000.00",
-        "currency": "USD",
-        "transaction_type": "wire",
-        "channel": "wire",
-        "occurred_at": (base_time + timedelta(days=5, hours=3, minutes=24)).isoformat(),
-        "origin_customer_name": "Marcus Kane",
-        "destination_customer_name": "Apex Holdings Offshore",
-        "origin_customer_country": "US",
-        "destination_customer_country": "SC",
-    })
+            "occurred_at": (base_time + timedelta(days=5, hours=3, minutes=24)).isoformat(),
+            "origin_customer_name": "Marcus Kane",
+            "destination_customer_name": "Apex Holdings Offshore",
+            "origin_customer_country": "US",
+            "destination_customer_country": "SC",
+        }
+    )
 
     # D: Layering Fan-in: 4 small accounts funnel into 1 collector account
     collector_acc = "ACC-COLLECTOR-01"
     for k in range(1, 5):
-        suspicious_rows.append({
-            "external_ref": f"TXN-FANIN-{k:02d}",
-            "origin_account": f"ACC-MULE-{k:02d}",
-            "destination_account": collector_acc,
-            "amount": f"{7800.00 + (k * 250.0):.2f}",
-            "currency": "USD",
-            "transaction_type": "transfer",
-            "channel": "online",
-            "occurred_at": (base_time + timedelta(days=6, hours=8 + k, minutes=15)).isoformat(),
-            "origin_customer_name": f"Courier Agent {k}",
-            "destination_customer_name": "Central Nexus Inc",
-            "origin_customer_country": "US",
-            "destination_customer_country": "US",
-        })
+        suspicious_rows.append(
+            {
+                "external_ref": f"TXN-FANIN-{k:02d}",
+                "origin_account": f"ACC-MULE-{k:02d}",
+                "destination_account": collector_acc,
+                "amount": f"{7800.00 + (k * 250.0):.2f}",
+                "currency": "USD",
+                "transaction_type": "transfer",
+                "channel": "online",
+                "occurred_at": (base_time + timedelta(days=6, hours=8 + k, minutes=15)).isoformat(),
+                "origin_customer_name": f"Courier Agent {k}",
+                "destination_customer_name": "Central Nexus Inc",
+                "origin_customer_country": "US",
+                "destination_customer_country": "US",
+            }
+        )
 
     # Save suspicious batch
     with open(out_dir / "transactions_aml_suspicious.csv", "w", newline="", encoding="utf-8") as f:
@@ -248,7 +268,9 @@ def generate_sample_datasets():
         },
     ]
 
-    with open(out_dir / "transactions_validation_errors.csv", "w", newline="", encoding="utf-8") as f:
+    with open(
+        out_dir / "transactions_validation_errors.csv", "w", newline="", encoding="utf-8"
+    ) as f:
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         writer.writerows(error_rows)

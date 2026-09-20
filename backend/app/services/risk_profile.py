@@ -8,10 +8,10 @@ from __future__ import annotations
 
 import logging
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
-from sqlalchemy import desc, func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.account import Account
@@ -60,9 +60,7 @@ async def recalculate_customer_risk(
         else:
             # Query predictions for these transactions
             preds_res = await db.execute(
-                select(Prediction.risk_probability).where(
-                    Prediction.transaction_id.in_(txn_ids)
-                )
+                select(Prediction.risk_probability).where(Prediction.transaction_id.in_(txn_ids))
             )
             probs = [float(p) for p in preds_res.scalars().all()]
 
@@ -83,7 +81,7 @@ async def recalculate_customer_risk(
                 else:
                     category = "low"
 
-    now = datetime.now(timezone.utc)
+    now = datetime.now(UTC)
     customer.current_risk_score = score
     customer.current_risk_category = category
     customer.risk_updated_at = now

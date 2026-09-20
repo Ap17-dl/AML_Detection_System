@@ -11,7 +11,6 @@ from app.core.audit import record_audit_log
 from app.core.security import CurrentUser, require_role
 from app.db.session import get_db
 from app.models.alert import Alert
-from app.models.customer import Customer
 from app.models.role import RoleName
 from app.models.transaction import Transaction
 
@@ -28,22 +27,16 @@ async def get_compliance_summary(
     """Returns aggregated AML compliance metrics."""
     total_alerts = (await db.execute(select(func.count(Alert.alert_id)))).scalar() or 0
     closed_alerts = (
-        await db.execute(
-            select(func.count(Alert.alert_id)).where(Alert.status == "closed")
-        )
+        await db.execute(select(func.count(Alert.alert_id)).where(Alert.status == "closed"))
     ).scalar() or 0
     confirmed = (
         await db.execute(
-            select(func.count(Alert.alert_id)).where(
-                Alert.outcome == "confirmed_suspicious"
-            )
+            select(func.count(Alert.alert_id)).where(Alert.outcome == "confirmed_suspicious")
         )
     ).scalar() or 0
     false_positives = (
         await db.execute(
-            select(func.count(Alert.alert_id)).where(
-                Alert.outcome == "false_positive"
-            )
+            select(func.count(Alert.alert_id)).where(Alert.outcome == "false_positive")
         )
     ).scalar() or 0
 
@@ -85,9 +78,7 @@ async def export_alerts_csv(
             )
         filename = "aml_alerts_report.csv"
     else:
-        writer.writerow(
-            ["transaction_id", "amount", "currency", "channel", "occurred_at"]
-        )
+        writer.writerow(["transaction_id", "amount", "currency", "channel", "occurred_at"])
         res = await db.execute(
             select(Transaction).order_by(Transaction.occurred_at.desc()).limit(1000)
         )

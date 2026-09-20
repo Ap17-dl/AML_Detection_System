@@ -35,7 +35,9 @@ class UserRoleUpdateRequest(BaseModel):
 
 
 class AdminAccessRequestIn(BaseModel):
-    reason: str = Field(default="", max_length=1000, description="Justification for requesting admin access")
+    reason: str = Field(
+        default="", max_length=1000, description="Justification for requesting admin access"
+    )
 
 
 class AdminAccessRequestOut(BaseModel):
@@ -43,4 +45,3 @@ class AdminAccessRequestOut(BaseModel):
     message: str
     host_notified: bool
     email_delivery: dict | None = None
-

@@ -1,14 +1,13 @@
 """Unit and integration tests for graph network analysis (AML-FR-10, AML-FR-11, AML-FR-12)."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from app.models.account import Account
-from app.models.graph_indicator import GraphIndicator
 from app.models.transaction import Transaction
 from app.services.graph_engine import build_account_subgraph
-from app.tests.conftest import ADMIN, ANALYST, OPERATOR, FakeResult, FakeSession, api_client
+from app.tests.conftest import OPERATOR, FakeResult, api_client
 
 
 async def test_graph_endpoint_denies_data_operator(fake_session):
@@ -30,7 +29,7 @@ async def test_build_account_subgraph_computes_indicators(fake_session):
         destination_account_id=acct_b,
         amount=Decimal("5000.00"),
         currency="USD",
-        occurred_at=datetime.now(timezone.utc),
+        occurred_at=datetime.now(UTC),
         ingestion_status="accepted",
     )
     t2 = Transaction(
@@ -39,7 +38,7 @@ async def test_build_account_subgraph_computes_indicators(fake_session):
         destination_account_id=acct_c,
         amount=Decimal("4900.00"),
         currency="USD",
-        occurred_at=datetime.now(timezone.utc),
+        occurred_at=datetime.now(UTC),
         ingestion_status="accepted",
     )
     t3 = Transaction(
@@ -48,7 +47,7 @@ async def test_build_account_subgraph_computes_indicators(fake_session):
         destination_account_id=acct_a,
         amount=Decimal("4800.00"),
         currency="USD",
-        occurred_at=datetime.now(timezone.utc),
+        occurred_at=datetime.now(UTC),
         ingestion_status="accepted",
     )
 

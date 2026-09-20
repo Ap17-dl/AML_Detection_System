@@ -8,7 +8,7 @@ from __future__ import annotations
 
 import argparse
 import random
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pandas as pd
@@ -24,11 +24,10 @@ def generate_synthetic_transactions(
 
     channels = ["online", "branch", "atm", "wire"]
     channel_weights_normal = [0.65, 0.15, 0.15, 0.05]
-    channel_weights_laundering = [0.40, 0.10, 0.10, 0.40]
 
     types = ["transfer", "deposit", "withdrawal", "wire"]
 
-    base_time = datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    base_time = datetime(2026, 1, 1, 0, 0, 0, tzinfo=UTC)
     records = []
 
     num_laundering = int(num_samples * laundering_ratio)
@@ -43,9 +42,7 @@ def generate_synthetic_transactions(
         # Mostly business hours (8 AM - 8 PM)
         day_offset = random.randint(0, 90)
         hour = (
-            random.randint(8, 20)
-            if random.random() < 0.85
-            else random.choice([6, 7, 21, 22, 23])
+            random.randint(8, 20) if random.random() < 0.85 else random.choice([6, 7, 21, 22, 23])
         )
         minute = random.randint(0, 59)
         occurred_at = base_time + timedelta(days=day_offset, hours=hour, minutes=minute)
@@ -128,7 +125,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Generate synthetic AML transaction dataset")
     parser.add_argument("--samples", type=int, default=5000, help="Number of records")
     parser.add_argument("--ratio", type=float, default=0.05, help="Laundering ratio")
-    parser.add_argument("--out", type=str, default="backend/ml/data/synthetic_aml.csv", help="Output path")
+    parser.add_argument(
+        "--out", type=str, default="backend/ml/data/synthetic_aml.csv", help="Output path"
+    )
     args = parser.parse_args()
 
     out_path = Path(args.out)

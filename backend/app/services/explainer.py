@@ -7,10 +7,8 @@ generates audit-persisted natural-language explanations.
 from __future__ import annotations
 
 import logging
-import uuid
 from typing import Any
 
-import numpy as np
 import shap
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -86,7 +84,7 @@ def explain_transaction(
         vals = shap_values[0, :, 1] if shap_values.shape[-1] == 2 else shap_values[0, :]
 
     contributions = []
-    for name, val in zip(FEATURE_NAMES, vals):
+    for name, val in zip(FEATURE_NAMES, vals, strict=False):
         sv = float(val)
         direction = "increases_risk" if sv > 0 else "decreases_risk"
         friendly = FEATURE_LABELS.get(name, name)
@@ -108,12 +106,10 @@ def explain_transaction(
     mitigating = [c for c in top_features if c["direction"] == "decreases_risk"]
 
     driver_phrases = [
-        f"{c['description'].lower()} (+{c['shap_value']:.2f})"
-        for c in risk_drivers[:3]
+        f"{c['description'].lower()} (+{c['shap_value']:.2f})" for c in risk_drivers[:3]
     ]
     mitigating_phrases = [
-        f"{c['description'].lower()} ({c['shap_value']:.2f})"
-        for c in mitigating[:2]
+        f"{c['description'].lower()} ({c['shap_value']:.2f})" for c in mitigating[:2]
     ]
 
     parts = []
@@ -122,7 +118,9 @@ def explain_transaction(
     if mitigating_phrases:
         parts.append(f"Mitigating indicators include: {', '.join(mitigating_phrases)}.")
     if not parts:
-        parts.append("Transaction risk evaluated based on baseline behavioral and channel indicators.")
+        parts.append(
+            "Transaction risk evaluated based on baseline behavioral and channel indicators."
+        )
 
     narrative_text = " ".join(parts)
     return top_features, narrative_text

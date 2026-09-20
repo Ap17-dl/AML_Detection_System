@@ -15,9 +15,7 @@ from app.schemas.alert import AlertOut, DashboardSummaryOut
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
-_ALL_STAFF = require_role(
-    RoleName.AML_ANALYST, RoleName.ADMINISTRATOR, RoleName.DATA_OPERATOR
-)
+_ALL_STAFF = require_role(RoleName.AML_ANALYST, RoleName.ADMINISTRATOR, RoleName.DATA_OPERATOR)
 
 
 @router.get("/summary", response_model=DashboardSummaryOut)
@@ -37,9 +35,7 @@ async def get_dashboard_summary(
 
     # 3. High-risk transactions
     high_risk_res = await db.execute(
-        select(func.count(Prediction.prediction_id)).where(
-            Prediction.risk_category == "high"
-        )
+        select(func.count(Prediction.prediction_id)).where(Prediction.risk_category == "high")
     )
     high_risk = high_risk_res.scalar() or 0
 
@@ -62,9 +58,7 @@ async def get_dashboard_summary(
     # 6. Alerts by risk
     risk_counts: dict[str, int] = {"high": 0, "medium": 0, "low": 0}
     risk_res = await db.execute(
-        select(Alert.risk_category, func.count(Alert.alert_id)).group_by(
-            Alert.risk_category
-        )
+        select(Alert.risk_category, func.count(Alert.alert_id)).group_by(Alert.risk_category)
     )
     for cat, count in risk_res.all():
         if cat in risk_counts:
@@ -80,9 +74,7 @@ async def get_dashboard_summary(
             status_counts[st] = count
 
     # 8. Recent 5 alerts
-    recent_res = await db.execute(
-        select(Alert).order_by(Alert.created_at.desc()).limit(5)
-    )
+    recent_res = await db.execute(select(Alert).order_by(Alert.created_at.desc()).limit(5))
     recent = recent_res.scalars().all()
     recent_outs = []
     for a in recent:

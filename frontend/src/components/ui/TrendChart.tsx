@@ -27,7 +27,7 @@ export function TrendChart({ data, height = 240 }: TrendChartProps) {
   if (!data || data.length === 0) {
     return (
       <div
-        className="flex items-center justify-center rounded-lg border border-border bg-bg text-caption text-text-secondary"
+        className="border-border bg-bg text-caption text-text-secondary flex items-center justify-center rounded-lg border"
         style={{ height }}
       >
         No historical risk points recorded yet.
@@ -72,32 +72,36 @@ export function TrendChart({ data, height = 240 }: TrendChartProps) {
           <Tooltip
             content={({ active, payload }) => {
               if (active && payload && payload.length) {
-                const pt = payload[0].payload as TrendPoint & { formattedDate: string };
+                const pt = payload[0].payload as TrendPoint & {
+                  formattedDate: string;
+                };
                 return (
-                  <div className="rounded-md border border-border bg-surface p-2.5 shadow-md text-xs">
-                    <p className="font-semibold text-text-primary">{pt.formattedDate}</p>
+                  <div className="border-border bg-surface rounded-md border p-2.5 text-xs shadow-md">
+                    <p className="text-text-primary font-semibold">
+                      {pt.formattedDate}
+                    </p>
                     <p className="text-text-secondary mt-0.5">
                       Risk Score:{" "}
-                      <span className="font-mono font-medium text-text-primary">
+                      <span className="text-text-primary font-mono font-medium">
                         {(pt.score * 100).toFixed(1)}%
                       </span>
                     </p>
-                    <p className="capitalize text-text-secondary">
+                    <p className="text-text-secondary capitalize">
                       Category:{" "}
                       <span
                         className={`font-medium ${
                           pt.category === "high"
                             ? "text-red-500"
                             : pt.category === "medium"
-                            ? "text-amber-500"
-                            : "text-emerald-500"
+                              ? "text-amber-500"
+                              : "text-emerald-500"
                         }`}
                       >
                         {pt.category}
                       </span>
                     </p>
                     {pt.reason && (
-                      <p className="text-text-secondary text-[11px] mt-1 border-t pt-1">
+                      <p className="text-text-secondary mt-1 border-t pt-1 text-[11px]">
                         Reason: {pt.reason.replace(/_/g, " ")}
                       </p>
                     )}
@@ -111,13 +115,23 @@ export function TrendChart({ data, height = 240 }: TrendChartProps) {
             y={0.7}
             stroke="#ef4444"
             strokeDasharray="3 3"
-            label={{ value: "High (0.70)", fill: "#ef4444", fontSize: 10, position: "insideTopRight" }}
+            label={{
+              value: "High (0.70)",
+              fill: "#ef4444",
+              fontSize: 10,
+              position: "insideTopRight",
+            }}
           />
           <ReferenceLine
             y={0.3}
             stroke="#10b981"
             strokeDasharray="3 3"
-            label={{ value: "Low (0.30)", fill: "#10b981", fontSize: 10, position: "insideBottomRight" }}
+            label={{
+              value: "Low (0.30)",
+              fill: "#10b981",
+              fontSize: 10,
+              position: "insideBottomRight",
+            }}
           />
           <Area
             type="monotone"

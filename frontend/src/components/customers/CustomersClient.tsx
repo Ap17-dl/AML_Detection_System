@@ -51,7 +51,15 @@ export default function CustomersClient({
     } finally {
       setLoading(false);
     }
-  }, [accessToken, apiBaseUrl, page, search, riskCategory, sortColumn, sortOrder]);
+  }, [
+    accessToken,
+    apiBaseUrl,
+    page,
+    search,
+    riskCategory,
+    sortColumn,
+    sortOrder,
+  ]);
 
   useEffect(() => {
     fetchCustomers();
@@ -75,7 +83,7 @@ export default function CustomersClient({
       render: (c) => (
         <Link
           href={`/customers/${c.customer_id}`}
-          className="text-accent hover:underline font-medium"
+          className="text-accent font-medium hover:underline"
         >
           {c.full_name}
         </Link>
@@ -85,9 +93,7 @@ export default function CustomersClient({
       key: "external_ref",
       label: "External Ref",
       render: (c) => (
-        <span className="font-mono text-caption">
-          {c.external_ref ?? "—"}
-        </span>
+        <span className="text-caption font-mono">{c.external_ref ?? "—"}</span>
       ),
     },
     {
@@ -138,7 +144,7 @@ export default function CustomersClient({
           placeholder="Search by name, ref, or country…"
           value={searchInput}
           onChange={(e) => setSearchInput(e.target.value)}
-          className="border-border bg-bg text-body text-text-primary placeholder:text-text-secondary rounded-md border px-3 py-2 outline-none focus:ring-2 focus:ring-accent min-w-[200px] flex-1"
+          className="border-border bg-bg text-body text-text-primary placeholder:text-text-secondary focus:ring-accent min-w-[200px] flex-1 rounded-md border px-3 py-2 outline-none focus:ring-2"
         />
         <select
           value={riskCategory}

@@ -1,6 +1,5 @@
 "use client";
 
-
 interface ConfirmDialogProps {
   isOpen: boolean;
   title: string;
@@ -30,19 +29,19 @@ export function ConfirmDialog({
       : "bg-accent hover:bg-accent/90 text-surface";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-      <div className="w-full max-w-md rounded-[var(--radius-card)] border border-border bg-surface p-6 shadow-xl flex flex-col gap-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+      <div className="border-border bg-surface flex w-full max-w-md flex-col gap-4 rounded-[var(--radius-card)] border p-6 shadow-xl">
         <div>
           <h3 className="text-section-title text-text-primary">{title}</h3>
           <p className="text-body text-text-secondary mt-1">{description}</p>
         </div>
 
-        <div className="flex items-center justify-end gap-3 mt-4 border-t pt-4">
+        <div className="mt-4 flex items-center justify-end gap-3 border-t pt-4">
           <button
             type="button"
             onClick={onCancel}
             disabled={isLoading}
-            className="rounded-md border border-border px-4 py-2 text-sm font-medium text-text-secondary hover:bg-bg transition-colors"
+            className="border-border text-text-secondary hover:bg-bg rounded-md border px-4 py-2 text-sm font-medium transition-colors"
           >
             Cancel
           </button>

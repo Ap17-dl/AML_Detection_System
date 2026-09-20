@@ -1,18 +1,18 @@
 """Unit and integration tests for ML prediction and model metadata (AML-FR-07, AML-FR-08, AML-FR-09)."""
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from decimal import Decimal
 
 from app.models.model_metadata import ModelMetadata
 from app.models.prediction import Prediction
 from app.models.transaction import Transaction
 from app.services.inference import score_transaction
-from app.tests.conftest import ADMIN, ANALYST, OPERATOR, FakeResult, FakeSession, api_client
+from app.tests.conftest import ADMIN, ANALYST, OPERATOR, FakeResult, api_client
 
 
 def test_score_transaction_bounds_and_categories():
-    now = datetime(2026, 3, 15, 14, 0, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 3, 15, 14, 0, 0, tzinfo=UTC)
 
     # Typical small transaction
     prob_low, cat_low, ver_low = score_transaction(
@@ -25,7 +25,7 @@ def test_score_transaction_bounds_and_categories():
     assert ver_low == "xgb_v1.0.0"
 
     # Extreme suspicious structuring / night transaction
-    night = datetime(2026, 3, 15, 3, 0, 0, tzinfo=timezone.utc)
+    night = datetime(2026, 3, 15, 3, 0, 0, tzinfo=UTC)
     prob_high, cat_high, _ = score_transaction(
         amount=9900.0,
         occurred_at=night,
@@ -53,7 +53,7 @@ async def test_prediction_endpoint_allows_analyst_and_returns_prediction(fake_se
         destination_account_id=uuid.uuid4(),
         amount=Decimal("500.00"),
         currency="USD",
-        occurred_at=datetime.now(timezone.utc),
+        occurred_at=datetime.now(UTC),
     )
     pred = Prediction(
         prediction_id=uuid.uuid4(),
@@ -62,7 +62,7 @@ async def test_prediction_endpoint_allows_analyst_and_returns_prediction(fake_se
         risk_probability=Decimal("0.85400"),
         risk_category="high",
         combined_risk_score=Decimal("0.85400"),
-        predicted_at=datetime.now(timezone.utc),
+        predicted_at=datetime.now(UTC),
     )
 
     # First query gets transaction, second gets prediction
@@ -82,7 +82,7 @@ async def test_list_models_allows_admin(fake_session):
     meta = ModelMetadata(
         model_version="xgb_v1.0.0",
         algorithm="XGBoost",
-        trained_at=datetime.now(timezone.utc),
+        trained_at=datetime.now(UTC),
         training_dataset="synthetic_aml_5000",
         precision_score=Decimal("0.9600"),
         recall_score=Decimal("0.9400"),
@@ -95,7 +95,7 @@ async def test_list_models_allows_admin(fake_session):
         threshold_medium_max=Decimal("0.7000"),
         is_active=True,
         artifact_path="/path/to/model",
-        created_at=datetime.now(timezone.utc),
+        created_at=datetime.now(UTC),
     )
     fake_session.execute_results.append(FakeResult(rows=[meta]))
 

@@ -78,7 +78,7 @@ export function SignUpForm() {
   if (confirmationRequired) {
     return (
       <div className="flex flex-col gap-4 text-center">
-        <div className="mx-auto flex size-12 items-center justify-center rounded-full bg-accent/10 text-accent">
+        <div className="bg-accent/10 text-accent mx-auto flex size-12 items-center justify-center rounded-full">
           <svg
             viewBox="0 0 24 24"
             fill="none"
@@ -93,12 +93,12 @@ export function SignUpForm() {
             <polyline points="22 4 12 14.01 9 11.01" />
           </svg>
         </div>
-        <h2 className="text-h3 font-semibold text-text-primary">
+        <h2 className="text-h3 text-text-primary font-semibold">
           Check your email
         </h2>
         <p className="text-body text-text-secondary">
           We&apos;ve sent a confirmation link to{" "}
-          <span className="font-medium text-text-primary">{email}</span>. Please
+          <span className="text-text-primary font-medium">{email}</span>. Please
           click the link to verify your account and sign in.
         </p>
         <Link
@@ -116,7 +116,7 @@ export function SignUpForm() {
       {error && (
         <div
           role="alert"
-          className="animate-fade-slide-up rounded-md border border-risk-high/30 bg-risk-high/10 p-3 text-caption text-risk-high"
+          className="animate-fade-slide-up border-risk-high/30 bg-risk-high/10 text-caption text-risk-high rounded-md border p-3"
         >
           {error}
         </div>
@@ -171,7 +171,8 @@ export function SignUpForm() {
           <option value="3">Data Operator (Batch Ingestion)</option>
         </select>
         <p className="text-caption text-text-secondary">
-          Need Administrator access? You can request it from the host after signing in.
+          Need Administrator access? You can request it from the host after
+          signing in.
         </p>
       </div>
 
@@ -229,9 +230,7 @@ export function SignUpForm() {
           <button
             type="button"
             onClick={() => setShowConfirmPassword((shown) => !shown)}
-            aria-label={
-              showConfirmPassword ? "Hide password" : "Show password"
-            }
+            aria-label={showConfirmPassword ? "Hide password" : "Show password"}
             aria-pressed={showConfirmPassword}
             className="text-text-secondary hover:text-text-primary focus-visible:text-accent absolute inset-y-0 right-0 flex w-10 items-center justify-center transition-colors focus:outline-none"
           >
@@ -257,7 +256,7 @@ export function SignUpForm() {
         Already have an account?{" "}
         <Link
           href="/login"
-          className="font-medium text-accent hover:underline transition-colors"
+          className="text-accent font-medium transition-colors hover:underline"
         >
           Sign in
         </Link>

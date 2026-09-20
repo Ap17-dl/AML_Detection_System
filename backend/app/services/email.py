@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 import httpx
@@ -22,7 +22,7 @@ async def send_admin_request_email(
     with the applicant details, reason, and a link to approve the role change in Platform Administration.
     """
     settings = get_settings()
-    now_str = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M:%S UTC")
+    now_str = datetime.now(UTC).strftime("%Y-%m-%d %H:%M:%S UTC")
 
     subject = f"Admin Access Request: {applicant_name} ({applicant_email})"
     html_content = f"""
@@ -123,8 +123,17 @@ async def send_admin_request_email(
             )
             if response.status_code in (200, 201):
                 data = response.json()
-                logger.info("Resend email sent successfully (ID: %s) to %s", data.get("id"), settings.host_email)
-                return {"sent": True, "simulated": False, "id": data.get("id"), "to": settings.host_email}
+                logger.info(
+                    "Resend email sent successfully (ID: %s) to %s",
+                    data.get("id"),
+                    settings.host_email,
+                )
+                return {
+                    "sent": True,
+                    "simulated": False,
+                    "id": data.get("id"),
+                    "to": settings.host_email,
+                }
             else:
                 logger.error("Resend API error (%d): %s", response.status_code, response.text)
                 return {

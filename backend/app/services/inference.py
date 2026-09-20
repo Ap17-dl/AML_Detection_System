@@ -7,8 +7,6 @@ determines risk category (low/medium/high), and saves predictions.
 from __future__ import annotations
 
 import logging
-import os
-import uuid
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -27,7 +25,12 @@ logger = logging.getLogger(__name__)
 # In-memory cached model artifact
 _MODEL_CACHE: dict[str, Any] = {}
 DEFAULT_MODEL_VERSION = "xgb_v1.0.0"
-DEFAULT_ARTIFACT_PATH = Path(__file__).resolve().parent.parent.parent / "ml" / "artifacts" / f"{DEFAULT_MODEL_VERSION}.joblib"
+DEFAULT_ARTIFACT_PATH = (
+    Path(__file__).resolve().parent.parent.parent
+    / "ml"
+    / "artifacts"
+    / f"{DEFAULT_MODEL_VERSION}.joblib"
+)
 
 
 def get_model_artifact(artifact_path: str | Path | None = None) -> dict:

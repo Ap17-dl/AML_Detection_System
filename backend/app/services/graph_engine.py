@@ -108,7 +108,9 @@ async def build_account_subgraph(
         else:
             edge_aggregates[key]["amount"] += float(t.amount)
             edge_aggregates[key]["count"] += 1
-            if cat == "high" or (cat == "medium" and edge_aggregates[key]["risk_category"] == "low"):
+            if cat == "high" or (
+                cat == "medium" and edge_aggregates[key]["risk_category"] == "low"
+            ):
                 edge_aggregates[key]["risk_category"] = cat
 
         G.add_edge(u, v, weight=float(t.amount))
@@ -117,8 +119,12 @@ async def build_account_subgraph(
     in_degree = G.in_degree(target_str) if G.has_node(target_str) else 0
     out_degree = G.out_degree(target_str) if G.has_node(target_str) else 0
 
-    fan_in_ratio = round(float(in_degree / max(out_degree, 1)), 4) if out_degree > 0 or in_degree > 0 else 0.0
-    fan_out_ratio = round(float(out_degree / max(in_degree, 1)), 4) if in_degree > 0 or out_degree > 0 else 0.0
+    fan_in_ratio = (
+        round(float(in_degree / max(out_degree, 1)), 4) if out_degree > 0 or in_degree > 0 else 0.0
+    )
+    fan_out_ratio = (
+        round(float(out_degree / max(in_degree, 1)), 4) if in_degree > 0 or out_degree > 0 else 0.0
+    )
 
     # Cycle detection around account_id
     is_in_cycle = False
@@ -139,9 +145,7 @@ async def build_account_subgraph(
     for pred in preds_by_txn.values():
         neighborhood_risks.append(float(pred.risk_probability))
     neighborhood_risk = (
-        round(sum(neighborhood_risks) / len(neighborhood_risks), 4)
-        if neighborhood_risks
-        else 0.10
+        round(sum(neighborhood_risks) / len(neighborhood_risks), 4) if neighborhood_risks else 0.10
     )
 
     # 4. Save/update GraphIndicator
@@ -177,9 +181,7 @@ async def build_account_subgraph(
     # Query accounts for readable labels
     account_lookup: dict[uuid.UUID, Account] = {}
     if neighbor_ids:
-        acct_res = await db.execute(
-            select(Account).where(Account.account_id.in_(neighbor_ids))
-        )
+        acct_res = await db.execute(select(Account).where(Account.account_id.in_(neighbor_ids)))
         for a in acct_res.scalars().all():
             account_lookup[a.account_id] = a
 
@@ -199,7 +201,11 @@ async def build_account_subgraph(
                 in_degree=n_in,
                 out_degree=n_out,
                 risk_score=neighborhood_risk if node_id == target_str else None,
-                risk_category="high" if (node_id == target_str and is_in_cycle) else "medium" if (n_in > 3 or n_out > 3) else "low",
+                risk_category=(
+                    "high"
+                    if (node_id == target_str and is_in_cycle)
+                    else "medium" if (n_in > 3 or n_out > 3) else "low"
+                ),
             )
         )
 

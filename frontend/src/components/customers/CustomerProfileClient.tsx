@@ -38,7 +38,9 @@ export default function CustomerProfileClient({
 }: CustomerProfileClientProps) {
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [accounts, setAccounts] = useState<Account[]>([]);
-  const [riskProfile, setRiskProfile] = useState<CustomerRiskProfile | null>(null);
+  const [riskProfile, setRiskProfile] = useState<CustomerRiskProfile | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [recalculating, setRecalculating] = useState(false);
 
@@ -50,8 +52,12 @@ export default function CustomerProfileClient({
 
         const [custRes, acctRes, riskRes] = await Promise.all([
           fetch(`${apiBaseUrl}/api/v1/customers/${customerId}`, { headers }),
-          fetch(`${apiBaseUrl}/api/v1/customers/${customerId}/accounts`, { headers }),
-          fetch(`${apiBaseUrl}/api/v1/customers/${customerId}/risk-profile`, { headers }),
+          fetch(`${apiBaseUrl}/api/v1/customers/${customerId}/accounts`, {
+            headers,
+          }),
+          fetch(`${apiBaseUrl}/api/v1/customers/${customerId}/risk-profile`, {
+            headers,
+          }),
         ]);
 
         if (custRes.ok) setCustomer(await custRes.json());
@@ -69,10 +75,13 @@ export default function CustomerProfileClient({
   async function handleRecalculate() {
     setRecalculating(true);
     try {
-      const res = await fetch(`${apiBaseUrl}/api/v1/customers/${customerId}/recalculate-risk`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${accessToken}` },
-      });
+      const res = await fetch(
+        `${apiBaseUrl}/api/v1/customers/${customerId}/recalculate-risk`,
+        {
+          method: "POST",
+          headers: { Authorization: `Bearer ${accessToken}` },
+        },
+      );
       if (res.ok) {
         const updated: CustomerRiskProfile = await res.json();
         setRiskProfile(updated);
@@ -144,7 +153,8 @@ export default function CustomerProfileClient({
             <RiskBadge category={customer.current_risk_category} />
             {customer.risk_updated_at && (
               <span className="text-caption text-text-secondary">
-                Last evaluated: {new Date(customer.risk_updated_at).toLocaleString()}
+                Last evaluated:{" "}
+                {new Date(customer.risk_updated_at).toLocaleString()}
               </span>
             )}
           </div>
@@ -153,7 +163,7 @@ export default function CustomerProfileClient({
         <button
           onClick={handleRecalculate}
           disabled={recalculating}
-          className="inline-flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-sm font-medium text-surface shadow-sm hover:bg-accent/90 disabled:opacity-50 transition-colors"
+          className="bg-accent text-surface hover:bg-accent/90 inline-flex items-center gap-2 rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors disabled:opacity-50"
         >
           {recalculating ? "Recalculating…" : "Recalculate Risk"}
         </button>
@@ -161,7 +171,9 @@ export default function CustomerProfileClient({
 
       {/* Profile details */}
       <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
-        <h2 className="text-section-title text-text-primary mb-4">Customer Profile</h2>
+        <h2 className="text-section-title text-text-primary mb-4">
+          Customer Profile
+        </h2>
         <dl className="grid grid-cols-2 gap-x-8 gap-y-3 md:grid-cols-3">
           <div>
             <dt className="text-caption text-text-secondary">External Ref</dt>
@@ -198,7 +210,9 @@ export default function CustomerProfileClient({
             </dd>
           </div>
           <div>
-            <dt className="text-caption text-text-secondary">Current Risk Score</dt>
+            <dt className="text-caption text-text-secondary">
+              Current Risk Score
+            </dt>
             <dd className="text-body text-text-primary font-mono font-semibold">
               {customer.current_risk_score != null
                 ? (customer.current_risk_score * 100).toFixed(1) + "%"
@@ -209,9 +223,11 @@ export default function CustomerProfileClient({
       </div>
 
       {/* Dynamic Risk Trend Chart */}
-      <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm flex flex-col gap-4">
+      <div className="border-border bg-surface flex flex-col gap-4 rounded-[var(--radius-card)] border p-6 shadow-sm">
         <div className="flex items-center justify-between">
-          <h2 className="text-section-title text-text-primary">Risk Trend Analysis</h2>
+          <h2 className="text-section-title text-text-primary">
+            Risk Trend Analysis
+          </h2>
           <span className="text-caption text-text-secondary">
             {trendData.length} evaluation points
           </span>
@@ -255,7 +271,7 @@ export default function CustomerProfileClient({
                   key={acct.account_id}
                   className="border-border border-b last:border-b-0"
                 >
-                  <td className="text-body font-mono px-3 py-2">
+                  <td className="text-body px-3 py-2 font-mono">
                     {acct.account_number}
                   </td>
                   <td className="text-caption text-text-secondary px-3 py-2 capitalize">

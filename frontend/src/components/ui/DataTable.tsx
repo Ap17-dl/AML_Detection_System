@@ -68,7 +68,9 @@ export function DataTable<T extends object>({
                 <th
                   key={col.key}
                   className={`text-label text-text-secondary px-4 py-3 ${
-                    col.sortable ? "cursor-pointer select-none hover:text-text-primary" : ""
+                    col.sortable
+                      ? "hover:text-text-primary cursor-pointer select-none"
+                      : ""
                   } ${col.className ?? ""}`}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
                 >
@@ -108,29 +110,33 @@ export function DataTable<T extends object>({
             ) : (
               items.map((item, idx) => {
                 const record = item as Record<string, unknown>;
-                const itemKey = (record.id as string) ?? (record.account_id as string) ?? (record.alert_id as string) ?? (record.transaction_id as string) ?? idx;
+                const itemKey =
+                  (record.id as string) ??
+                  (record.account_id as string) ??
+                  (record.alert_id as string) ??
+                  (record.transaction_id as string) ??
+                  idx;
                 return (
-                <tr
-                  key={String(itemKey)}
-                  className={`border-border border-b transition-colors last:border-b-0 ${
-                    onRowClick
-                      ? "hover:bg-bg cursor-pointer"
-                      : ""
-                  }`}
-                  onClick={onRowClick ? () => onRowClick(item) : undefined}
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={col.key}
-                      className={`text-body text-text-primary px-4 py-3 ${col.className ?? ""}`}
-                    >
-                      {col.render
-                        ? col.render(item)
-                        : (record[col.key] as ReactNode) ?? "—"}
-                    </td>
-                  ))}
-                </tr>
-              );})
+                  <tr
+                    key={String(itemKey)}
+                    className={`border-border border-b transition-colors last:border-b-0 ${
+                      onRowClick ? "hover:bg-bg cursor-pointer" : ""
+                    }`}
+                    onClick={onRowClick ? () => onRowClick(item) : undefined}
+                  >
+                    {columns.map((col) => (
+                      <td
+                        key={col.key}
+                        className={`text-body text-text-primary px-4 py-3 ${col.className ?? ""}`}
+                      >
+                        {col.render
+                          ? col.render(item)
+                          : ((record[col.key] as ReactNode) ?? "—")}
+                      </td>
+                    ))}
+                  </tr>
+                );
+              })
             )}
           </tbody>
         </table>
@@ -148,7 +154,7 @@ export function DataTable<T extends object>({
             type="button"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className="text-body border-border text-text-primary rounded-md border px-3 py-1 transition-colors hover:bg-bg disabled:cursor-not-allowed disabled:opacity-40"
+            className="text-body border-border text-text-primary hover:bg-bg rounded-md border px-3 py-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
           >
             Previous
           </button>
@@ -159,7 +165,7 @@ export function DataTable<T extends object>({
             type="button"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
-            className="text-body border-border text-text-primary rounded-md border px-3 py-1 transition-colors hover:bg-bg disabled:cursor-not-allowed disabled:opacity-40"
+            className="text-body border-border text-text-primary hover:bg-bg rounded-md border px-3 py-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
           >
             Next
           </button>

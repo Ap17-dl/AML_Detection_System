@@ -1,8 +1,9 @@
 """Unit and integration tests for CSV ingestion and row validation (AML-FR-04, AML-FR-05, AML-FR-06)."""
 
 import io
-from app.services.ingestion import _validate_row, ingest_csv
-from app.tests.conftest import ADMIN, ANALYST, OPERATOR, FakeSession, FakeResult, api_client
+
+from app.services.ingestion import _validate_row
+from app.tests.conftest import ANALYST, api_client
 
 
 def test_validate_row_valid():

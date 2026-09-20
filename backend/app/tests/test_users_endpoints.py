@@ -143,4 +143,3 @@ async def test_request_admin_access_by_existing_admin(fake_session):
     data = response.json()
     assert data["status"] == "already_admin"
     assert data["host_notified"] is False
-

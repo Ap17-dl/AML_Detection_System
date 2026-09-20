@@ -2,14 +2,14 @@
 
 import uuid
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from sqlalchemy import func, or_, select
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit import record_audit_log
 from app.core.security import CurrentUser, require_role
 from app.db.session import get_db
-from app.models.alert import Alert, AnalystFeedback, CaseNote
+from app.models.alert import Alert, CaseNote
 from app.models.customer import Customer
 from app.models.role import RoleName
 from app.models.transaction import Transaction
@@ -33,7 +33,9 @@ _ANALYST_OR_ADMIN = require_role(RoleName.AML_ANALYST, RoleName.ADMINISTRATOR)
 @router.get("", response_model=AlertListOut)
 async def list_alerts(
     status: str | None = Query(None, description="Filter by status: open, in_progress, closed"),
-    risk_category: str | None = Query(None, description="Filter by risk category: low, medium, high"),
+    risk_category: str | None = Query(
+        None, description="Filter by risk category: low, medium, high"
+    ),
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
@@ -183,9 +185,7 @@ async def list_case_notes(
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ) -> list[CaseNoteOut]:
     res = await db.execute(
-        select(CaseNote)
-        .where(CaseNote.alert_id == alert_id)
-        .order_by(CaseNote.created_at.asc())
+        select(CaseNote).where(CaseNote.alert_id == alert_id).order_by(CaseNote.created_at.asc())
     )
     notes = res.scalars().all()
     out = []

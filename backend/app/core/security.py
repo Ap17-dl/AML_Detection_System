@@ -1,9 +1,13 @@
+import ssl
 import uuid
 from dataclasses import dataclass
+from functools import lru_cache
 
+import certifi
 import jwt
 from fastapi import Depends
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from jwt import PyJWKClient
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -25,12 +29,6 @@ class CurrentUser:
     role_name: str
     full_name: str | None
     is_active: bool
-
-
-import ssl
-from functools import lru_cache
-import certifi
-from jwt import PyJWKClient
 
 
 @lru_cache(maxsize=1)
@@ -103,21 +101,25 @@ async def get_current_user(
             from sqlalchemy import text
 
             await db.execute(
-                text("""
+                text(
+                    """
                     INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data)
                     VALUES (:uid, :email, json_build_object('full_name', cast(:full_name as text))::jsonb, json_build_object('role_id', cast(:role_id as int))::jsonb)
                     ON CONFLICT (id) DO NOTHING
-                """),
+                """
+                ),
                 {"uid": user_id, "email": email, "full_name": full_name, "role_id": role_id},
             )
             await db.execute(
-                text("""
+                text(
+                    """
                     INSERT INTO public.users (user_id, email, full_name, role_id)
                     VALUES (:uid, :email, :full_name, :role_id)
                     ON CONFLICT (user_id) DO UPDATE SET
                         email = EXCLUDED.email,
                         full_name = COALESCE(EXCLUDED.full_name, public.users.full_name)
-                """),
+                """
+                ),
                 {"uid": user_id, "email": email, "full_name": full_name, "role_id": role_id},
             )
             await db.commit()
