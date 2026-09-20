@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap");
 @import "tailwindcss";
 
 /*
@@ -74,6 +75,40 @@
   /* Radius scale (§2.4): 6px inputs/buttons is Tailwind's default `rounded-md`, 12px
      modals is the default `rounded-xl` — only the 10px card radius needs a custom token. */
   --radius-card: 10px;
+
+  /* Landing page brand colors matching StitchMCP institutional design */
+  --color-brand-gold: #ffd700;
+  --color-brand-goldLight: #fff8d6;
+  --color-brand-goldHover: #e5c100;
+  --color-brand-blue: #1a3a8a;
+  --color-brand-blueLight: #2e5aac;
+  --color-brand-navy: #0b192c;
+  --color-brand-dark: #14161a;
+  --color-brand-muted: #5b6270;
+  --color-brand-border: #e2e5ea;
+  --color-brand-bgLight: #f7f8fa;
+  --color-brand-cardBg: #f5f7fa;
+  --color-risk-crit: #8b1a1a;
+}
+
+.hero-gold-blob {
+  background: linear-gradient(135deg, #ffd700 0%, #ffca00 100%);
+}
+
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined", sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
 }
 
 body {

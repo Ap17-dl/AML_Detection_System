@@ -55,22 +55,6 @@ export function LoginForm() {
       });
 
       if (signInError) {
-        // Check dev-login as fallback
-        const devRes = await fetch(`${apiBase}/api/v1/auth/dev-login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ email }),
-        }).catch(() => null);
-
-        if (devRes && devRes.ok) {
-          const data = await devRes.json();
-          document.cookie = `aml_dev_token=${data.access_token}; path=/; max-age=604800; SameSite=Lax`;
-          setIsSubmitting(false);
-          router.push("/dashboard");
-          router.refresh();
-          return;
-        }
-
         setIsSubmitting(false);
         setError("Incorrect email or password.");
         return;
