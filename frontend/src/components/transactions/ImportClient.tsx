@@ -91,20 +91,23 @@ export default function ImportClient({
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
+      <div className="border-border flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+          <h1 className="text-text-primary text-2xl font-bold tracking-tight">
             Import Transactions Batch
           </h1>
-          <p className="text-xs text-text-secondary mt-1">
-            Upload standardized CSV clearing batch files for ingestion and real-time ML scoring.
+          <p className="text-text-secondary mt-1 text-xs">
+            Upload standardized CSV clearing batch files for ingestion and
+            real-time ML scoring.
           </p>
         </div>
         <Link
           href="/transactions"
-          className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-brand-navy dark:hover:text-white transition-colors"
+          className="text-text-secondary hover:text-brand-navy inline-flex items-center gap-1.5 text-xs font-semibold transition-colors dark:hover:text-white"
         >
-          <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+          <span className="material-symbols-outlined text-[16px]">
+            arrow_back
+          </span>
           <span>Return to Transactions</span>
         </Link>
       </div>
@@ -118,27 +121,29 @@ export default function ImportClient({
           }}
           onDragLeave={() => setIsDragging(false)}
           onDrop={handleDrop}
-          className={`border-border bg-surface flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-12 transition-all shadow-xs ${
+          className={`border-border bg-surface flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed p-12 shadow-xs transition-all ${
             isDragging
               ? "border-brand-blue bg-brand-blue/5 scale-[1.01]"
               : "hover:border-brand-blue/50"
           }`}
         >
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-brand-blue/10 text-brand-blue ring-1 ring-brand-blue/20">
-            <span className="material-symbols-outlined text-3xl">upload_file</span>
+          <div className="bg-brand-blue/10 text-brand-blue ring-brand-blue/20 flex h-16 w-16 items-center justify-center rounded-2xl ring-1">
+            <span className="material-symbols-outlined text-3xl">
+              upload_file
+            </span>
           </div>
           <div className="text-center">
-            <p className="text-sm font-bold text-text-primary">
+            <p className="text-text-primary text-sm font-bold">
               {file ? file.name : "Drag & drop a transaction CSV file here"}
             </p>
-            <p className="text-xs text-text-secondary mt-1">
+            <p className="text-text-secondary mt-1 text-xs">
               {file
                 ? `${(file.size / 1024).toFixed(1)} KB • Ready for processing`
                 : "Supports schema v2.0 (origin, dest, amount, type, channel)"}
             </p>
           </div>
           {!file && (
-            <label className="bg-brand-navy hover:bg-brand-blue text-white cursor-pointer rounded-lg px-5 py-2.5 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95">
+            <label className="bg-brand-navy hover:bg-brand-blue cursor-pointer rounded-lg px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95">
               Browse Local Files
               <input
                 type="file"
@@ -149,11 +154,11 @@ export default function ImportClient({
             </label>
           )}
           {file && !uploading && (
-            <div className="flex items-center gap-3 mt-2">
+            <div className="mt-2 flex items-center gap-3">
               <button
                 type="button"
                 onClick={handleUpload}
-                className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-6 py-2.5 text-xs font-semibold shadow-sm transition-all duration-150 active:scale-95"
+                className="bg-brand-navy hover:bg-brand-blue rounded-lg px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95"
               >
                 Upload & Ingest Batch
               </button>
@@ -163,7 +168,7 @@ export default function ImportClient({
                   setFile(null);
                   setError(null);
                 }}
-                className="border border-border text-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg px-4 py-2 text-xs font-medium transition-colors"
+                className="border-border text-text-secondary rounded-lg border px-4 py-2 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 Cancel
               </button>

@@ -43,10 +43,10 @@ export function Sidebar({ role }: { role: Role }) {
             />
           </div>
           <div className="flex flex-col">
-            <span className="text-brand-navy dark:text-white group-hover:text-brand-blueLight text-base font-extrabold tracking-tight transition-colors">
+            <span className="text-brand-navy group-hover:text-brand-blueLight text-base font-extrabold tracking-tight transition-colors dark:text-white">
               AML Sentinel
             </span>
-            <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 dark:text-slate-400">
+            <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase dark:text-slate-400">
               Enterprise v2.4
             </span>
           </div>
@@ -54,7 +54,7 @@ export function Sidebar({ role }: { role: Role }) {
 
         {/* Navigation Section */}
         <nav className="flex flex-col gap-1">
-          <span className="text-caption text-text-secondary px-3 pb-1 text-[11px] font-semibold uppercase tracking-wider">
+          <span className="text-caption text-text-secondary px-3 pb-1 text-[11px] font-semibold tracking-wider uppercase">
             Navigation
           </span>
           {items.map((item) => {
@@ -65,10 +65,10 @@ export function Sidebar({ role }: { role: Role }) {
               <Link
                 key={item.label}
                 href={item.href}
-                className={`group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 outline-none focus-visible:ring-2 focus-visible:ring-brand-blue ${
+                className={`group focus-visible:ring-brand-blue relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-150 outline-none focus-visible:ring-2 ${
                   isActive
-                    ? "bg-brand-navy text-white shadow-sm dark:bg-brand-blue/20 dark:text-brand-blueLight"
-                    : "text-text-secondary hover:bg-slate-100 hover:text-text-primary dark:hover:bg-slate-800/60"
+                    ? "bg-brand-navy dark:bg-brand-blue/20 dark:text-brand-blueLight text-white shadow-sm"
+                    : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800/60"
                 }`}
               >
                 {isActive && (
@@ -78,7 +78,7 @@ export function Sidebar({ role }: { role: Role }) {
                   className={`material-symbols-outlined text-[20px] transition-colors ${
                     isActive
                       ? "text-brand-gold"
-                      : "text-slate-400 group-hover:text-text-primary"
+                      : "group-hover:text-text-primary text-slate-400"
                   }`}
                   aria-hidden="true"
                 >
@@ -106,17 +106,17 @@ export function Sidebar({ role }: { role: Role }) {
       </div>
 
       {/* System Status Footer */}
-      <div className="border-border bg-slate-50/70 dark:bg-slate-900/50 mt-4 rounded-xl border p-3">
+      <div className="border-border mt-4 rounded-xl border bg-slate-50/70 p-3 dark:bg-slate-900/50">
         <div className="flex items-center gap-2">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-[11px] font-medium text-text-primary">
+          <span className="text-text-primary text-[11px] font-medium">
             Surveillance Engine
           </span>
         </div>
-        <p className="mt-1 text-[10px] text-text-secondary">
+        <p className="text-text-secondary mt-1 text-[10px]">
           Live ML Scoring • Latency ~18ms
         </p>
       </div>

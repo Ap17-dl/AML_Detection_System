@@ -13,7 +13,13 @@ interface RiskBadgeProps {
 
 const CONFIG: Record<
   string,
-  { label: string; dotClass: string; textClass: string; bgClass: string; borderClass: string }
+  {
+    label: string;
+    dotClass: string;
+    textClass: string;
+    bgClass: string;
+    borderClass: string;
+  }
 > = {
   low: {
     label: "Low",
@@ -51,7 +57,7 @@ export function RiskBadge({ category, className = "" }: RiskBadgeProps) {
 
   if (!config) {
     return (
-      <span className={`text-xs text-text-secondary ${className}`}>—</span>
+      <span className={`text-text-secondary text-xs ${className}`}>—</span>
     );
   }
 

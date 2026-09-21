@@ -100,7 +100,10 @@ export function LoginForm() {
     <div className="flex flex-col gap-6">
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+          <label
+            htmlFor="email"
+            className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+          >
             Email
           </label>
           <input
@@ -118,12 +121,15 @@ export function LoginForm() {
 
         <div className="flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+            <label
+              htmlFor="password"
+              className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+            >
               Password
             </label>
             <Link
               href="/forgot-password"
-              className="text-xs text-brand-blue hover:text-brand-blueLight dark:text-blue-400 font-medium transition-colors"
+              className="text-brand-blue hover:text-brand-blueLight text-xs font-medium transition-colors dark:text-blue-400"
             >
               Forgot password?
             </Link>
@@ -157,7 +163,7 @@ export function LoginForm() {
           {error && (
             <p
               role="alert"
-              className="animate-fade-slide-up text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-lg p-2.5 mt-1"
+              className="animate-fade-slide-up mt-1 rounded-lg border border-rose-200 bg-rose-50 p-2.5 text-xs font-medium text-rose-600 dark:border-rose-800/40 dark:bg-rose-950/40 dark:text-rose-400"
             >
               {error}
             </p>
@@ -167,18 +173,18 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2 mt-1"
+          className="bg-brand-navy hover:bg-brand-blue mt-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60"
         >
           {isSubmitting && <Spinner className="size-4" />}
           {isSubmitting ? "Signing in…" : "Sign in"}
         </button>
 
         <div className="flex items-center justify-center pt-1">
-          <p className="text-xs text-text-secondary">
+          <p className="text-text-secondary text-xs">
             Need compliance access?{" "}
             <Link
               href="/signup"
-              className="text-brand-blue dark:text-blue-400 font-semibold hover:underline"
+              className="text-brand-blue font-semibold hover:underline dark:text-blue-400"
             >
               Create account →
             </Link>
@@ -188,11 +194,11 @@ export function LoginForm() {
 
       {/* Demo Personas for Quick Access */}
       <div className="border-border border-t pt-5">
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
+        <div className="mb-3 flex items-center justify-between">
+          <span className="text-text-secondary text-[11px] font-semibold tracking-wider uppercase">
             One-Click Demo Roles
           </span>
-          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/30">
+          <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-600 dark:border-emerald-800/30 dark:bg-emerald-950/40 dark:text-emerald-400">
             Instant Sandbox
           </span>
         </div>
@@ -201,34 +207,40 @@ export function LoginForm() {
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("admin@aml.local")}
-            className="group flex flex-col items-center justify-center rounded-xl border border-border bg-slate-50/70 dark:bg-slate-900/50 p-2.5 text-center transition-all hover:border-brand-navy hover:bg-white dark:hover:bg-slate-800 shadow-xs hover:shadow-sm active:scale-95 disabled:opacity-50"
+            className="group border-border hover:border-brand-navy flex flex-col items-center justify-center rounded-xl border bg-slate-50/70 p-2.5 text-center shadow-xs transition-all hover:bg-white hover:shadow-sm active:scale-95 disabled:opacity-50 dark:bg-slate-900/50 dark:hover:bg-slate-800"
           >
-            <span className="text-xs font-bold text-text-primary group-hover:text-brand-navy dark:group-hover:text-brand-blueLight">
+            <span className="text-text-primary group-hover:text-brand-navy dark:group-hover:text-brand-blueLight text-xs font-bold">
               Admin
             </span>
-            <span className="text-[10px] text-text-secondary mt-0.5">Full System</span>
+            <span className="text-text-secondary mt-0.5 text-[10px]">
+              Full System
+            </span>
           </button>
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("analyst@aml.local")}
-            className="group flex flex-col items-center justify-center rounded-xl border border-border bg-slate-50/70 dark:bg-slate-900/50 p-2.5 text-center transition-all hover:border-brand-blue hover:bg-white dark:hover:bg-slate-800 shadow-xs hover:shadow-sm active:scale-95 disabled:opacity-50"
+            className="group border-border hover:border-brand-blue flex flex-col items-center justify-center rounded-xl border bg-slate-50/70 p-2.5 text-center shadow-xs transition-all hover:bg-white hover:shadow-sm active:scale-95 disabled:opacity-50 dark:bg-slate-900/50 dark:hover:bg-slate-800"
           >
-            <span className="text-xs font-bold text-text-primary group-hover:text-brand-blue">
+            <span className="text-text-primary group-hover:text-brand-blue text-xs font-bold">
               Analyst
             </span>
-            <span className="text-[10px] text-text-secondary mt-0.5">Alert Triage</span>
+            <span className="text-text-secondary mt-0.5 text-[10px]">
+              Alert Triage
+            </span>
           </button>
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("operator@aml.local")}
-            className="group flex flex-col items-center justify-center rounded-xl border border-border bg-slate-50/70 dark:bg-slate-900/50 p-2.5 text-center transition-all hover:border-slate-500 hover:bg-white dark:hover:bg-slate-800 shadow-xs hover:shadow-sm active:scale-95 disabled:opacity-50"
+            className="group border-border flex flex-col items-center justify-center rounded-xl border bg-slate-50/70 p-2.5 text-center shadow-xs transition-all hover:border-slate-500 hover:bg-white hover:shadow-sm active:scale-95 disabled:opacity-50 dark:bg-slate-900/50 dark:hover:bg-slate-800"
           >
-            <span className="text-xs font-bold text-text-primary group-hover:text-slate-900 dark:group-hover:text-white">
+            <span className="text-text-primary text-xs font-bold group-hover:text-slate-900 dark:group-hover:text-white">
               Operator
             </span>
-            <span className="text-[10px] text-text-secondary mt-0.5">Data Ingest</span>
+            <span className="text-text-secondary mt-0.5 text-[10px]">
+              Data Ingest
+            </span>
           </button>
         </div>
       </div>

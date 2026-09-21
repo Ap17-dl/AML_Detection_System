@@ -176,55 +176,62 @@ export default function AdminClient({
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
+      <div className="border-border flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+            <h1 className="text-text-primary text-2xl font-bold tracking-tight">
               Platform Administration
             </h1>
-            <span className="bg-brand-navy text-brand-gold border border-brand-gold/30 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+            <span className="bg-brand-navy text-brand-gold border-brand-gold/30 rounded-full border px-2.5 py-0.5 text-[11px] font-bold">
               Root Authority
             </span>
           </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Manage staff RBAC roles, review ML model performance thresholds, and inspect immutable audit logs.
+          <p className="text-text-secondary mt-1 text-xs">
+            Manage staff RBAC roles, review ML model performance thresholds, and
+            inspect immutable audit logs.
           </p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center gap-2 border-b border-border pb-1">
+      <div className="border-border flex items-center gap-2 border-b pb-1">
         <button
           onClick={() => setActiveTab("users")}
           className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "users"
-              ? "bg-brand-navy text-white shadow-xs dark:bg-brand-blue/30 dark:text-brand-blueLight"
+              ? "bg-brand-navy dark:bg-brand-blue/30 dark:text-brand-blueLight text-white shadow-xs"
               : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
+          <span className="material-symbols-outlined text-[16px]">
+            manage_accounts
+          </span>
           <span>Staff &amp; RBAC Users ({users.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("models")}
           className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "models"
-              ? "bg-brand-navy text-white shadow-xs dark:bg-brand-blue/30 dark:text-brand-blueLight"
+              ? "bg-brand-navy dark:bg-brand-blue/30 dark:text-brand-blueLight text-white shadow-xs"
               : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          <span className="material-symbols-outlined text-[16px]">model_training</span>
+          <span className="material-symbols-outlined text-[16px]">
+            model_training
+          </span>
           <span>Model Governance &amp; Thresholds</span>
         </button>
         <button
           onClick={() => setActiveTab("audit")}
           className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "audit"
-              ? "bg-brand-navy text-white shadow-xs dark:bg-brand-blue/30 dark:text-brand-blueLight"
+              ? "bg-brand-navy dark:bg-brand-blue/30 dark:text-brand-blueLight text-white shadow-xs"
               : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          <span className="material-symbols-outlined text-[16px]">security</span>
+          <span className="material-symbols-outlined text-[16px]">
+            security
+          </span>
           <span>Immutable Audit Trail</span>
         </button>
       </div>
@@ -384,36 +391,46 @@ export default function AdminClient({
 
       {/* Role Change Modal */}
       {selectedUserToChangeRole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-slide-up">
-          <div className="border border-border bg-surface flex w-full max-w-sm flex-col gap-4 rounded-2xl p-6 shadow-2xl">
-            <div className="flex items-center gap-2 border-b border-border pb-3">
-              <span className="material-symbols-outlined text-brand-navy dark:text-brand-gold text-[20px]">manage_accounts</span>
-              <h3 className="text-base font-bold text-text-primary">
+        <div className="animate-fade-slide-up fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="border-border bg-surface flex w-full max-w-sm flex-col gap-4 rounded-2xl border p-6 shadow-2xl">
+            <div className="border-border flex items-center gap-2 border-b pb-3">
+              <span className="material-symbols-outlined text-brand-navy dark:text-brand-gold text-[20px]">
+                manage_accounts
+              </span>
+              <h3 className="text-text-primary text-base font-bold">
                 Update Staff RBAC Role
               </h3>
             </div>
-            <p className="text-xs text-text-secondary">
-              Modify clearance level for <span className="font-semibold text-text-primary">{selectedUserToChangeRole.email}</span>.
+            <p className="text-text-secondary text-xs">
+              Modify clearance level for{" "}
+              <span className="text-text-primary font-semibold">
+                {selectedUserToChangeRole.email}
+              </span>
+              .
             </p>
             <select
               value={newRoleVal}
               onChange={(e) => setNewRoleVal(e.target.value)}
-              className="border border-border bg-surface text-text-primary rounded-lg p-2.5 text-xs font-medium outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 cursor-pointer"
+              className="border-border bg-surface text-text-primary focus:border-brand-blue focus:ring-brand-blue/20 cursor-pointer rounded-lg border p-2.5 text-xs font-medium outline-none focus:ring-2"
             >
               <option value="administrator">Administrator (Full Access)</option>
-              <option value="aml_analyst">AML Analyst (Alerts &amp; SAR Filing)</option>
-              <option value="data_operator">Data Operator (Data Ingestion Only)</option>
+              <option value="aml_analyst">
+                AML Analyst (Alerts &amp; SAR Filing)
+              </option>
+              <option value="data_operator">
+                Data Operator (Data Ingestion Only)
+              </option>
             </select>
-            <div className="flex justify-end gap-2.5 border-t border-border pt-3">
+            <div className="border-border flex justify-end gap-2.5 border-t pt-3">
               <button
                 onClick={() => setSelectedUserToChangeRole(null)}
-                className="border border-border text-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors"
+                className="border-border text-text-secondary rounded-lg border px-3.5 py-1.5 text-xs font-medium transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRoleChange}
-                className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95"
+                className="bg-brand-navy hover:bg-brand-blue rounded-lg px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all active:scale-95"
               >
                 Apply Change
               </button>

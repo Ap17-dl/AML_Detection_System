@@ -92,18 +92,19 @@ export default function NetworkExplorerClient({
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
+      <div className="border-border flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+            <h1 className="text-text-primary text-2xl font-bold tracking-tight">
               Graph Network Topology Explorer
             </h1>
-            <span className="bg-brand-gold/15 text-amber-800 dark:text-amber-300 border border-brand-gold/30 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+            <span className="bg-brand-gold/15 border-brand-gold/30 rounded-full border px-2.5 py-0.5 text-[11px] font-bold text-amber-800 dark:text-amber-300">
               GNN Subgraph
             </span>
           </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Analyze multi-hop transaction topologies, fan-in/fan-out structuring, and circular money-mule laundering rings.
+          <p className="text-text-secondary mt-1 text-xs">
+            Analyze multi-hop transaction topologies, fan-in/fan-out
+            structuring, and circular money-mule laundering rings.
           </p>
         </div>
       </div>
@@ -111,10 +112,10 @@ export default function NetworkExplorerClient({
       {/* Query Bar */}
       <form
         onSubmit={handleSearchSubmit}
-        className="border border-border bg-surface flex flex-wrap items-center gap-3 rounded-xl p-4 shadow-xs"
+        className="border-border bg-surface flex flex-wrap items-center gap-3 rounded-xl border p-4 shadow-xs"
       >
         <div className="relative min-w-[240px] flex-1">
-          <span className="material-symbols-outlined absolute inset-y-0 left-3 flex items-center text-slate-400 text-[18px]">
+          <span className="material-symbols-outlined absolute inset-y-0 left-3 flex items-center text-[18px] text-slate-400">
             hub
           </span>
           <input
@@ -122,17 +123,17 @@ export default function NetworkExplorerClient({
             placeholder="Enter Account ID (UUID) to inspect network topology…"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            className="border border-border bg-surface text-xs text-text-primary placeholder:text-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15 w-full rounded-lg pl-9 pr-3 py-2 font-mono outline-none transition-all"
+            className="border-border bg-surface text-text-primary focus:border-brand-blue focus:ring-brand-blue/15 w-full rounded-lg border py-2 pr-3 pl-9 font-mono text-xs transition-all outline-none placeholder:text-slate-400 focus:ring-2"
           />
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
+          <label className="text-text-secondary text-[11px] font-semibold tracking-wider uppercase">
             Neighborhood Hops
           </label>
           <select
             value={hops}
             onChange={(e) => setHops(Number(e.target.value))}
-            className="border border-border bg-surface text-xs text-text-primary rounded-lg px-3 py-2 outline-none focus:border-brand-blue cursor-pointer"
+            className="border-border bg-surface text-text-primary focus:border-brand-blue cursor-pointer rounded-lg border px-3 py-2 text-xs outline-none"
           >
             <option value={1}>1-hop (Direct Counterparties)</option>
             <option value={2}>2-hops (Extended Network)</option>
@@ -141,9 +142,11 @@ export default function NetworkExplorerClient({
         </div>
         <button
           type="submit"
-          className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-5 py-2 text-xs font-semibold shadow-sm transition-all duration-150 inline-flex items-center gap-1.5 active:scale-95"
+          className="bg-brand-navy hover:bg-brand-blue inline-flex items-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95"
         >
-          <span className="material-symbols-outlined text-[16px]">travel_explore</span>
+          <span className="material-symbols-outlined text-[16px]">
+            travel_explore
+          </span>
           <span>Explore Network</span>
         </button>
       </form>

@@ -58,7 +58,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
     <header className="border-border bg-surface/95 sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b px-6 backdrop-blur-md transition-colors">
       {/* Left: Environment Node Indicator */}
       <div className="flex items-center gap-3">
-        <div className="border-border bg-slate-50/90 dark:bg-slate-900/60 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs shadow-xs">
+        <div className="border-border inline-flex items-center gap-2 rounded-full border bg-slate-50/90 px-3 py-1 text-xs shadow-xs dark:bg-slate-900/60">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
@@ -77,7 +77,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
           <button
             type="button"
             onClick={() => setShowAdminModal(true)}
-            className="text-xs font-semibold text-brand-blue dark:text-blue-400 border border-brand-blue/30 bg-brand-blue/5 hover:bg-brand-blue hover:text-white rounded-lg px-3 py-1.5 shadow-xs transition-all duration-150 active:scale-[0.98]"
+            className="text-brand-blue border-brand-blue/30 bg-brand-blue/5 hover:bg-brand-blue rounded-lg border px-3 py-1.5 text-xs font-semibold shadow-xs transition-all duration-150 hover:text-white active:scale-[0.98] dark:text-blue-400"
           >
             Request Admin Access
           </button>
@@ -87,12 +87,12 @@ export function Topbar({ user }: { user: CurrentUser }) {
 
         {/* User Card */}
         <div className="border-border flex items-center gap-3 border-l pl-3 sm:pl-4">
-          <div className="hidden sm:flex flex-col items-end text-right">
-            <p className="text-sm font-semibold text-text-primary leading-tight">
+          <div className="hidden flex-col items-end text-right sm:flex">
+            <p className="text-text-primary text-sm leading-tight font-semibold">
               {user.full_name ?? user.email}
             </p>
             <span
-              className={`mt-0.5 inline-block rounded-full border px-2 py-0.2 text-[10px] font-semibold tracking-wide ${roleMeta.badgeClass}`}
+              className={`py-0.2 mt-0.5 inline-block rounded-full border px-2 text-[10px] font-semibold tracking-wide ${roleMeta.badgeClass}`}
             >
               {roleMeta.label}
             </span>
@@ -100,7 +100,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
 
           <div
             title={`${user.full_name ?? user.email} (${roleMeta.label})`}
-            className="bg-brand-navy text-brand-gold flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold shadow-xs ring-2 ring-brand-gold/20"
+            className="bg-brand-navy text-brand-gold ring-brand-gold/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold shadow-xs ring-2"
           >
             {userInitials}
           </div>
@@ -108,7 +108,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
           <button
             type="button"
             onClick={handleSignOut}
-            className="text-xs font-medium border border-border text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg px-2.5 py-1.5 transition-all duration-150 active:scale-[0.98]"
+            className="border-border text-text-secondary hover:text-text-primary rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all duration-150 hover:bg-slate-100 active:scale-[0.98] dark:hover:bg-slate-800"
           >
             Sign out
           </button>

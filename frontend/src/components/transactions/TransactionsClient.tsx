@@ -159,35 +159,38 @@ export default function TransactionsClient({
   return (
     <div className="flex flex-col gap-6">
       {/* Top bar */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
+      <div className="border-border flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+            <h1 className="text-text-primary text-2xl font-bold tracking-tight">
               Transaction Surveillance
             </h1>
-            <span className="bg-brand-blue/10 text-brand-blue dark:text-blue-300 border border-brand-blue/20 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+            <span className="bg-brand-blue/10 text-brand-blue border-brand-blue/20 rounded-full border px-2.5 py-0.5 text-[11px] font-bold dark:text-blue-300">
               {data?.total.toLocaleString() ?? 0} Transactions
             </span>
           </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Real-time multi-rail feed across wire, online, branch, ATM, and API endpoints.
+          <p className="text-text-secondary mt-1 text-xs">
+            Real-time multi-rail feed across wire, online, branch, ATM, and API
+            endpoints.
           </p>
         </div>
         {canImport && (
           <Link
             href="/transactions/import"
-            className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition-all duration-150 inline-flex items-center gap-1.5"
+            className="bg-brand-navy hover:bg-brand-blue inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150"
           >
-            <span className="material-symbols-outlined text-[16px]">upload_file</span>
+            <span className="material-symbols-outlined text-[16px]">
+              upload_file
+            </span>
             <span>Import Batch CSV</span>
           </Link>
         )}
       </div>
 
       {/* Filters toolbar */}
-      <div className="border border-border bg-surface flex flex-wrap items-center gap-3 rounded-xl p-4 shadow-xs">
+      <div className="border-border bg-surface flex flex-wrap items-center gap-3 rounded-xl border p-4 shadow-xs">
         <div className="relative min-w-[220px] flex-1">
-          <span className="material-symbols-outlined absolute inset-y-0 left-3 flex items-center text-slate-400 text-[18px]">
+          <span className="material-symbols-outlined absolute inset-y-0 left-3 flex items-center text-[18px] text-slate-400">
             search
           </span>
           <input
@@ -195,11 +198,13 @@ export default function TransactionsClient({
             placeholder="Search by transaction ref or account ID…"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="border border-border bg-surface text-xs text-text-primary placeholder:text-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15 w-full rounded-lg pl-9 pr-3 py-2 outline-none transition-all"
+            className="border-border bg-surface text-text-primary focus:border-brand-blue focus:ring-brand-blue/15 w-full rounded-lg border py-2 pr-3 pl-9 text-xs transition-all outline-none placeholder:text-slate-400 focus:ring-2"
           />
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">From</label>
+          <label className="text-text-secondary text-[11px] font-semibold tracking-wider uppercase">
+            From
+          </label>
           <input
             type="date"
             value={dateFrom}
@@ -207,11 +212,13 @@ export default function TransactionsClient({
               setDateFrom(e.target.value);
               setPage(1);
             }}
-            className="border border-border bg-surface text-xs text-text-primary rounded-lg px-2.5 py-1.5 outline-none focus:border-brand-blue"
+            className="border-border bg-surface text-text-primary focus:border-brand-blue rounded-lg border px-2.5 py-1.5 text-xs outline-none"
           />
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <label className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">To</label>
+          <label className="text-text-secondary text-[11px] font-semibold tracking-wider uppercase">
+            To
+          </label>
           <input
             type="date"
             value={dateTo}
@@ -219,7 +226,7 @@ export default function TransactionsClient({
               setDateTo(e.target.value);
               setPage(1);
             }}
-            className="border border-border bg-surface text-xs text-text-primary rounded-lg px-2.5 py-1.5 outline-none focus:border-brand-blue"
+            className="border-border bg-surface text-text-primary focus:border-brand-blue rounded-lg border px-2.5 py-1.5 text-xs outline-none"
           />
         </div>
         <select
@@ -228,7 +235,7 @@ export default function TransactionsClient({
             setChannel(e.target.value);
             setPage(1);
           }}
-          className="border border-border bg-surface text-xs text-text-primary rounded-lg px-3 py-2 outline-none focus:border-brand-blue cursor-pointer"
+          className="border-border bg-surface text-text-primary focus:border-brand-blue cursor-pointer rounded-lg border px-3 py-2 text-xs outline-none"
         >
           <option value="">All Channels</option>
           <option value="online">Online Rail</option>
@@ -261,23 +268,25 @@ export default function TransactionsClient({
 
       {/* Transaction Detail Drawer */}
       {selectedTxn && (
-        <div className="fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm animate-fade-slide-up">
+        <div className="animate-fade-slide-up fixed inset-0 z-50 flex justify-end bg-black/60 backdrop-blur-sm">
           <div className="border-border bg-surface flex h-full w-full max-w-lg flex-col overflow-y-auto border-l p-6 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-border pb-4">
+            <div className="border-border flex items-center justify-between border-b pb-4">
               <div>
                 <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-brand-blue text-[20px]">receipt_long</span>
-                  <h2 className="text-base font-bold text-text-primary">
+                  <span className="material-symbols-outlined text-brand-blue text-[20px]">
+                    receipt_long
+                  </span>
+                  <h2 className="text-text-primary text-base font-bold">
                     Transaction Details
                   </h2>
                 </div>
-                <span className="text-text-secondary font-mono text-xs mt-0.5 block">
+                <span className="text-text-secondary mt-0.5 block font-mono text-xs">
                   {selectedTxn.transaction_id}
                 </span>
               </div>
               <button
                 onClick={() => setSelectedTxn(null)}
-                className="text-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-text-primary rounded-lg p-1.5 transition-colors"
+                className="text-text-secondary hover:text-text-primary rounded-lg p-1.5 transition-colors hover:bg-slate-100 dark:hover:bg-slate-800"
               >
                 ✕
               </button>
@@ -285,16 +294,18 @@ export default function TransactionsClient({
 
             <div className="mt-6 flex flex-col gap-6">
               {/* ML Risk Evaluation Card */}
-              <div className="border border-border bg-slate-50/70 dark:bg-slate-900/50 flex flex-col gap-3 rounded-xl p-4 shadow-xs">
-                <span className="text-xs font-semibold tracking-wider uppercase text-text-secondary">
+              <div className="border-border flex flex-col gap-3 rounded-xl border bg-slate-50/70 p-4 shadow-xs dark:bg-slate-900/50">
+                <span className="text-text-secondary text-xs font-semibold tracking-wider uppercase">
                   ML Risk Evaluation
                 </span>
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-medium text-text-primary">Assigned Risk Tier</span>
+                  <span className="text-text-primary text-xs font-medium">
+                    Assigned Risk Tier
+                  </span>
                   <RiskBadge category={selectedTxn.risk_category} />
                 </div>
                 <div className="flex flex-col gap-1.5">
-                  <div className="text-xs text-text-secondary flex justify-between">
+                  <div className="text-text-secondary flex justify-between text-xs">
                     <span>Probability of Laundering</span>
                     <span className="text-text-primary font-mono font-bold">
                       {selectedTxn.risk_probability != null
@@ -303,7 +314,7 @@ export default function TransactionsClient({
                     </span>
                   </div>
                   {selectedTxn.risk_probability != null && (
-                    <div className="bg-slate-200 dark:bg-slate-800 h-2 w-full overflow-hidden rounded-full">
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200 dark:bg-slate-800">
                       <div
                         className={`h-full rounded-full transition-all duration-500 ${
                           selectedTxn.risk_category === "high"
@@ -319,9 +330,9 @@ export default function TransactionsClient({
                     </div>
                   )}
                 </div>
-                <div className="text-text-secondary mt-1 flex justify-between border-t border-border pt-2 text-[11px]">
+                <div className="text-text-secondary border-border mt-1 flex justify-between border-t pt-2 text-[11px]">
                   <span>Scoring Engine</span>
-                  <span className="font-mono text-text-primary font-medium">
+                  <span className="text-text-primary font-mono font-medium">
                     {selectedTxn.model_version ?? "Ensemble XGBoost + GNN v2.1"}
                   </span>
                 </div>

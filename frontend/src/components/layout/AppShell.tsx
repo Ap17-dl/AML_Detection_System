@@ -12,14 +12,12 @@ export function AppShell({
   children: ReactNode;
 }) {
   return (
-    <div className="bg-brand-bgLight dark:bg-bg flex min-h-screen text-brand-dark dark:text-text-primary antialiased">
+    <div className="bg-brand-bgLight dark:bg-bg text-brand-dark dark:text-text-primary flex min-h-screen antialiased">
       <Sidebar role={user.role} />
-      <div className="flex flex-1 flex-col min-w-0 overflow-hidden">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Topbar user={user} />
         <main className="flex-1 overflow-y-auto p-6 md:p-8">
-          <div className="mx-auto max-w-7xl w-full">
-            {children}
-          </div>
+          <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
       </div>
     </div>

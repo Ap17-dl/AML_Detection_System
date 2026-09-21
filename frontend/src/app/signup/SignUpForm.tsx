@@ -77,17 +77,20 @@ export function SignUpForm() {
 
   if (confirmationRequired) {
     return (
-      <div className="flex flex-col gap-4 text-center py-4">
-        <div className="bg-brand-blue/10 text-brand-blue mx-auto flex size-14 items-center justify-center rounded-2xl ring-1 ring-brand-blue/20">
-          <span className="material-symbols-outlined text-3xl">mark_email_read</span>
+      <div className="flex flex-col gap-4 py-4 text-center">
+        <div className="bg-brand-blue/10 text-brand-blue ring-brand-blue/20 mx-auto flex size-14 items-center justify-center rounded-2xl ring-1">
+          <span className="material-symbols-outlined text-3xl">
+            mark_email_read
+          </span>
         </div>
-        <h2 className="text-xl text-text-primary font-bold">
+        <h2 className="text-text-primary text-xl font-bold">
           Check your email
         </h2>
-        <p className="text-sm text-text-secondary leading-relaxed max-w-sm mx-auto">
+        <p className="text-text-secondary mx-auto max-w-sm text-sm leading-relaxed">
           We&apos;ve sent a confirmation link to{" "}
-          <span className="text-text-primary font-semibold">{email}</span>. Please
-          click the link to verify your compliance credentials and sign in.
+          <span className="text-text-primary font-semibold">{email}</span>.
+          Please click the link to verify your compliance credentials and sign
+          in.
         </p>
         <Link
           href="/login"
@@ -104,14 +107,17 @@ export function SignUpForm() {
       {error && (
         <div
           role="alert"
-          className="animate-fade-slide-up border-rose-200 dark:border-rose-800/40 bg-rose-50 dark:bg-rose-950/40 text-xs font-medium text-rose-700 dark:text-rose-400 rounded-lg border p-3"
+          className="animate-fade-slide-up rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs font-medium text-rose-700 dark:border-rose-800/40 dark:bg-rose-950/40 dark:text-rose-400"
         >
           {error}
         </div>
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="fullName" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+        <label
+          htmlFor="fullName"
+          className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+        >
           Full name
         </label>
         <input
@@ -128,7 +134,10 @@ export function SignUpForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+        <label
+          htmlFor="email"
+          className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+        >
           Email address
         </label>
         <input
@@ -145,7 +154,10 @@ export function SignUpForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="roleId" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+        <label
+          htmlFor="roleId"
+          className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+        >
           Platform role
         </label>
         <select
@@ -158,13 +170,17 @@ export function SignUpForm() {
           <option value="2">AML Compliance Analyst (Alerts & Cases)</option>
           <option value="3">Data Operator (Batch Ingestion)</option>
         </select>
-        <p className="text-[11px] text-text-secondary">
-          Need Administrator access? You can request it from the host after signing in.
+        <p className="text-text-secondary text-[11px]">
+          Need Administrator access? You can request it from the host after
+          signing in.
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+        <label
+          htmlFor="password"
+          className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+        >
           Password
         </label>
         <div className="relative">
@@ -199,7 +215,7 @@ export function SignUpForm() {
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="confirmPassword"
-          className="text-xs font-semibold uppercase tracking-wider text-text-secondary"
+          className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
         >
           Confirm password
         </label>
@@ -235,17 +251,17 @@ export function SignUpForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2 mt-2"
+        className="bg-brand-navy hover:bg-brand-blue mt-2 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60"
       >
         {isSubmitting && <Spinner className="size-4" />}
         {isSubmitting ? "Creating account…" : "Create account"}
       </button>
 
-      <p className="text-xs text-text-secondary text-center pt-1">
+      <p className="text-text-secondary pt-1 text-center text-xs">
         Already have credentials?{" "}
         <Link
           href="/login"
-          className="text-brand-blue dark:text-blue-400 font-semibold hover:underline"
+          className="text-brand-blue font-semibold hover:underline dark:text-blue-400"
         >
           Sign in
         </Link>

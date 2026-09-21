@@ -130,26 +130,27 @@ export default function CustomersClient({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
+      <div className="border-border flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+            <h1 className="text-text-primary text-2xl font-bold tracking-tight">
               Customer Entity Directory
             </h1>
-            <span className="bg-brand-blue/10 text-brand-blue dark:text-blue-300 border border-brand-blue/20 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+            <span className="bg-brand-blue/10 text-brand-blue border-brand-blue/20 rounded-full border px-2.5 py-0.5 text-[11px] font-bold dark:text-blue-300">
               {data?.total.toLocaleString() ?? 0} Entities
             </span>
           </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Browse monitored legal entities, retail accountholders, and cumulative AML risk profiles.
+          <p className="text-text-secondary mt-1 text-xs">
+            Browse monitored legal entities, retail accountholders, and
+            cumulative AML risk profiles.
           </p>
         </div>
       </div>
 
       {/* Filters */}
-      <div className="border border-border bg-surface flex flex-wrap items-center gap-3 rounded-xl p-4 shadow-xs">
+      <div className="border-border bg-surface flex flex-wrap items-center gap-3 rounded-xl border p-4 shadow-xs">
         <div className="relative min-w-[240px] flex-1">
-          <span className="material-symbols-outlined absolute inset-y-0 left-3 flex items-center text-slate-400 text-[18px]">
+          <span className="material-symbols-outlined absolute inset-y-0 left-3 flex items-center text-[18px] text-slate-400">
             search
           </span>
           <input
@@ -157,7 +158,7 @@ export default function CustomersClient({
             placeholder="Search by entity name, external ref, or country code…"
             value={searchInput}
             onChange={(e) => setSearchInput(e.target.value)}
-            className="border border-border bg-surface text-xs text-text-primary placeholder:text-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15 w-full rounded-lg pl-9 pr-3 py-2 outline-none transition-all"
+            className="border-border bg-surface text-text-primary focus:border-brand-blue focus:ring-brand-blue/15 w-full rounded-lg border py-2 pr-3 pl-9 text-xs transition-all outline-none placeholder:text-slate-400 focus:ring-2"
           />
         </div>
         <select
@@ -166,7 +167,7 @@ export default function CustomersClient({
             setRiskCategory(e.target.value);
             setPage(1);
           }}
-          className="border border-border bg-surface text-xs text-text-primary rounded-lg px-3 py-2 outline-none focus:border-brand-blue cursor-pointer"
+          className="border-border bg-surface text-text-primary focus:border-brand-blue cursor-pointer rounded-lg border px-3 py-2 text-xs outline-none"
         >
           <option value="">All Risk Tiers</option>
           <option value="low">Low Risk</option>

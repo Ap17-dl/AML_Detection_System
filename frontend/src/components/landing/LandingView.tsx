@@ -50,7 +50,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
   const handleNavClick = (
     e: React.MouseEvent<HTMLAnchorElement>,
-    id: string
+    id: string,
   ) => {
     e.preventDefault();
     const el = document.getElementById(id);
@@ -122,7 +122,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                   className={`relative py-1 transition-colors duration-150 ${
                     isActive
                       ? "text-brand-blue font-bold"
-                      : "text-slate-600 hover:text-brand-navy"
+                      : "hover:text-brand-navy text-slate-600"
                   }`}
                 >
                   {item.label}
@@ -201,7 +201,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                     className={`py-1 transition-colors ${
                       isActive
                         ? "text-brand-blue font-bold"
-                        : "text-slate-600 hover:text-brand-navy"
+                        : "hover:text-brand-navy text-slate-600"
                     }`}
                   >
                     {item.label}

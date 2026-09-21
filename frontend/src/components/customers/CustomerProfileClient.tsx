@@ -133,29 +133,33 @@ export default function CustomerProfileClient({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-border pb-5">
+      <div className="border-border flex flex-col gap-4 border-b pb-5 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <Link
             href="/customers"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-brand-navy dark:hover:text-white transition-colors"
+            className="text-text-secondary hover:text-brand-navy inline-flex items-center gap-1.5 text-xs font-semibold transition-colors dark:hover:text-white"
           >
-            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span className="material-symbols-outlined text-[16px]">
+              arrow_back
+            </span>
             <span>Return to Customers Directory</span>
           </Link>
-          <h1 className="text-2xl font-bold tracking-tight text-text-primary mt-2">
+          <h1 className="text-text-primary mt-2 text-2xl font-bold tracking-tight">
             {customer.full_name}
           </h1>
           <div className="mt-2 flex flex-wrap items-center gap-3">
             {customer.kyc_level && (
-              <span className="text-[11px] font-semibold uppercase tracking-wider border border-border bg-slate-100 dark:bg-slate-800 text-text-secondary rounded-full px-2.5 py-0.5">
+              <span className="border-border text-text-secondary rounded-full border bg-slate-100 px-2.5 py-0.5 text-[11px] font-semibold tracking-wider uppercase dark:bg-slate-800">
                 KYC Tier: {customer.kyc_level}
               </span>
             )}
             <RiskBadge category={customer.current_risk_category} />
             {customer.risk_updated_at && (
-              <span className="text-xs text-text-secondary">
+              <span className="text-text-secondary text-xs">
                 Evaluated:{" "}
-                <span className="font-mono">{new Date(customer.risk_updated_at).toLocaleDateString()}</span>
+                <span className="font-mono">
+                  {new Date(customer.risk_updated_at).toLocaleDateString()}
+                </span>
               </span>
             )}
           </div>
@@ -164,16 +168,20 @@ export default function CustomerProfileClient({
         <button
           onClick={handleRecalculate}
           disabled={recalculating}
-          className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition-all duration-150 inline-flex items-center gap-1.5 disabled:opacity-50"
+          className="bg-brand-navy hover:bg-brand-blue inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 disabled:opacity-50"
         >
-          <span className="material-symbols-outlined text-[16px]">autorenew</span>
-          <span>{recalculating ? "Recalculating…" : "Recalculate Risk Score"}</span>
+          <span className="material-symbols-outlined text-[16px]">
+            autorenew
+          </span>
+          <span>
+            {recalculating ? "Recalculating…" : "Recalculate Risk Score"}
+          </span>
         </button>
       </div>
 
       {/* Profile details */}
-      <div className="border border-border bg-surface rounded-xl p-6 shadow-xs">
-        <h2 className="text-sm font-bold text-text-primary mb-4 border-b border-border pb-2">
+      <div className="border-border bg-surface rounded-xl border p-6 shadow-xs">
+        <h2 className="text-text-primary border-border mb-4 border-b pb-2 text-sm font-bold">
           Customer Profile & AML Identity
         </h2>
         <dl className="grid grid-cols-2 gap-x-8 gap-y-3 md:grid-cols-3">

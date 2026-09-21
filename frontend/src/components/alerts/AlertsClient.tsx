@@ -127,10 +127,12 @@ export default function AlertsClient({
       render: (a) => (
         <Link
           href={`/alerts/${a.alert_id}`}
-          className="text-xs text-brand-blue hover:text-brand-blueLight dark:text-blue-400 font-semibold inline-flex items-center gap-1 hover:underline"
+          className="text-brand-blue hover:text-brand-blueLight inline-flex items-center gap-1 text-xs font-semibold hover:underline dark:text-blue-400"
         >
           Investigate
-          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
+          <span className="material-symbols-outlined text-[14px]">
+            arrow_forward
+          </span>
         </Link>
       ),
     },
@@ -139,27 +141,30 @@ export default function AlertsClient({
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
+      <div className="border-border flex flex-col gap-3 border-b pb-5 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+            <h1 className="text-text-primary text-2xl font-bold tracking-tight">
               Alert Triage Queue
             </h1>
-            <span className="bg-brand-blue/10 text-brand-blue dark:text-blue-300 border border-brand-blue/20 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+            <span className="bg-brand-blue/10 text-brand-blue border-brand-blue/20 rounded-full border px-2.5 py-0.5 text-[11px] font-bold dark:text-blue-300">
               {total} Total Alerts
             </span>
           </div>
-          <p className="text-xs text-text-secondary mt-1">
-            Prioritize and investigate flagged suspicious transactions and customer behavioral anomalies.
+          <p className="text-text-secondary mt-1 text-xs">
+            Prioritize and investigate flagged suspicious transactions and
+            customer behavioral anomalies.
           </p>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="border border-border bg-surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4 shadow-xs">
+      <div className="border-border bg-surface flex flex-wrap items-center justify-between gap-3 rounded-xl border p-4 shadow-xs">
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
-            <span className="material-symbols-outlined text-[18px]">filter_list</span>
+          <div className="text-text-secondary flex items-center gap-1.5 text-xs font-semibold">
+            <span className="material-symbols-outlined text-[18px]">
+              filter_list
+            </span>
             <span>Filters:</span>
           </div>
 
@@ -169,7 +174,7 @@ export default function AlertsClient({
               setStatusFilter(e.target.value);
               setPage(1);
             }}
-            className="border border-border bg-surface text-text-primary rounded-lg px-3 py-1.5 text-xs font-medium outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 cursor-pointer"
+            className="border-border bg-surface text-text-primary focus:border-brand-blue focus:ring-brand-blue/20 cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium outline-none focus:ring-2"
           >
             <option value="">All Lifecycle Statuses</option>
             <option value="open">Open</option>
@@ -183,7 +188,7 @@ export default function AlertsClient({
               setRiskFilter(e.target.value);
               setPage(1);
             }}
-            className="border border-border bg-surface text-text-primary rounded-lg px-3 py-1.5 text-xs font-medium outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 cursor-pointer"
+            className="border-border bg-surface text-text-primary focus:border-brand-blue focus:ring-brand-blue/20 cursor-pointer rounded-lg border px-3 py-1.5 text-xs font-medium outline-none focus:ring-2"
           >
             <option value="">All Risk Tiers</option>
             <option value="high">High Risk</option>
@@ -200,7 +205,7 @@ export default function AlertsClient({
               setRiskFilter("");
               setPage(1);
             }}
-            className="text-xs text-text-secondary hover:text-text-primary underline cursor-pointer"
+            className="text-text-secondary hover:text-text-primary cursor-pointer text-xs underline"
           >
             Clear filters
           </button>

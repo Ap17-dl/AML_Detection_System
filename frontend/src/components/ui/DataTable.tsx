@@ -63,13 +63,13 @@ export function DataTable<T extends object>({
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-border bg-slate-50/80 dark:bg-slate-900/60 border-b">
+            <tr className="border-border border-b bg-slate-50/80 dark:bg-slate-900/60">
               {columns.map((col) => (
                 <th
                   key={col.key}
                   className={`text-label text-text-secondary px-4 py-3 text-xs font-semibold tracking-wider ${
                     col.sortable
-                      ? "hover:text-text-primary cursor-pointer select-none transition-colors"
+                      ? "hover:text-text-primary cursor-pointer transition-colors select-none"
                       : ""
                   } ${col.className ?? ""}`}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
@@ -83,7 +83,9 @@ export function DataTable<T extends object>({
                             {sortOrder === "asc" ? "↑" : "↓"}
                           </span>
                         ) : (
-                          <span className="text-slate-300 dark:text-slate-600">↕</span>
+                          <span className="text-slate-300 dark:text-slate-600">
+                            ↕
+                          </span>
                         )}
                       </span>
                     )}
@@ -92,29 +94,28 @@ export function DataTable<T extends object>({
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border">
+          <tbody className="divide-border divide-y">
             {isLoading ? (
               // Skeleton loading rows
               Array.from({ length: Math.min(pageSize, 5) }).map((_, i) => (
                 <tr key={`skeleton-${i}`} className="animate-pulse">
                   {columns.map((col) => (
                     <td key={col.key} className="px-4 py-3.5">
-                      <div className="bg-slate-200 dark:bg-slate-800 h-4 w-24 rounded" />
+                      <div className="h-4 w-24 rounded bg-slate-200 dark:bg-slate-800" />
                     </td>
                   ))}
                 </tr>
               ))
             ) : items.length === 0 ? (
               <tr>
-                <td
-                  colSpan={columns.length}
-                  className="px-4 py-16 text-center"
-                >
+                <td colSpan={columns.length} className="px-4 py-16 text-center">
                   <div className="flex flex-col items-center justify-center gap-2">
-                    <span className="material-symbols-outlined text-slate-300 dark:text-slate-600 text-4xl">
+                    <span className="material-symbols-outlined text-4xl text-slate-300 dark:text-slate-600">
                       search_off
                     </span>
-                    <p className="text-body text-text-secondary">{emptyMessage}</p>
+                    <p className="text-body text-text-secondary">
+                      {emptyMessage}
+                    </p>
                   </div>
                 </td>
               </tr>
@@ -156,7 +157,7 @@ export function DataTable<T extends object>({
       </div>
 
       {/* Pagination */}
-      <div className="border-border bg-slate-50/50 dark:bg-slate-900/30 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t px-4 py-3">
+      <div className="border-border flex flex-col gap-3 border-t bg-slate-50/50 px-4 py-3 sm:flex-row sm:items-center sm:justify-between dark:bg-slate-900/30">
         <span className="text-caption text-text-secondary">
           {total === 0
             ? "No results"
@@ -167,18 +168,18 @@ export function DataTable<T extends object>({
             type="button"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className="border-border bg-surface text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium rounded-lg border px-3 py-1.5 transition-all disabled:cursor-not-allowed disabled:opacity-40"
+            className="border-border bg-surface text-text-primary rounded-lg border px-3 py-1.5 text-xs font-medium transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"
           >
             ← Previous
           </button>
-          <span className="text-caption text-text-secondary font-mono px-1">
+          <span className="text-caption text-text-secondary px-1 font-mono">
             {page} / {totalPages}
           </span>
           <button
             type="button"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
-            className="border-border bg-surface text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium rounded-lg border px-3 py-1.5 transition-all disabled:cursor-not-allowed disabled:opacity-40"
+            className="border-border bg-surface text-text-primary rounded-lg border px-3 py-1.5 text-xs font-medium transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40 dark:hover:bg-slate-800"
           >
             Next →
           </button>
