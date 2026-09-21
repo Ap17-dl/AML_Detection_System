@@ -8,7 +8,7 @@ import { EyeIcon, EyeOffIcon, Spinner } from "@/components/ui/icons";
 import { createClient } from "@/lib/supabase/client";
 
 const INPUT_CLASSES =
-  "text-body rounded-md border border-border bg-surface px-3 py-2 text-text-primary transition-colors outline-none focus:border-accent focus:ring-2 focus:ring-accent/30";
+  "text-sm rounded-lg border border-border bg-surface px-3.5 py-2.5 text-text-primary transition-all duration-150 outline-none focus:border-brand-blue focus:ring-3 focus:ring-brand-blue/15 placeholder:text-slate-400";
 
 export function SignUpForm() {
   const router = useRouter();
@@ -77,33 +77,21 @@ export function SignUpForm() {
 
   if (confirmationRequired) {
     return (
-      <div className="flex flex-col gap-4 text-center">
-        <div className="bg-accent/10 text-accent mx-auto flex size-12 items-center justify-center rounded-full">
-          <svg
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth={2}
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="size-6"
-            aria-hidden="true"
-          >
-            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-            <polyline points="22 4 12 14.01 9 11.01" />
-          </svg>
+      <div className="flex flex-col gap-4 text-center py-4">
+        <div className="bg-brand-blue/10 text-brand-blue mx-auto flex size-14 items-center justify-center rounded-2xl ring-1 ring-brand-blue/20">
+          <span className="material-symbols-outlined text-3xl">mark_email_read</span>
         </div>
-        <h2 className="text-h3 text-text-primary font-semibold">
+        <h2 className="text-xl text-text-primary font-bold">
           Check your email
         </h2>
-        <p className="text-body text-text-secondary">
+        <p className="text-sm text-text-secondary leading-relaxed max-w-sm mx-auto">
           We&apos;ve sent a confirmation link to{" "}
-          <span className="text-text-primary font-medium">{email}</span>. Please
-          click the link to verify your account and sign in.
+          <span className="text-text-primary font-semibold">{email}</span>. Please
+          click the link to verify your compliance credentials and sign in.
         </p>
         <Link
           href="/login"
-          className="text-body bg-accent mt-2 flex items-center justify-center rounded-md px-4 py-2 font-medium text-white transition-all hover:-translate-y-px hover:shadow-md"
+          className="bg-brand-navy hover:bg-brand-blue mt-3 inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150"
         >
           Return to sign in
         </Link>
@@ -116,14 +104,14 @@ export function SignUpForm() {
       {error && (
         <div
           role="alert"
-          className="animate-fade-slide-up border-risk-high/30 bg-risk-high/10 text-caption text-risk-high rounded-md border p-3"
+          className="animate-fade-slide-up border-rose-200 dark:border-rose-800/40 bg-rose-50 dark:bg-rose-950/40 text-xs font-medium text-rose-700 dark:text-rose-400 rounded-lg border p-3"
         >
           {error}
         </div>
       )}
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="fullName" className="text-label text-text-secondary">
+        <label htmlFor="fullName" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Full name
         </label>
         <input
@@ -140,7 +128,7 @@ export function SignUpForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-label text-text-secondary">
+        <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Email address
         </label>
         <input
@@ -157,7 +145,7 @@ export function SignUpForm() {
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="roleId" className="text-label text-text-secondary">
+        <label htmlFor="roleId" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Platform role
         </label>
         <select
@@ -170,14 +158,13 @@ export function SignUpForm() {
           <option value="2">AML Compliance Analyst (Alerts & Cases)</option>
           <option value="3">Data Operator (Batch Ingestion)</option>
         </select>
-        <p className="text-caption text-text-secondary">
-          Need Administrator access? You can request it from the host after
-          signing in.
+        <p className="text-[11px] text-text-secondary">
+          Need Administrator access? You can request it from the host after signing in.
         </p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-label text-text-secondary">
+        <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
           Password
         </label>
         <div className="relative">
@@ -188,6 +175,7 @@ export function SignUpForm() {
             autoComplete="new-password"
             required
             minLength={6}
+            placeholder="At least 6 characters"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
             className={`${INPUT_CLASSES} w-full pr-10`}
@@ -197,7 +185,7 @@ export function SignUpForm() {
             onClick={() => setShowPassword((shown) => !shown)}
             aria-label={showPassword ? "Hide password" : "Show password"}
             aria-pressed={showPassword}
-            className="text-text-secondary hover:text-text-primary focus-visible:text-accent absolute inset-y-0 right-0 flex w-10 items-center justify-center transition-colors focus:outline-none"
+            className="text-text-secondary hover:text-text-primary focus-visible:text-brand-blue absolute inset-y-0 right-0 flex w-10 items-center justify-center transition-colors focus:outline-none"
           >
             {showPassword ? (
               <EyeOffIcon className="size-4" />
@@ -211,7 +199,7 @@ export function SignUpForm() {
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="confirmPassword"
-          className="text-label text-text-secondary"
+          className="text-xs font-semibold uppercase tracking-wider text-text-secondary"
         >
           Confirm password
         </label>
@@ -223,6 +211,7 @@ export function SignUpForm() {
             autoComplete="new-password"
             required
             minLength={6}
+            placeholder="Re-enter password"
             value={confirmPassword}
             onChange={(event) => setConfirmPassword(event.target.value)}
             className={`${INPUT_CLASSES} w-full pr-10`}
@@ -232,7 +221,7 @@ export function SignUpForm() {
             onClick={() => setShowConfirmPassword((shown) => !shown)}
             aria-label={showConfirmPassword ? "Hide password" : "Show password"}
             aria-pressed={showConfirmPassword}
-            className="text-text-secondary hover:text-text-primary focus-visible:text-accent absolute inset-y-0 right-0 flex w-10 items-center justify-center transition-colors focus:outline-none"
+            className="text-text-secondary hover:text-text-primary focus-visible:text-brand-blue absolute inset-y-0 right-0 flex w-10 items-center justify-center transition-colors focus:outline-none"
           >
             {showConfirmPassword ? (
               <EyeOffIcon className="size-4" />
@@ -246,17 +235,17 @@ export function SignUpForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="text-body bg-accent focus-visible:ring-accent focus-visible:ring-offset-surface mt-2 flex items-center justify-center gap-2 rounded-md px-4 py-2 font-medium text-white transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 hover:enabled:-translate-y-px hover:enabled:shadow-md active:enabled:translate-y-0 disabled:opacity-60"
+        className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2 mt-2"
       >
         {isSubmitting && <Spinner className="size-4" />}
         {isSubmitting ? "Creating account…" : "Create account"}
       </button>
 
-      <p className="text-caption text-text-secondary text-center">
-        Already have an account?{" "}
+      <p className="text-xs text-text-secondary text-center pt-1">
+        Already have credentials?{" "}
         <Link
           href="/login"
-          className="text-accent font-medium transition-colors hover:underline"
+          className="text-brand-blue dark:text-blue-400 font-semibold hover:underline"
         >
           Sign in
         </Link>

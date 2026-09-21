@@ -127,9 +127,10 @@ export default function AlertsClient({
       render: (a) => (
         <Link
           href={`/alerts/${a.alert_id}`}
-          className="text-caption text-accent font-medium hover:underline"
+          className="text-xs text-brand-blue hover:text-brand-blueLight dark:text-blue-400 font-semibold inline-flex items-center gap-1 hover:underline"
         >
-          Investigate →
+          Investigate
+          <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
         </Link>
       ),
     },
@@ -138,47 +139,72 @@ export default function AlertsClient({
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
         <div>
-          <h1 className="text-page-title text-text-primary">
-            Alert Triage Queue
-          </h1>
-          <p className="text-body text-text-secondary">
-            Prioritize and investigate flagged suspicious transactions and
-            customer behavioral anomalies.
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+              Alert Triage Queue
+            </h1>
+            <span className="bg-brand-blue/10 text-brand-blue dark:text-blue-300 border border-brand-blue/20 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+              {total} Total Alerts
+            </span>
+          </div>
+          <p className="text-xs text-text-secondary mt-1">
+            Prioritize and investigate flagged suspicious transactions and customer behavioral anomalies.
           </p>
         </div>
       </div>
 
       {/* Filter Bar */}
-      <div className="border-border bg-surface flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border p-4 shadow-sm">
-        <select
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
-            setPage(1);
-          }}
-          className="border-border bg-bg text-body text-text-primary rounded-md border px-3 py-2 text-sm"
-        >
-          <option value="">All Statuses</option>
-          <option value="open">Open</option>
-          <option value="in_progress">In Progress</option>
-          <option value="closed">Closed</option>
-        </select>
+      <div className="border border-border bg-surface flex flex-wrap items-center justify-between gap-3 rounded-xl p-4 shadow-xs">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-text-secondary">
+            <span className="material-symbols-outlined text-[18px]">filter_list</span>
+            <span>Filters:</span>
+          </div>
 
-        <select
-          value={riskFilter}
-          onChange={(e) => {
-            setRiskFilter(e.target.value);
-            setPage(1);
-          }}
-          className="border-border bg-bg text-body text-text-primary rounded-md border px-3 py-2 text-sm"
-        >
-          <option value="">All Risk Tiers</option>
-          <option value="high">High Risk</option>
-          <option value="medium">Medium Risk</option>
-          <option value="low">Low Risk</option>
-        </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setPage(1);
+            }}
+            className="border border-border bg-surface text-text-primary rounded-lg px-3 py-1.5 text-xs font-medium outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 cursor-pointer"
+          >
+            <option value="">All Lifecycle Statuses</option>
+            <option value="open">Open</option>
+            <option value="in_progress">In Progress</option>
+            <option value="closed">Closed</option>
+          </select>
+
+          <select
+            value={riskFilter}
+            onChange={(e) => {
+              setRiskFilter(e.target.value);
+              setPage(1);
+            }}
+            className="border border-border bg-surface text-text-primary rounded-lg px-3 py-1.5 text-xs font-medium outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 cursor-pointer"
+          >
+            <option value="">All Risk Tiers</option>
+            <option value="high">High Risk</option>
+            <option value="medium">Medium Risk</option>
+            <option value="low">Low Risk</option>
+          </select>
+        </div>
+
+        {(statusFilter || riskFilter) && (
+          <button
+            type="button"
+            onClick={() => {
+              setStatusFilter("");
+              setRiskFilter("");
+              setPage(1);
+            }}
+            className="text-xs text-text-secondary hover:text-text-primary underline cursor-pointer"
+          >
+            Clear filters
+          </button>
+        )}
       </div>
 
       {/* Table */}

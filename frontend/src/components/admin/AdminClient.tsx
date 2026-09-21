@@ -176,47 +176,56 @@ export default function AdminClient({
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div>
-        <h1 className="text-page-title text-text-primary">
-          Platform Administration
-        </h1>
-        <p className="text-body text-text-secondary">
-          Manage staff RBAC roles, review ML model performance thresholds, and
-          inspect immutable audit logs.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+              Platform Administration
+            </h1>
+            <span className="bg-brand-navy text-brand-gold border border-brand-gold/30 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+              Root Authority
+            </span>
+          </div>
+          <p className="text-xs text-text-secondary mt-1">
+            Manage staff RBAC roles, review ML model performance thresholds, and inspect immutable audit logs.
+          </p>
+        </div>
       </div>
 
       {/* Tabs */}
-      <div className="border-border flex gap-6 border-b text-sm font-medium">
+      <div className="flex items-center gap-2 border-b border-border pb-1">
         <button
           onClick={() => setActiveTab("users")}
-          className={`border-b-2 pb-3 transition-colors ${
+          className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "users"
-              ? "border-accent text-accent font-semibold"
-              : "text-text-secondary hover:text-text-primary border-transparent"
+              ? "bg-brand-navy text-white shadow-xs dark:bg-brand-blue/30 dark:text-brand-blueLight"
+              : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          Staff &amp; RBAC Users ({users.length})
+          <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
+          <span>Staff &amp; RBAC Users ({users.length})</span>
         </button>
         <button
           onClick={() => setActiveTab("models")}
-          className={`border-b-2 pb-3 transition-colors ${
+          className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "models"
-              ? "border-accent text-accent font-semibold"
-              : "text-text-secondary hover:text-text-primary border-transparent"
+              ? "bg-brand-navy text-white shadow-xs dark:bg-brand-blue/30 dark:text-brand-blueLight"
+              : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          Model Governance &amp; Thresholds
+          <span className="material-symbols-outlined text-[16px]">model_training</span>
+          <span>Model Governance &amp; Thresholds</span>
         </button>
         <button
           onClick={() => setActiveTab("audit")}
-          className={`border-b-2 pb-3 transition-colors ${
+          className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "audit"
-              ? "border-accent text-accent font-semibold"
-              : "text-text-secondary hover:text-text-primary border-transparent"
+              ? "bg-brand-navy text-white shadow-xs dark:bg-brand-blue/30 dark:text-brand-blueLight"
+              : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
           }`}
         >
-          System Audit Trail
+          <span className="material-symbols-outlined text-[16px]">security</span>
+          <span>Immutable Audit Trail</span>
         </button>
       </div>
 
@@ -375,34 +384,36 @@ export default function AdminClient({
 
       {/* Role Change Modal */}
       {selectedUserToChangeRole && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="border-border bg-surface flex w-full max-w-sm flex-col gap-4 rounded-[var(--radius-card)] border p-6 shadow-xl">
-            <h3 className="text-section-title text-text-primary">
-              Update Staff Role
-            </h3>
-            <p className="text-body text-text-secondary text-sm">
-              Change access level for{" "}
-              <strong>{selectedUserToChangeRole.email}</strong>.
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-slide-up">
+          <div className="border border-border bg-surface flex w-full max-w-sm flex-col gap-4 rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center gap-2 border-b border-border pb-3">
+              <span className="material-symbols-outlined text-brand-navy dark:text-brand-gold text-[20px]">manage_accounts</span>
+              <h3 className="text-base font-bold text-text-primary">
+                Update Staff RBAC Role
+              </h3>
+            </div>
+            <p className="text-xs text-text-secondary">
+              Modify clearance level for <span className="font-semibold text-text-primary">{selectedUserToChangeRole.email}</span>.
             </p>
             <select
               value={newRoleVal}
               onChange={(e) => setNewRoleVal(e.target.value)}
-              className="border-border bg-bg text-text-primary rounded-md border p-2 text-sm"
+              className="border border-border bg-surface text-text-primary rounded-lg p-2.5 text-xs font-medium outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 cursor-pointer"
             >
-              <option value="administrator">Administrator</option>
-              <option value="aml_analyst">AML Analyst</option>
-              <option value="data_operator">Data Operator</option>
+              <option value="administrator">Administrator (Full Access)</option>
+              <option value="aml_analyst">AML Analyst (Alerts &amp; SAR Filing)</option>
+              <option value="data_operator">Data Operator (Data Ingestion Only)</option>
             </select>
-            <div className="flex justify-end gap-3 border-t pt-3">
+            <div className="flex justify-end gap-2.5 border-t border-border pt-3">
               <button
                 onClick={() => setSelectedUserToChangeRole(null)}
-                className="border-border text-text-secondary rounded-md border px-3 py-1.5 text-xs"
+                className="border border-border text-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg px-3.5 py-1.5 text-xs font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRoleChange}
-                className="bg-accent text-surface rounded-md px-3 py-1.5 text-xs font-semibold"
+                className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-1.5 text-xs font-semibold shadow-sm transition-all active:scale-95"
               >
                 Apply Change
               </button>

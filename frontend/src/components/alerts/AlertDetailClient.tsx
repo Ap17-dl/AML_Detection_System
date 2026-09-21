@@ -134,33 +134,35 @@ export default function AlertDetailClient({
   return (
     <div className="space-y-6">
       {/* Top Breadcrumbs & Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between border-b border-border pb-5">
         <div>
           <Link
             href="/alerts"
-            className="text-caption text-accent hover:underline"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-text-secondary hover:text-brand-navy dark:hover:text-white transition-colors"
           >
-            ← Back to Alerts Queue
+            <span className="material-symbols-outlined text-[16px]">arrow_back</span>
+            <span>Return to Alerts Queue</span>
           </Link>
-          <div className="mt-2 flex items-center gap-3">
-            <h1 className="text-page-title text-text-primary">
-              Investigation: {alert.alert_id.slice(0, 8)}
+          <div className="mt-2 flex flex-wrap items-center gap-3">
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+              Investigation: <span className="font-mono text-brand-blue dark:text-blue-400">{alert.alert_id.slice(0, 8)}</span>
             </h1>
             <RiskBadge category={alert.risk_category} />
             <StatusPill status={alert.status} />
             {alert.outcome && <StatusPill status={alert.outcome} />}
           </div>
-          <span className="text-caption text-text-secondary">
-            Triggered on {new Date(alert.created_at).toLocaleString()}
-          </span>
+          <p className="text-xs text-text-secondary mt-1">
+            Triggered on <span className="font-mono">{new Date(alert.created_at).toLocaleString()}</span>
+          </p>
         </div>
 
         {alert.status !== "closed" && (
           <button
             onClick={() => setIsDispositionModalOpen(true)}
-            className="bg-accent text-surface hover:bg-accent/90 rounded-md px-4 py-2 text-sm font-semibold shadow-sm transition-colors"
+            className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition-all duration-150 flex items-center gap-1.5"
           >
-            Conclude & Dispose Alert →
+            <span className="material-symbols-outlined text-[16px]">gavel</span>
+            <span>Conclude & Dispose Alert</span>
           </button>
         )}
       </div>
@@ -168,49 +170,53 @@ export default function AlertDetailClient({
       {/* Grid: Alert Info & Explainable Factors */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Left: Metadata & Entities */}
-        <div className="border-border bg-surface flex flex-col gap-4 rounded-[var(--radius-card)] border p-6 shadow-sm">
-          <h2 className="text-section-title text-text-primary border-b pb-2">
-            Case Parameters
-          </h2>
-          <div className="text-body grid grid-cols-2 gap-4">
-            <div>
-              <span className="text-caption text-text-secondary block">
+        <div className="border border-border bg-surface flex flex-col gap-4 rounded-xl p-6 shadow-xs">
+          <div className="flex items-center gap-2 border-b border-border pb-3">
+            <span className="material-symbols-outlined text-brand-blue text-[20px]">badge</span>
+            <h2 className="text-sm font-bold text-text-primary">
+              Case Parameters & Entity Metadata
+            </h2>
+          </div>
+          <div className="grid grid-cols-2 gap-4 text-xs">
+            <div className="bg-slate-50/70 dark:bg-slate-900/50 border border-border rounded-lg p-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary block">
                 Target Customer
               </span>
-              <span className="text-text-primary font-medium">
+              <span className="text-text-primary font-bold text-sm mt-0.5 block">
                 {alert.customer_name || alert.customer_id || "Unidentified"}
               </span>
               {alert.customer_id && (
                 <Link
                   href={`/customers/${alert.customer_id}`}
-                  className="text-accent mt-0.5 block text-xs hover:underline"
+                  className="text-brand-blue hover:text-brand-blueLight dark:text-blue-400 mt-1 inline-flex items-center gap-1 font-semibold hover:underline"
                 >
-                  View Customer Profile →
+                  View Customer Profile
+                  <span className="material-symbols-outlined text-[12px]">arrow_forward</span>
                 </Link>
               )}
             </div>
-            <div>
-              <span className="text-caption text-text-secondary block">
+            <div className="bg-slate-50/70 dark:bg-slate-900/50 border border-border rounded-lg p-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary block">
                 Trigger Transaction ID
               </span>
-              <span className="text-text-primary font-mono text-xs break-all">
+              <span className="text-text-primary font-mono text-xs break-all mt-0.5 block">
                 {alert.triggering_transaction_id || "—"}
               </span>
             </div>
-            <div>
-              <span className="text-caption text-text-secondary block">
+            <div className="bg-slate-50/70 dark:bg-slate-900/50 border border-border rounded-lg p-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary block">
                 Assigned Investigator
               </span>
-              <span className="text-sm">
+              <span className="text-text-primary font-medium text-xs mt-0.5 block">
                 {alert.assigned_to_email || "Unassigned"}
               </span>
             </div>
-            <div>
-              <span className="text-caption text-text-secondary block">
+            <div className="bg-slate-50/70 dark:bg-slate-900/50 border border-border rounded-lg p-3">
+              <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary block">
                 Disposition Outcome
               </span>
-              <span className="text-sm font-medium capitalize">
-                {alert.outcome?.replace(/_/g, " ") || "Pending"}
+              <span className="text-text-primary font-semibold text-xs mt-0.5 block capitalize">
+                {alert.outcome?.replace(/_/g, " ") || "Under Review"}
               </span>
             </div>
           </div>
@@ -225,18 +231,25 @@ export default function AlertDetailClient({
               accessToken={accessToken}
             />
           ) : (
-            <div className="border-border bg-surface text-caption text-text-secondary rounded-lg border p-6">
-              No specific transaction linked to this alert.
+            <div className="border border-border bg-surface text-xs text-text-secondary rounded-xl p-6 flex flex-col items-center justify-center gap-2">
+              <span className="material-symbols-outlined text-3xl text-slate-300 dark:text-slate-600">info</span>
+              <span>No individual transaction linked to this alert topology.</span>
             </div>
           )}
         </div>
       </div>
 
       {/* Case Notes & Audit Thread */}
-      <div className="border-border bg-surface flex flex-col gap-4 rounded-[var(--radius-card)] border p-6 shadow-sm">
-        <h2 className="text-section-title text-text-primary">
-          Investigator Case Notes ({notes.length})
-        </h2>
+      <div className="border border-border bg-surface flex flex-col gap-4 rounded-xl p-6 shadow-xs">
+        <div className="flex items-center justify-between border-b border-border pb-3">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-brand-gold text-[20px]">rate_review</span>
+            <h2 className="text-sm font-bold text-text-primary">
+              Investigator Case Notes & Audit Trail ({notes.length})
+            </h2>
+          </div>
+          <span className="text-[11px] text-text-secondary font-mono">APPEND-ONLY LOG</span>
+        </div>
 
         <div className="flex flex-col gap-3">
           {notes.length === 0 ? (
@@ -289,29 +302,32 @@ export default function AlertDetailClient({
 
       {/* Disposition Modal */}
       {isDispositionModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
-          <div className="border-border bg-surface flex w-full max-w-lg flex-col gap-4 rounded-[var(--radius-card)] border p-6 shadow-xl">
-            <div className="flex items-center justify-between border-b pb-3">
-              <h3 className="text-section-title text-text-primary">
-                Alert Disposition & Resolution
-              </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm animate-fade-slide-up">
+          <div className="border border-border bg-surface flex w-full max-w-lg flex-col gap-4 rounded-2xl p-6 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-brand-navy dark:text-brand-gold text-[22px]">gavel</span>
+                <h3 className="text-base font-bold text-text-primary">
+                  Alert Disposition & Resolution
+                </h3>
+              </div>
               <button
                 onClick={() => setIsDispositionModalOpen(false)}
-                className="text-text-secondary hover:text-text-primary"
+                className="text-text-secondary hover:text-text-primary rounded-lg p-1 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
               >
                 ✕
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 text-sm">
+            <div className="flex flex-col gap-4 text-xs">
               <div>
-                <label className="text-caption text-text-secondary mb-1 block font-semibold">
+                <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5 block">
                   Investigation Outcome
                 </label>
                 <select
                   value={outcomeChoice}
                   onChange={(e) => setOutcomeChoice(e.target.value)}
-                  className="border-border bg-bg text-text-primary w-full rounded-md border p-2"
+                  className="border border-border bg-surface text-text-primary w-full rounded-lg p-2.5 text-xs font-medium outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 cursor-pointer"
                 >
                   <option value="confirmed_suspicious">
                     Confirmed Suspicious (Eligible for SAR Filing)
@@ -326,7 +342,7 @@ export default function AlertDetailClient({
               </div>
 
               <div>
-                <label className="text-caption text-text-secondary mb-1 block font-semibold">
+                <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5 block">
                   XAI Explanation Quality Rating (1 - 5)
                 </label>
                 <div className="flex items-center gap-2">
@@ -335,10 +351,10 @@ export default function AlertDetailClient({
                       key={star}
                       type="button"
                       onClick={() => setFeedbackRating(star)}
-                      className={`h-8 w-8 rounded text-sm font-semibold ${
+                      className={`h-9 w-9 rounded-lg text-xs font-bold transition-all ${
                         feedbackRating >= star
-                          ? "bg-amber-500 text-white"
-                          : "bg-bg border-border text-text-secondary border"
+                          ? "bg-amber-500 text-white shadow-xs scale-105"
+                          : "bg-surface border border-border text-text-secondary hover:border-amber-400"
                       }`}
                     >
                       {star}★
@@ -348,30 +364,30 @@ export default function AlertDetailClient({
               </div>
 
               <div>
-                <label className="text-caption text-text-secondary mb-1 block font-semibold">
+                <label className="text-xs font-semibold uppercase tracking-wider text-text-secondary mb-1.5 block">
                   Resolution Feedback & Retraining Notes
                 </label>
                 <textarea
                   value={feedbackNotes}
                   onChange={(e) => setFeedbackNotes(e.target.value)}
-                  placeholder="Notes explaining your decision to improve model precision…"
+                  placeholder="Document notes explaining your decision to improve future model calibration…"
                   rows={3}
-                  className="border-border bg-bg text-text-primary w-full rounded-md border p-2"
+                  className="border border-border bg-surface text-text-primary w-full rounded-lg p-3 text-xs outline-none focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/20 placeholder:text-slate-400"
                 />
               </div>
             </div>
 
-            <div className="mt-2 flex justify-end gap-3 border-t pt-4">
+            <div className="mt-2 flex justify-end gap-2.5 border-t border-border pt-4">
               <button
                 onClick={() => setIsDispositionModalOpen(false)}
-                className="border-border text-text-secondary hover:bg-bg rounded-md border px-4 py-2 text-sm"
+                className="border border-border text-text-secondary hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg px-4 py-2 text-xs font-semibold transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleConfirmDisposition}
                 disabled={submittingFeedback}
-                className="bg-accent text-surface hover:bg-accent/90 rounded-md px-4 py-2 text-sm font-semibold disabled:opacity-50"
+                className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-2 text-xs font-semibold shadow-sm transition-all duration-150 disabled:opacity-50"
               >
                 {submittingFeedback
                   ? "Submitting…"

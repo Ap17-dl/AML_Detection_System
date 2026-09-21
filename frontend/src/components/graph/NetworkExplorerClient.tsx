@@ -92,14 +92,18 @@ export default function NetworkExplorerClient({
   return (
     <div className="flex flex-col gap-6">
       {/* Header */}
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
         <div>
-          <h1 className="text-page-title text-text-primary">
-            Network Explorer
-          </h1>
-          <p className="text-body text-text-secondary">
-            Inspect transaction topology, fan-in/fan-out structuring, and
-            circular laundering rings.
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+              Graph Network Topology Explorer
+            </h1>
+            <span className="bg-brand-gold/15 text-amber-800 dark:text-amber-300 border border-brand-gold/30 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+              GNN Subgraph
+            </span>
+          </div>
+          <p className="text-xs text-text-secondary mt-1">
+            Analyze multi-hop transaction topologies, fan-in/fan-out structuring, and circular money-mule laundering rings.
           </p>
         </div>
       </div>
@@ -107,36 +111,40 @@ export default function NetworkExplorerClient({
       {/* Query Bar */}
       <form
         onSubmit={handleSearchSubmit}
-        className="border-border bg-surface flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border p-4 shadow-sm"
+        className="border border-border bg-surface flex flex-wrap items-center gap-3 rounded-xl p-4 shadow-xs"
       >
-        <div className="min-w-[240px] flex-1">
+        <div className="relative min-w-[240px] flex-1">
+          <span className="material-symbols-outlined absolute inset-y-0 left-3 flex items-center text-slate-400 text-[18px]">
+            hub
+          </span>
           <input
             type="text"
-            placeholder="Enter Account ID (UUID) to inspect network…"
+            placeholder="Enter Account ID (UUID) to inspect network topology…"
             value={inputVal}
             onChange={(e) => setInputVal(e.target.value)}
-            className="border-border bg-bg text-body text-text-primary placeholder:text-text-secondary focus:ring-accent w-full rounded-md border px-3 py-2 font-mono text-sm outline-none focus:ring-2"
+            className="border border-border bg-surface text-xs text-text-primary placeholder:text-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15 w-full rounded-lg pl-9 pr-3 py-2 font-mono outline-none transition-all"
           />
         </div>
-        <div className="flex items-center gap-2">
-          <label className="text-caption text-text-secondary">
+        <div className="flex items-center gap-2 text-xs">
+          <label className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
             Neighborhood Hops
           </label>
           <select
             value={hops}
             onChange={(e) => setHops(Number(e.target.value))}
-            className="border-border bg-bg text-body text-text-primary rounded-md border px-3 py-2 text-sm"
+            className="border border-border bg-surface text-xs text-text-primary rounded-lg px-3 py-2 outline-none focus:border-brand-blue cursor-pointer"
           >
             <option value={1}>1-hop (Direct Counterparties)</option>
             <option value={2}>2-hops (Extended Network)</option>
-            <option value={3}>3-hops (Deep Flow)</option>
+            <option value={3}>3-hops (Deep Flow Clusters)</option>
           </select>
         </div>
         <button
           type="submit"
-          className="bg-accent text-surface hover:bg-accent/90 rounded-md px-4 py-2 text-sm font-medium shadow-sm transition-colors"
+          className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-5 py-2 text-xs font-semibold shadow-sm transition-all duration-150 inline-flex items-center gap-1.5 active:scale-95"
         >
-          Explore Network
+          <span className="material-symbols-outlined text-[16px]">travel_explore</span>
+          <span>Explore Network</span>
         </button>
       </form>
 

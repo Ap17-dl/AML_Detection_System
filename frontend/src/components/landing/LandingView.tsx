@@ -2,17 +2,73 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface LandingViewProps {
   isAuthenticated: boolean;
   userEmail: string | null;
 }
 
+const NAV_ITEMS = [
+  { label: "Home", href: "#home", id: "home" },
+  { label: "Features", href: "#features", id: "features" },
+  { label: "About", href: "#about", id: "about" },
+  { label: "Solutions", href: "#solutions", id: "solutions" },
+  { label: "Contact", href: "#contact", id: "contact" },
+];
+
 export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [subscribed, setSubscribed] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+
+      const sectionIds = ["home", "features", "about", "solutions", "contact"];
+      const scrollPosition = window.scrollY + 140;
+
+      for (let i = sectionIds.length - 1; i >= 0; i--) {
+        const el = document.getElementById(sectionIds[i]);
+        if (el) {
+          const top = el.offsetTop;
+          if (scrollPosition >= top) {
+            setActiveSection(sectionIds[i]);
+            break;
+          }
+        }
+      }
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    id: string
+  ) => {
+    e.preventDefault();
+    const el = document.getElementById(id);
+    if (el) {
+      const offset = 80;
+      const bodyRect = document.body.getBoundingClientRect().top;
+      const elementRect = el.getBoundingClientRect().top;
+      const elementPosition = elementRect - bodyRect;
+      const offsetPosition = elementPosition - offset;
+
+      window.scrollTo({
+        top: id === "home" ? 0 : offsetPosition,
+        behavior: "smooth",
+      });
+      setActiveSection(id);
+      setMobileMenuOpen(false);
+    }
+  };
 
   const handleNewsletterSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -25,11 +81,18 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
   return (
     <div className="bg-brand-bgLight text-brand-dark selection:bg-brand-gold selection:text-brand-navy min-h-screen antialiased">
       {/* 1. TOP NAVIGATION BAR */}
-      <header className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/95 shadow-sm backdrop-blur-md transition-all duration-200">
-        <div className="mx-auto flex h-20 w-full max-w-7xl items-center justify-between px-6">
+      <header
+        className={`sticky top-0 z-50 transition-all duration-200 ${
+          scrolled
+            ? "border-b border-slate-200/90 bg-white/95 py-3 shadow-md backdrop-blur-md"
+            : "border-b border-slate-200/60 bg-white/90 py-4 shadow-sm backdrop-blur-sm"
+        }`}
+      >
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6">
           {/* Left: Logo & Brand Name */}
           <Link
             href="#home"
+            onClick={(e) => handleNavClick(e, "home")}
             className="group flex items-center gap-3 focus:outline-none"
           >
             <div className="bg-brand-navy relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg p-1 shadow-sm">
@@ -47,52 +110,32 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
             </span>
           </Link>
 
-          {/* Center: Navigation links */}
+          {/* Center: Navigation links sorted by scroll order with active indicator */}
           <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
-            <a
-              href="#home"
-              className="text-brand-blueLight font-semibold transition-colors"
-            >
-              Home
-            </a>
-            <a
-              href="#features"
-              className="hover:text-brand-navy text-slate-600 transition-colors duration-150"
-            >
-              Features
-            </a>
-            <a
-              href="#solutions"
-              className="hover:text-brand-navy text-slate-600 transition-colors duration-150"
-            >
-              Solutions
-            </a>
-            <a
-              href="#about"
-              className="hover:text-brand-navy text-slate-600 transition-colors duration-150"
-            >
-              About
-            </a>
-            <a
-              href="#contact"
-              className="hover:text-brand-navy text-slate-600 transition-colors duration-150"
-            >
-              Contact
-            </a>
+            {NAV_ITEMS.map((item) => {
+              const isActive = activeSection === item.id;
+              return (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.id)}
+                  className={`relative py-1 transition-colors duration-150 ${
+                    isActive
+                      ? "text-brand-blue font-bold"
+                      : "text-slate-600 hover:text-brand-navy"
+                  }`}
+                >
+                  {item.label}
+                  {isActive && (
+                    <span className="bg-brand-blue absolute inset-x-0 -bottom-1.5 h-0.5 rounded-full" />
+                  )}
+                </a>
+              );
+            })}
           </nav>
 
-          {/* Right: Phone & Action CTAs */}
-          <div className="flex items-center gap-4 sm:gap-5">
-            <a
-              className="hover:text-brand-blueLight hidden items-center gap-2 text-xs font-semibold text-slate-700 transition-colors lg:flex"
-              href="tel:+18005557368"
-            >
-              <span className="material-symbols-outlined text-brand-blueLight text-base">
-                call
-              </span>
-              <span>+1 (800) 555-SENTINEL</span>
-            </a>
-
+          {/* Right: Action CTAs (Phone removed) */}
+          <div className="flex items-center gap-3 sm:gap-4">
             {isAuthenticated ? (
               <div className="flex items-center gap-3">
                 {userEmail && (
@@ -144,45 +187,27 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
           </div>
         </div>
 
-        {/* Mobile Dropdown Nav */}
+        {/* Mobile Dropdown Nav sorted by scroll order */}
         {mobileMenuOpen && (
           <div className="border-t border-slate-200 bg-white px-6 py-4 md:hidden">
             <div className="flex flex-col gap-3 font-medium text-slate-700">
-              <a
-                href="#home"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-brand-blueLight py-1 font-semibold"
-              >
-                Home
-              </a>
-              <a
-                href="#features"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-brand-navy py-1"
-              >
-                Features
-              </a>
-              <a
-                href="#solutions"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-brand-navy py-1"
-              >
-                Solutions
-              </a>
-              <a
-                href="#about"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-brand-navy py-1"
-              >
-                About
-              </a>
-              <a
-                href="#contact"
-                onClick={() => setMobileMenuOpen(false)}
-                className="hover:text-brand-navy py-1"
-              >
-                Contact
-              </a>
+              {NAV_ITEMS.map((item) => {
+                const isActive = activeSection === item.id;
+                return (
+                  <a
+                    key={item.id}
+                    href={item.href}
+                    onClick={(e) => handleNavClick(e, item.id)}
+                    className={`py-1 transition-colors ${
+                      isActive
+                        ? "text-brand-blue font-bold"
+                        : "text-slate-600 hover:text-brand-navy"
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                );
+              })}
               <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3">
                 {isAuthenticated ? (
                   <Link
@@ -215,7 +240,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
       {/* 2. HERO SECTION */}
       <section
-        className="bg-brand-bgLight relative overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24"
+        className="bg-brand-bgLight relative scroll-mt-20 overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24"
         id="home"
       >
         {/* Golden Wave / Curved Organic Background Shape */}
@@ -394,7 +419,10 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
       </section>
 
       {/* 3. FEATURES SECTION (4 Icon Cards in a Row) */}
-      <section className="relative bg-white py-20 lg:py-24" id="features">
+      <section
+        className="relative scroll-mt-20 bg-white py-20 lg:py-24"
+        id="features"
+      >
         <div className="mx-auto max-w-7xl px-6">
           {/* Section Header */}
           <div className="mx-auto mb-16 max-w-3xl text-center">
@@ -536,7 +564,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
       {/* 4. ABOUT SECTION */}
       <section
-        className="relative overflow-hidden bg-[#F0F4F8] py-20 lg:py-28"
+        className="relative scroll-mt-20 overflow-hidden bg-[#F0F4F8] py-20 lg:py-28"
         id="about"
       >
         {/* Blue-gray wave divider at top */}
@@ -680,7 +708,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
       {/* 5. SOLUTIONS SECTION */}
       <section
-        className="bg-brand-cardBg relative py-20 lg:py-28"
+        className="bg-brand-cardBg relative scroll-mt-20 py-20 lg:py-28"
         id="solutions"
       >
         {/* Undulating header wave */}
@@ -856,7 +884,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
       {/* 6. CTA BANNER SECTION */}
       <section
-        className="bg-brand-navy relative overflow-hidden py-20"
+        className="bg-brand-navy relative scroll-mt-20 overflow-hidden py-20"
         id="demo"
       >
         {/* Golden ambient accent glow */}
@@ -893,7 +921,8 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
               </span>
             </Link>
             <a
-              href="tel:+18005557368"
+              href="#contact"
+              onClick={(e) => handleNavClick(e, "contact")}
               className="rounded-full border border-white/20 bg-white/10 px-8 py-4 text-base font-semibold text-white transition-all hover:bg-white/20"
             >
               Speak With An Analyst
@@ -904,7 +933,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
       {/* 7. FOOTER */}
       <footer
-        className="border-t border-slate-800 bg-[#0B192C] text-sm text-slate-400"
+        className="scroll-mt-20 border-t border-slate-800 bg-[#0B192C] text-sm text-slate-400"
         id="contact"
       >
         <div className="mx-auto max-w-7xl px-6 py-16">
@@ -1079,12 +1108,6 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
               )}
 
               <div className="space-y-1.5 text-xs text-slate-400">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-brand-gold text-sm">
-                    call
-                  </span>
-                  <span>+1 (800) 555-SENTINEL</span>
-                </div>
                 <div className="flex items-center gap-2">
                   <span className="material-symbols-outlined text-brand-gold text-sm">
                     mail

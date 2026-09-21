@@ -76,6 +76,7 @@ async def get_current_user(
 
     claims = decode_supabase_jwt(credentials.credentials)
     user_id = uuid.UUID(claims["sub"])
+    email = claims.get("email") or ""
 
     result = await db.execute(
         select(User, Role.role_name)
@@ -83,10 +84,17 @@ async def get_current_user(
         .where(User.user_id == user_id)
     )
     row = result.first()
+    if row is None and email:
+        result = await db.execute(
+            select(User, Role.role_name)
+            .join(Role, User.role_id == Role.role_id)
+            .where(User.email == email)
+        )
+        row = result.first()
+
     if row is None:
         # User authenticated via Supabase Auth but profile not yet synced to local database.
         # Auto-provision user in auth.users and public.users.
-        email = claims.get("email") or ""
         metadata = claims.get("user_metadata") or {}
         full_name = metadata.get("full_name") or (email.split("@")[0] if email else "User")
         try:
@@ -100,16 +108,28 @@ async def get_current_user(
         try:
             from sqlalchemy import text
 
-            await db.execute(
-                text(
+            # Check if user already exists in auth.users by email
+            existing_auth = (
+                await db.execute(
+                    text("SELECT id FROM auth.users WHERE email = :email"),
+                    {"email": email},
+                )
+            ).first()
+
+            actual_uid = existing_auth[0] if existing_auth else user_id
+
+            if not existing_auth:
+                await db.execute(
+                    text(
+                        """
+                        INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data)
+                        VALUES (:uid, :email, json_build_object('full_name', cast(:full_name as text))::jsonb, json_build_object('role_id', cast(:role_id as int))::jsonb)
+                        ON CONFLICT (id) DO NOTHING
                     """
-                    INSERT INTO auth.users (id, email, raw_user_meta_data, raw_app_meta_data)
-                    VALUES (:uid, :email, json_build_object('full_name', cast(:full_name as text))::jsonb, json_build_object('role_id', cast(:role_id as int))::jsonb)
-                    ON CONFLICT (id) DO NOTHING
-                """
-                ),
-                {"uid": user_id, "email": email, "full_name": full_name, "role_id": role_id},
-            )
+                    ),
+                    {"uid": actual_uid, "email": email, "full_name": full_name, "role_id": role_id},
+                )
+
             await db.execute(
                 text(
                     """
@@ -120,14 +140,14 @@ async def get_current_user(
                         full_name = COALESCE(EXCLUDED.full_name, public.users.full_name)
                 """
                 ),
-                {"uid": user_id, "email": email, "full_name": full_name, "role_id": role_id},
+                {"uid": actual_uid, "email": email, "full_name": full_name, "role_id": role_id},
             )
             await db.commit()
 
             result = await db.execute(
                 select(User, Role.role_name)
                 .join(Role, User.role_id == Role.role_id)
-                .where(User.user_id == user_id)
+                .where((User.user_id == actual_uid) | (User.email == email))
             )
             row = result.first()
         except Exception:

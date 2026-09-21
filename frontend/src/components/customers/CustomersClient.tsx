@@ -130,34 +130,48 @@ export default function CustomersClient({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-display text-text-primary">Customers</h1>
-        <p className="text-body text-text-secondary mt-1">
-          Browse customer profiles and risk assessments.
-        </p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-b border-border pb-5">
+        <div>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+              Customer Entity Directory
+            </h1>
+            <span className="bg-brand-blue/10 text-brand-blue dark:text-blue-300 border border-brand-blue/20 rounded-full px-2.5 py-0.5 text-[11px] font-bold">
+              {data?.total.toLocaleString() ?? 0} Entities
+            </span>
+          </div>
+          <p className="text-xs text-text-secondary mt-1">
+            Browse monitored legal entities, retail accountholders, and cumulative AML risk profiles.
+          </p>
+        </div>
       </div>
 
       {/* Filters */}
-      <div className="border-border bg-surface flex flex-wrap items-center gap-3 rounded-[var(--radius-card)] border p-4 shadow-sm">
-        <input
-          type="text"
-          placeholder="Search by name, ref, or country…"
-          value={searchInput}
-          onChange={(e) => setSearchInput(e.target.value)}
-          className="border-border bg-bg text-body text-text-primary placeholder:text-text-secondary focus:ring-accent min-w-[200px] flex-1 rounded-md border px-3 py-2 outline-none focus:ring-2"
-        />
+      <div className="border border-border bg-surface flex flex-wrap items-center gap-3 rounded-xl p-4 shadow-xs">
+        <div className="relative min-w-[240px] flex-1">
+          <span className="material-symbols-outlined absolute inset-y-0 left-3 flex items-center text-slate-400 text-[18px]">
+            search
+          </span>
+          <input
+            type="text"
+            placeholder="Search by entity name, external ref, or country code…"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            className="border border-border bg-surface text-xs text-text-primary placeholder:text-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15 w-full rounded-lg pl-9 pr-3 py-2 outline-none transition-all"
+          />
+        </div>
         <select
           value={riskCategory}
           onChange={(e) => {
             setRiskCategory(e.target.value);
             setPage(1);
           }}
-          className="border-border bg-bg text-body text-text-primary rounded-md border px-3 py-2"
+          className="border border-border bg-surface text-xs text-text-primary rounded-lg px-3 py-2 outline-none focus:border-brand-blue cursor-pointer"
         >
-          <option value="">All Risk Levels</option>
-          <option value="low">Low</option>
-          <option value="medium">Medium</option>
-          <option value="high">High</option>
+          <option value="">All Risk Tiers</option>
+          <option value="low">Low Risk</option>
+          <option value="medium">Medium Risk</option>
+          <option value="high">High Risk</option>
         </select>
       </div>
 

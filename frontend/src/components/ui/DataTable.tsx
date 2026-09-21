@@ -58,27 +58,33 @@ export function DataTable<T extends object>({
   }
 
   return (
-    <div className="border-border bg-surface overflow-hidden rounded-[var(--radius-card)] border shadow-sm">
+    <div className="border-border bg-surface overflow-hidden rounded-xl border shadow-sm">
       {/* Table */}
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-border border-b">
+            <tr className="border-border bg-slate-50/80 dark:bg-slate-900/60 border-b">
               {columns.map((col) => (
                 <th
                   key={col.key}
-                  className={`text-label text-text-secondary px-4 py-3 ${
+                  className={`text-label text-text-secondary px-4 py-3 text-xs font-semibold tracking-wider ${
                     col.sortable
-                      ? "hover:text-text-primary cursor-pointer select-none"
+                      ? "hover:text-text-primary cursor-pointer select-none transition-colors"
                       : ""
                   } ${col.className ?? ""}`}
                   onClick={col.sortable ? () => handleSort(col.key) : undefined}
                 >
-                  <span className="inline-flex items-center gap-1">
+                  <span className="inline-flex items-center gap-1.5">
                     {col.label}
-                    {col.sortable && sortColumn === col.key && (
-                      <span className="text-accent text-xs">
-                        {sortOrder === "asc" ? "↑" : "↓"}
+                    {col.sortable && (
+                      <span className="text-xs">
+                        {sortColumn === col.key ? (
+                          <span className="text-brand-blue font-bold">
+                            {sortOrder === "asc" ? "↑" : "↓"}
+                          </span>
+                        ) : (
+                          <span className="text-slate-300 dark:text-slate-600">↕</span>
+                        )}
                       </span>
                     )}
                   </span>
@@ -86,14 +92,14 @@ export function DataTable<T extends object>({
               ))}
             </tr>
           </thead>
-          <tbody>
+          <tbody className="divide-y divide-border">
             {isLoading ? (
               // Skeleton loading rows
               Array.from({ length: Math.min(pageSize, 5) }).map((_, i) => (
-                <tr key={`skeleton-${i}`} className="border-border border-b">
+                <tr key={`skeleton-${i}`} className="animate-pulse">
                   {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3">
-                      <div className="bg-border h-4 w-24 animate-pulse rounded" />
+                    <td key={col.key} className="px-4 py-3.5">
+                      <div className="bg-slate-200 dark:bg-slate-800 h-4 w-24 rounded" />
                     </td>
                   ))}
                 </tr>
@@ -102,9 +108,14 @@ export function DataTable<T extends object>({
               <tr>
                 <td
                   colSpan={columns.length}
-                  className="text-body text-text-secondary px-4 py-12 text-center"
+                  className="px-4 py-16 text-center"
                 >
-                  {emptyMessage}
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <span className="material-symbols-outlined text-slate-300 dark:text-slate-600 text-4xl">
+                      search_off
+                    </span>
+                    <p className="text-body text-text-secondary">{emptyMessage}</p>
+                  </div>
                 </td>
               </tr>
             ) : (
@@ -119,15 +130,17 @@ export function DataTable<T extends object>({
                 return (
                   <tr
                     key={String(itemKey)}
-                    className={`border-border border-b transition-colors last:border-b-0 ${
-                      onRowClick ? "hover:bg-bg cursor-pointer" : ""
+                    className={`transition-colors duration-150 ${
+                      onRowClick
+                        ? "hover:bg-brand-blue/5 dark:hover:bg-brand-blue/10 cursor-pointer"
+                        : "hover:bg-slate-50/60 dark:hover:bg-slate-800/30"
                     }`}
                     onClick={onRowClick ? () => onRowClick(item) : undefined}
                   >
                     {columns.map((col) => (
                       <td
                         key={col.key}
-                        className={`text-body text-text-primary px-4 py-3 ${col.className ?? ""}`}
+                        className={`text-body text-text-primary px-4 py-3.5 ${col.className ?? ""}`}
                       >
                         {col.render
                           ? col.render(item)
@@ -143,7 +156,7 @@ export function DataTable<T extends object>({
       </div>
 
       {/* Pagination */}
-      <div className="border-border flex items-center justify-between border-t px-4 py-3">
+      <div className="border-border bg-slate-50/50 dark:bg-slate-900/30 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between border-t px-4 py-3">
         <span className="text-caption text-text-secondary">
           {total === 0
             ? "No results"
@@ -154,20 +167,20 @@ export function DataTable<T extends object>({
             type="button"
             disabled={page <= 1}
             onClick={() => onPageChange(page - 1)}
-            className="text-body border-border text-text-primary hover:bg-bg rounded-md border px-3 py-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+            className="border-border bg-surface text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium rounded-lg border px-3 py-1.5 transition-all disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Previous
+            ← Previous
           </button>
-          <span className="text-caption text-text-secondary">
-            Page {page} of {totalPages}
+          <span className="text-caption text-text-secondary font-mono px-1">
+            {page} / {totalPages}
           </span>
           <button
             type="button"
             disabled={page >= totalPages}
             onClick={() => onPageChange(page + 1)}
-            className="text-body border-border text-text-primary hover:bg-bg rounded-md border px-3 py-1 transition-colors disabled:cursor-not-allowed disabled:opacity-40"
+            className="border-border bg-surface text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium rounded-lg border px-3 py-1.5 transition-all disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Next
+            Next →
           </button>
         </div>
       </div>

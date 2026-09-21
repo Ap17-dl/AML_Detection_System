@@ -8,7 +8,7 @@ import { EyeIcon, EyeOffIcon, Spinner } from "@/components/ui/icons";
 import { createClient } from "@/lib/supabase/client";
 
 const INPUT_CLASSES =
-  "text-body rounded-md border border-border bg-surface px-3 py-2 text-text-primary transition-colors outline-none focus:border-accent focus:ring-2 focus:ring-accent/30";
+  "text-sm rounded-lg border border-border bg-surface px-3.5 py-2.5 text-text-primary transition-all duration-150 outline-none focus:border-brand-blue focus:ring-3 focus:ring-brand-blue/15 placeholder:text-slate-400";
 
 export function LoginForm() {
   const router = useRouter();
@@ -100,13 +100,14 @@ export function LoginForm() {
     <div className="flex flex-col gap-6">
       <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-label text-text-secondary">
+          <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
             Email
           </label>
           <input
             id="email"
             name="email"
             type="email"
+            placeholder="officer@institution.com"
             autoComplete="email"
             required
             value={email}
@@ -116,14 +117,23 @@ export function LoginForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label htmlFor="password" className="text-label text-text-secondary">
-            Password
-          </label>
+          <div className="flex items-center justify-between">
+            <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-text-secondary">
+              Password
+            </label>
+            <Link
+              href="/forgot-password"
+              className="text-xs text-brand-blue hover:text-brand-blueLight dark:text-blue-400 font-medium transition-colors"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <div className="relative">
             <input
               id="password"
               name="password"
               type={showPassword ? "text" : "password"}
+              placeholder="••••••••••••"
               autoComplete="current-password"
               required
               value={password}
@@ -135,7 +145,7 @@ export function LoginForm() {
               onClick={() => setShowPassword((shown) => !shown)}
               aria-label={showPassword ? "Hide password" : "Show password"}
               aria-pressed={showPassword}
-              className="text-text-secondary hover:text-text-primary focus-visible:text-accent absolute inset-y-0 right-0 flex w-10 items-center justify-center transition-colors focus:outline-none"
+              className="text-text-secondary hover:text-text-primary focus-visible:text-brand-blue absolute inset-y-0 right-0 flex w-10 items-center justify-center transition-colors focus:outline-none"
             >
               {showPassword ? (
                 <EyeOffIcon className="size-4" />
@@ -147,7 +157,7 @@ export function LoginForm() {
           {error && (
             <p
               role="alert"
-              className="animate-fade-slide-up text-caption text-risk-high"
+              className="animate-fade-slide-up text-xs font-medium text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-950/40 border border-rose-200 dark:border-rose-800/40 rounded-lg p-2.5 mt-1"
             >
               {error}
             </p>
@@ -157,57 +167,68 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="text-body bg-accent focus-visible:ring-accent focus-visible:ring-offset-surface mt-2 flex items-center justify-center gap-2 rounded-md px-4 py-2 font-medium text-white transition-all duration-150 ease-out focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 hover:enabled:-translate-y-px hover:enabled:shadow-md active:enabled:translate-y-0 disabled:opacity-60"
+          className="bg-brand-navy hover:bg-brand-blue text-white rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60 flex items-center justify-center gap-2 mt-1"
         >
           {isSubmitting && <Spinner className="size-4" />}
           {isSubmitting ? "Signing in…" : "Sign in"}
         </button>
 
-        <div className="flex items-center justify-between">
-          <Link
-            href="/forgot-password"
-            className="text-caption text-text-secondary hover:text-accent transition-colors"
-          >
-            Forgot password?
-          </Link>
-          <Link
-            href="/signup"
-            className="text-caption text-accent font-medium transition-colors hover:underline"
-          >
-            Create account →
-          </Link>
+        <div className="flex items-center justify-center pt-1">
+          <p className="text-xs text-text-secondary">
+            Need compliance access?{" "}
+            <Link
+              href="/signup"
+              className="text-brand-blue dark:text-blue-400 font-semibold hover:underline"
+            >
+              Create account →
+            </Link>
+          </p>
         </div>
       </form>
 
       {/* Demo Personas for Quick Access */}
-      <div className="border-border border-t pt-4">
-        <p className="text-caption text-text-secondary mb-2 text-center">
-          Or sign in instantly with a demo role:
-        </p>
-        <div className="grid grid-cols-3 gap-2">
+      <div className="border-border border-t pt-5">
+        <div className="flex items-center justify-between mb-3">
+          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-secondary">
+            One-Click Demo Roles
+          </span>
+          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800/30">
+            Instant Sandbox
+          </span>
+        </div>
+        <div className="grid grid-cols-3 gap-2.5">
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("admin@aml.local")}
-            className="text-caption border-border bg-bg text-text-primary hover:border-accent hover:text-accent rounded border px-2 py-1.5 text-center font-medium transition-colors disabled:opacity-50"
+            className="group flex flex-col items-center justify-center rounded-xl border border-border bg-slate-50/70 dark:bg-slate-900/50 p-2.5 text-center transition-all hover:border-brand-navy hover:bg-white dark:hover:bg-slate-800 shadow-xs hover:shadow-sm active:scale-95 disabled:opacity-50"
           >
-            Admin
+            <span className="text-xs font-bold text-text-primary group-hover:text-brand-navy dark:group-hover:text-brand-blueLight">
+              Admin
+            </span>
+            <span className="text-[10px] text-text-secondary mt-0.5">Full System</span>
           </button>
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("analyst@aml.local")}
-            className="text-caption border-border bg-bg text-text-primary hover:border-accent hover:text-accent rounded border px-2 py-1.5 text-center font-medium transition-colors disabled:opacity-50"
+            className="group flex flex-col items-center justify-center rounded-xl border border-border bg-slate-50/70 dark:bg-slate-900/50 p-2.5 text-center transition-all hover:border-brand-blue hover:bg-white dark:hover:bg-slate-800 shadow-xs hover:shadow-sm active:scale-95 disabled:opacity-50"
           >
-            Analyst
+            <span className="text-xs font-bold text-text-primary group-hover:text-brand-blue">
+              Analyst
+            </span>
+            <span className="text-[10px] text-text-secondary mt-0.5">Alert Triage</span>
           </button>
           <button
             type="button"
             disabled={isSubmitting}
             onClick={() => handleDemoLogin("operator@aml.local")}
-            className="text-caption border-border bg-bg text-text-primary hover:border-accent hover:text-accent rounded border px-2 py-1.5 text-center font-medium transition-colors disabled:opacity-50"
+            className="group flex flex-col items-center justify-center rounded-xl border border-border bg-slate-50/70 dark:bg-slate-900/50 p-2.5 text-center transition-all hover:border-slate-500 hover:bg-white dark:hover:bg-slate-800 shadow-xs hover:shadow-sm active:scale-95 disabled:opacity-50"
           >
-            Operator
+            <span className="text-xs font-bold text-text-primary group-hover:text-slate-900 dark:group-hover:text-white">
+              Operator
+            </span>
+            <span className="text-[10px] text-text-secondary mt-0.5">Data Ingest</span>
           </button>
         </div>
       </div>
