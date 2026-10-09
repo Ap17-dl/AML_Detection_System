@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
+import Script from "next/script";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -26,6 +27,33 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       className={`${inter.variable} ${jetbrainsMono.variable} h-full scroll-smooth antialiased`}
     >
       <head>
+        <Script
+          id="firefox-perf-fix"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                if (typeof window !== 'undefined' && window.performance && window.performance.measure) {
+                  var origMeasure = window.performance.measure.bind(window.performance);
+                  window.performance.measure = function(name, startOrOptions, end) {
+                    try {
+                      if (typeof startOrOptions === 'object' && startOrOptions !== null) {
+                        var s = startOrOptions.start;
+                        var e = startOrOptions.end;
+                        if ((typeof s === 'number' && s < 0) || (typeof e === 'number' && e < 0)) {
+                          return;
+                        }
+                      }
+                      return origMeasure(name, startOrOptions, end);
+                    } catch (err) {
+                      return;
+                    }
+                  };
+                }
+              })();
+            `,
+          }}
+        />
         <link
           rel="preload"
           href="/fonts/material-symbols-outlined.woff2"
