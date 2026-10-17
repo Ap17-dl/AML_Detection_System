@@ -208,7 +208,7 @@ export default function ReportsClient({
             <button
               onClick={() => handleExport("alerts")}
               disabled={exporting === "alerts"}
-              className="bg-brand-navy hover:bg-brand-blue inline-flex items-center gap-1.5 self-start rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95 disabled:opacity-50"
+              className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-1.5 self-start rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">
                 file_download
@@ -239,7 +239,7 @@ export default function ReportsClient({
             <button
               onClick={() => handleExport("transactions")}
               disabled={exporting === "transactions"}
-              className="bg-brand-navy hover:bg-brand-blue inline-flex items-center gap-1.5 self-start rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95 disabled:opacity-50"
+              className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-1.5 self-start rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95 disabled:opacity-50"
             >
               <span className="material-symbols-outlined text-[16px]">
                 file_download

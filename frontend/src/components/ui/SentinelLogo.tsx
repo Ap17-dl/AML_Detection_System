@@ -6,10 +6,14 @@ interface SentinelMarkProps extends SVGProps<SVGSVGElement> {
 }
 
 /**
- * Minimalist geometric mark for AML Sentinel.
- * Encapsulates a precision shield geometry and connected graph network nodes.
+ * Clean Institutional Banking Mark for AML Sentinel.
+ * Precision heraldic geometric shield enclosing financial network graph vertices.
  */
-export function SentinelMark({ size = 28, className = "", ...props }: SentinelMarkProps) {
+export function SentinelMark({
+  size = 28,
+  className = "",
+  ...props
+}: SentinelMarkProps) {
   return (
     <svg
       width={size}
@@ -21,30 +25,19 @@ export function SentinelMark({ size = 28, className = "", ...props }: SentinelMa
       aria-hidden="true"
       {...props}
     >
-      <defs>
-        <linearGradient id="sentinel-shield-grad" x1="4" y1="4" x2="28" y2="28" gradientUnits="userSpaceOnUse">
-          <stop stopColor="currentColor" stopOpacity="0.95" />
-          <stop offset="1" stopColor="currentColor" stopOpacity="0.6" />
-        </linearGradient>
-        <radialGradient id="sentinel-pulse" cx="16" cy="16" r="6" gradientUnits="userSpaceOnUse">
-          <stop stopColor="currentColor" stopOpacity="0.4" />
-          <stop offset="1" stopColor="currentColor" stopOpacity="0" />
-        </radialGradient>
-      </defs>
-
-      {/* Subtle outer geometric perimeter */}
+      {/* Outer Institutional Shield Perimeter */}
       <path
-        d="M16 3L27 7.8V15.2C27 22.4 22.3 27.5 16 29.5C9.7 27.5 5 22.4 5 15.2V7.8L16 3Z"
+        d="M16 2.5L27.5 7.5V15.5C27.5 23 22.5 28.5 16 30.5C9.5 28.5 4.5 23 4.5 15.5V7.5L16 2.5Z"
         stroke="currentColor"
-        strokeWidth="1.5"
+        strokeWidth="1.75"
         strokeLinecap="round"
         strokeLinejoin="round"
-        className="opacity-40"
+        className="opacity-90"
       />
 
-      {/* Internal Graph Network & Apex Node */}
+      {/* Internal Vault & Graph Network Conduits */}
       <path
-        d="M16 7L22 13.5M16 7L10 13.5M16 7V22M10 13.5L16 22M22 13.5L16 22M10 13.5H22"
+        d="M16 7L22 13M16 7L10 13M16 7V22M10 13L16 22M22 13L16 22M10 13H22"
         stroke="currentColor"
         strokeWidth="1.25"
         strokeLinecap="round"
@@ -52,10 +45,10 @@ export function SentinelMark({ size = 28, className = "", ...props }: SentinelMa
         className="opacity-70"
       />
 
-      {/* Center Graph Vertices */}
+      {/* Financial Vertices */}
       <circle cx="16" cy="7" r="1.75" fill="currentColor" />
-      <circle cx="10" cy="13.5" r="1.5" fill="currentColor" />
-      <circle cx="22" cy="13.5" r="1.5" fill="currentColor" />
+      <circle cx="10" cy="13" r="1.5" fill="currentColor" />
+      <circle cx="22" cy="13" r="1.5" fill="currentColor" />
       <circle cx="16" cy="22" r="1.75" fill="currentColor" />
       <circle cx="16" cy="14" r="2.25" fill="currentColor" />
     </svg>
@@ -70,22 +63,25 @@ interface SentinelLogoProps {
 }
 
 export function SentinelLogo({
-  size = 28,
+  size = 22,
   showSubtitle = true,
-  subtitle = "SURVEILLANCE",
+  subtitle = "INSTITUTIONAL BANKING",
   className = "",
 }: SentinelLogoProps) {
   return (
     <div className={`flex items-center gap-2.5 ${className}`}>
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface text-text-primary shadow-xs transition-colors">
+      <div className="border-border bg-surface text-text-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border shadow-xs transition-colors">
         <SentinelMark size={size} />
       </div>
       <div className="flex flex-col">
-        <span className="text-text-primary text-sm font-bold tracking-tight leading-none">
-          AML <span className="font-extrabold tracking-normal">SENTINEL</span>
+        <span className="text-text-primary text-sm leading-none font-extrabold tracking-tight">
+          AML{" "}
+          <span className="text-brand-blue font-black tracking-normal">
+            SENTINEL
+          </span>
         </span>
         {showSubtitle && (
-          <span className="text-text-secondary mt-1 text-[9px] font-semibold tracking-wider uppercase leading-none opacity-80">
+          <span className="text-text-muted mt-1 text-[8.5px] leading-none font-bold tracking-widest uppercase">
             {subtitle}
           </span>
         )}

@@ -173,7 +173,7 @@ export function LoginForm() {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-brand-navy hover:bg-brand-blue mt-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60"
+          className="bg-brand-blue hover:bg-brand-blueLight mt-1 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60"
         >
           {isSubmitting && <Spinner className="size-4" />}
           {isSubmitting ? "Signing in…" : "Sign in"}

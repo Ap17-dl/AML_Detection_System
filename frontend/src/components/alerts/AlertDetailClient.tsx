@@ -167,7 +167,7 @@ export default function AlertDetailClient({
         {alert.status !== "closed" && (
           <button
             onClick={() => setIsDispositionModalOpen(true)}
-            className="bg-brand-navy hover:bg-brand-blue flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150"
+            className="bg-brand-blue hover:bg-brand-blueLight flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150"
           >
             <span className="material-symbols-outlined text-[16px]">gavel</span>
             <span>Conclude & Dispose Alert</span>
@@ -409,7 +409,7 @@ export default function AlertDetailClient({
               <button
                 onClick={handleConfirmDisposition}
                 disabled={submittingFeedback}
-                className="bg-brand-navy hover:bg-brand-blue rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 disabled:opacity-50"
+                className="bg-brand-blue hover:bg-brand-blueLight rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 disabled:opacity-50"
               >
                 {submittingFeedback
                   ? "Submitting…"

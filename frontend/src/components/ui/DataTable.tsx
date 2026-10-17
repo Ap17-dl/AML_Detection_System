@@ -63,7 +63,7 @@ export function DataTable<T extends object>({
       <div className="overflow-x-auto">
         <table className="w-full text-left">
           <thead>
-            <tr className="border-border border-b bg-slate-50/80 dark:bg-slate-900/60">
+            <tr className="border-border border-b bg-slate-100/70 dark:bg-slate-800/40">
               {columns.map((col) => (
                 <th
                   key={col.key}

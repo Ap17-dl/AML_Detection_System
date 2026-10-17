@@ -143,7 +143,7 @@ export default function ImportClient({
             </p>
           </div>
           {!file && (
-            <label className="bg-brand-navy hover:bg-brand-blue cursor-pointer rounded-lg px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95">
+            <label className="bg-brand-blue hover:bg-brand-blueLight cursor-pointer rounded-lg px-5 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95">
               Browse Local Files
               <input
                 type="file"
@@ -158,7 +158,7 @@ export default function ImportClient({
               <button
                 type="button"
                 onClick={handleUpload}
-                className="bg-brand-navy hover:bg-brand-blue rounded-lg px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95"
+                className="bg-brand-blue hover:bg-brand-blueLight rounded-lg px-6 py-2.5 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95"
               >
                 Upload & Ingest Batch
               </button>

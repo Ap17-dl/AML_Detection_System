@@ -3,17 +3,16 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
-import { ThemeToggle } from "@/components/layout/ThemeToggle";
 import {
-  ActivityIcon,
-  ArrowRightIcon,
-  CheckIcon,
-  LockIcon,
-  NetworkIcon,
-  ReportsIcon,
-  ShieldCheckIcon,
-  ZapIcon,
-} from "@/components/ui/icons";
+  DossierSealArt,
+  ExplainableShapArt,
+  HeroNetworkVectorArt,
+  PipelineVectorArt,
+  RealTimeRadarArt,
+  TopologyClusterArt,
+} from "@/components/landing/VectorArt";
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import { ArrowRightIcon, CheckIcon } from "@/components/ui/icons";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { SentinelLogo } from "@/components/ui/SentinelLogo";
 
@@ -23,45 +22,45 @@ interface LandingViewProps {
 }
 
 const NAV_ITEMS = [
-  { label: "Overview", href: "#home", id: "home" },
-  { label: "Capabilities", href: "#features", id: "features" },
-  { label: "Architecture", href: "#about", id: "about" },
-  { label: "Metrics", href: "#solutions", id: "solutions" },
-  { label: "Contact", href: "#contact", id: "contact" },
+  { label: "Institutional Overview", href: "#home", id: "home" },
+  { label: "Core Capabilities", href: "#features", id: "features" },
+  { label: "Banking Rails", href: "#about", id: "about" },
+  { label: "Capital Metrics", href: "#solutions", id: "solutions" },
+  { label: "Advisory & Contact", href: "#contact", id: "contact" },
 ];
 
 const SIMULATED_ALERTS = [
   {
     id: "ALT-9204",
-    type: "Multi-Hop Layering",
-    amount: "$184,200",
+    type: "Multi-Hop Correspondent Layering",
+    amount: "$1,840,200",
     risk: "high" as const,
     time: "Just now",
-    entity: "Syndicate 0x8F..2A",
+    entity: "Correspondent Syndicate 0x8F..2A",
   },
   {
     id: "ALT-9203",
-    type: "Structuring Rapid Velocity",
-    amount: "$9,850 x 8",
+    type: "Rapid Velocity Structuring",
+    amount: "$9,850 x 8 ACH",
     risk: "medium" as const,
     time: "2m ago",
-    entity: "Apex Holdings LLC",
+    entity: "Apex Commercial Holdings LLC",
   },
   {
     id: "ALT-9202",
-    type: "High-Risk Remittance Corridor",
+    type: "Sanctioned Remittance Corridor",
     amount: "$420,000",
     risk: "critical" as const,
     time: "5m ago",
-    entity: "Vanguard Transit Co",
+    entity: "Vanguard Transit Co / Swift MT103",
   },
   {
     id: "ALT-9201",
-    type: "Dormant Account Re-activation",
+    type: "Dormant Escrow Re-activation",
     amount: "$54,100",
     risk: "low" as const,
     time: "12m ago",
-    entity: "Private Node #4910",
+    entity: "Corporate Escrow #4910",
   },
 ];
 
@@ -69,7 +68,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [scrolled, setScrolled] = useState(false);
-  const [activeTab, setActiveTab] = useState<"stream" | "topology">("stream");
+  const [activeTab, setActiveTab] = useState<"vector" | "stream">("vector");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -118,27 +117,41 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
   };
 
   return (
-    <div className="bg-bg text-text-primary min-h-screen selection:bg-brand-blue/20 selection:text-text-primary transition-colors">
-      {/* 1. MINIMALIST TOP NAVIGATION BAR */}
+    <div className="bg-bg text-text-primary selection:bg-brand-blue/20 selection:text-text-primary min-h-screen transition-colors">
+      {/* 1. CLEAN INSTITUTIONAL BANKING NAVIGATION BAR */}
       <header
         className={`sticky top-0 z-50 transition-all duration-200 ${
           scrolled
-            ? "border-b border-border/80 bg-surface/85 backdrop-blur-md shadow-2xs"
-            : "border-b border-transparent bg-bg/70 backdrop-blur-sm"
+            ? "border-border bg-surface/95 border-b shadow-xs backdrop-blur-md"
+            : "border-border/60 bg-surface/85 border-b backdrop-blur-sm"
         }`}
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-3.5">
+        {/* Top Institutional Notification Ribbon */}
+        <div className="border-border/50 flex items-center justify-between border-b bg-slate-900 px-6 py-1 text-[10.5px] font-medium tracking-wide text-slate-300">
+          <div className="mx-auto flex w-full max-w-7xl items-center justify-between">
+            <span className="flex items-center gap-2">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              FEDERAL RESERVE &amp; FINCEN REPORTING PROTOCOL READY • FFIEC
+              COMPLIANT
+            </span>
+            <span className="hidden font-mono text-[10px] text-slate-400 md:inline-block">
+              CLEARING RAILS: 100% OPERATIONAL
+            </span>
+          </div>
+        </div>
+
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-3">
           {/* Brand Logo */}
           <Link
             href="#home"
             onClick={(e) => handleNavClick(e, "home")}
             className="group flex items-center gap-3 focus:outline-none"
           >
-            <SentinelLogo size={22} subtitle="SURVEILLANCE" />
+            <SentinelLogo size={22} subtitle="INSTITUTIONAL BANKING" />
           </Link>
 
-          {/* Navigation Links */}
-          <nav className="hidden items-center gap-7 text-xs font-medium md:flex">
+          {/* Navigation Links with Clean Banking Typography */}
+          <nav className="hidden items-center gap-7 text-xs font-semibold md:flex">
             {NAV_ITEMS.map((item) => {
               const isActive = activeSection === item.id;
               return (
@@ -148,7 +161,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                   onClick={(e) => handleNavClick(e, item.id)}
                   className={`transition-colors duration-150 ${
                     isActive
-                      ? "text-text-primary font-semibold"
+                      ? "text-brand-blue font-bold"
                       : "text-text-secondary hover:text-text-primary"
                   }`}
                 >
@@ -165,15 +178,15 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
             {isAuthenticated ? (
               <div className="flex items-center gap-2.5">
                 {userEmail && (
-                  <span className="hidden font-mono text-[11px] text-text-muted xl:inline-block">
+                  <span className="text-text-muted hidden font-mono text-[11px] xl:inline-block">
                     {userEmail}
                   </span>
                 )}
                 <Link
                   href="/dashboard"
-                  className="bg-text-primary text-surface hover:opacity-90 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold shadow-xs transition-all active:scale-[0.98]"
+                  className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all active:scale-[0.98]"
                 >
-                  <span>Dashboard</span>
+                  <span>Banking Portal</span>
                   <ArrowRightIcon className="h-3.5 w-3.5" />
                 </Link>
               </div>
@@ -181,15 +194,15 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
               <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="text-text-secondary hover:text-text-primary px-3 py-1.5 text-xs font-medium transition-colors"
+                  className="text-text-secondary hover:text-text-primary px-3 py-1.5 text-xs font-semibold transition-colors"
                 >
-                  Sign In
+                  Client Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-text-primary text-surface hover:opacity-90 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold shadow-xs transition-all active:scale-[0.98]"
+                  className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-1.5 rounded-md px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all active:scale-[0.98]"
                 >
-                  <span>Get Started</span>
+                  <span>Request Access</span>
                   <ArrowRightIcon className="h-3.5 w-3.5" />
                 </Link>
               </div>
@@ -199,7 +212,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="border-border text-text-secondary hover:text-text-primary flex h-8 w-8 items-center justify-center rounded-lg border md:hidden"
+              className="border-border text-text-secondary hover:text-text-primary flex h-8 w-8 items-center justify-center rounded-md border md:hidden"
               aria-label="Toggle navigation menu"
             >
               <span className="text-sm font-bold">
@@ -212,7 +225,7 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
         {/* Mobile Dropdown Nav */}
         {mobileMenuOpen && (
           <div className="border-border bg-surface border-b px-6 py-4 md:hidden">
-            <div className="flex flex-col gap-2.5 text-xs font-medium">
+            <div className="flex flex-col gap-2.5 text-xs font-semibold">
               {NAV_ITEMS.map((item) => (
                 <a
                   key={item.id}
@@ -227,23 +240,23 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                 {isAuthenticated ? (
                   <Link
                     href="/dashboard"
-                    className="bg-text-primary text-surface flex justify-center rounded-lg py-2 text-xs font-semibold"
+                    className="bg-brand-blue hover:bg-brand-blueLight flex justify-center rounded-md py-2 text-xs font-semibold text-white"
                   >
-                    Go to Dashboard
+                    Banking Portal
                   </Link>
                 ) : (
                   <>
                     <Link
                       href="/login"
-                      className="border-border text-text-primary flex justify-center rounded-lg border py-2 text-xs font-medium"
+                      className="border-border text-text-primary flex justify-center rounded-md border py-2 text-xs font-medium"
                     >
-                      Sign In
+                      Client Sign In
                     </Link>
                     <Link
                       href="/signup"
-                      className="bg-text-primary text-surface flex justify-center rounded-lg py-2 text-xs font-semibold"
+                      className="bg-brand-blue hover:bg-brand-blueLight flex justify-center rounded-md py-2 text-xs font-semibold text-white"
                     >
-                      Sign Up
+                      Request Access
                     </Link>
                   </>
                 )}
@@ -253,49 +266,55 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
         )}
       </header>
 
-      {/* 2. HERO SECTION */}
+      {/* 2. INSTITUTIONAL HERO SECTION WITH VECTOR ART */}
       <section
-        className="bg-grid-minimal relative scroll-mt-20 overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-32"
+        className="bg-grid-minimal relative scroll-mt-20 overflow-hidden pt-12 pb-20 lg:pt-16 lg:pb-28"
         id="home"
       >
-        {/* Subtle Ambient Radial Lighting */}
-        <div className="ambient-glow-blue pointer-events-none absolute top-10 left-1/2 -translate-x-1/2 h-[450px] w-[700px] blur-3xl opacity-50" />
+        <div className="ambient-glow-blue pointer-events-none absolute top-10 left-1/2 h-[450px] w-[700px] -translate-x-1/2 opacity-50 blur-3xl" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
-            {/* Left Side: Minimalist Value Proposition */}
+            {/* Left Side: Institutional Value Proposition */}
             <div className="flex flex-col items-start lg:col-span-6">
-              {/* Pill Status Badge */}
-              <div className="border-border bg-surface/90 text-text-primary mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wide shadow-2xs backdrop-blur-sm">
+              {/* Institutional Pill Badge */}
+              <div className="border-border bg-surface text-text-primary mb-6 inline-flex items-center gap-2 rounded-full border px-3.5 py-1 text-xs font-semibold tracking-wide shadow-2xs">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-                <span>AML Sentinel 2.4</span>
+                <span className="font-bold tracking-tight">
+                  TIER-1 BANKING DEFENSE
+                </span>
                 <span className="text-text-muted">•</span>
-                <span className="text-text-secondary font-mono">Graph Intelligence</span>
+                <span className="text-text-secondary font-mono text-[11px]">
+                  CORRESPONDENT AUDITABLE
+                </span>
               </div>
 
-              {/* Minimalist Display Headline */}
-              <h1 className="text-text-primary mb-5 text-4xl leading-[1.15] font-extrabold tracking-tight sm:text-5xl lg:text-[54px]">
-                Autonomous AML Detection Engineered for Precision.
+              {/* Authoritative Display Headline */}
+              <h1 className="text-text-primary mb-5 text-4xl leading-[1.15] font-extrabold tracking-tight sm:text-5xl lg:text-[50px]">
+                Autonomous Anti-Money Laundering Defense for Modern Banking.
               </h1>
 
-              {/* Subtitle */}
-              <p className="text-text-secondary mb-8 max-w-xl text-base leading-relaxed sm:text-lg">
-                Harness explainable Graph Neural Networks and sub-second
-                transaction scoring to eliminate false positives and produce
-                audit-defensible SAR dossiers.
+              {/* Balanced Subtitle */}
+              <p className="text-text-secondary mb-8 max-w-xl text-base leading-relaxed font-normal sm:text-lg">
+                Institutional-grade transaction surveillance combining Graph
+                Neural Networks, sub-second ledger scoring, and automated SAR
+                dossier generation for commercial banks, clearinghouses, and
+                global payment rails.
               </p>
 
-              {/* CTAs */}
+              {/* Clean Banking CTAs */}
               <div className="mb-10 flex w-full flex-wrap items-center gap-3 sm:w-auto">
                 <Link
                   href={isAuthenticated ? "/dashboard" : "/signup"}
-                  className="bg-text-primary text-surface hover:opacity-90 inline-flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 text-xs font-semibold tracking-wide shadow-sm transition-all active:scale-[0.98] sm:w-auto"
+                  className="bg-brand-blue hover:bg-brand-blueLight inline-flex w-full items-center justify-center gap-2 rounded-md px-6 py-3 text-xs font-bold tracking-wide text-white shadow-xs transition-all active:scale-[0.98] sm:w-auto"
                 >
                   <span>
-                    {isAuthenticated ? "Launch Dashboard" : "Deploy Sandbox"}
+                    {isAuthenticated
+                      ? "Enter Banking Portal"
+                      : "Provision Sandbox"}
                   </span>
                   <ArrowRightIcon className="h-4 w-4" />
                 </Link>
@@ -303,82 +322,92 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                 <a
                   href="#features"
                   onClick={(e) => handleNavClick(e, "features")}
-                  className="border-border bg-surface text-text-primary hover:bg-surface-hover inline-flex w-full items-center justify-center gap-2 rounded-lg border px-6 py-3 text-xs font-semibold transition-all active:scale-[0.98] sm:w-auto"
+                  className="border-border bg-surface text-text-primary hover:bg-surface-hover inline-flex w-full items-center justify-center gap-2 rounded-md border px-6 py-3 text-xs font-semibold shadow-2xs transition-all active:scale-[0.98] sm:w-auto"
                 >
-                  <span>Explore Architecture</span>
+                  <span>Inspect Banking Rails</span>
                 </a>
               </div>
 
               {/* Metric Pillars */}
-              <div className="border-border flex w-full flex-wrap items-center gap-6 border-t pt-5 text-xs text-text-secondary">
-                <div className="flex items-center gap-1.5 font-medium">
-                  <CheckIcon className="h-4 w-4 text-emerald-500" />
-                  <span>99.2% Precision</span>
+              <div className="border-border text-text-secondary flex w-full flex-wrap items-center gap-6 border-t pt-5 text-xs font-medium">
+                <div className="flex items-center gap-1.5">
+                  <CheckIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-text-primary font-semibold">
+                    99.2% Precision
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5 font-medium">
-                  <CheckIcon className="h-4 w-4 text-emerald-500" />
-                  <span>SOC2 Type II</span>
+                <div className="flex items-center gap-1.5">
+                  <CheckIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-text-primary font-semibold">
+                    SOC2 Type II
+                  </span>
                 </div>
-                <div className="flex items-center gap-1.5 font-medium">
-                  <CheckIcon className="h-4 w-4 text-emerald-500" />
-                  <span>&lt;18ms Latency</span>
+                <div className="flex items-center gap-1.5">
+                  <CheckIcon className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                  <span className="text-text-primary font-semibold">
+                    &lt;18ms Clearance
+                  </span>
                 </div>
               </div>
             </div>
 
-            {/* Right Side: High-Precision Live Terminal / UI Mockup */}
+            {/* Right Side: Vector Art & Live Banking Surveillance Showcase */}
             <div className="relative lg:col-span-6">
-              <div className="border-border bg-surface overflow-hidden rounded-xl border shadow-lg transition-all">
-                {/* Window Chrome Header */}
-                <div className="border-border bg-surface-hover/60 flex items-center justify-between border-b px-4 py-3">
+              <div className="border-border bg-surface overflow-hidden rounded-xl border shadow-md transition-all">
+                {/* Banking Terminal Chrome Header */}
+                <div className="border-border flex items-center justify-between border-b bg-slate-900 px-4 py-3 text-white">
                   <div className="flex items-center gap-2">
-                    <span className="h-2.5 w-2.5 rounded-full bg-border" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-border" />
-                    <span className="h-2.5 w-2.5 rounded-full bg-border" />
-                    <span className="ml-2 font-mono text-[11px] text-text-muted">
-                      node://cluster-us-east/triage
+                    <span className="h-2.5 w-2.5 rounded-full bg-rose-400" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-amber-400" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-emerald-400" />
+                    <span className="ml-2 font-mono text-[11px] text-slate-300">
+                      fedwire://node-us-east/correspondent-mesh
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 font-mono text-[10px] text-emerald-500">
-                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
-                    INFERENCE LIVE
+                  <div className="flex items-center gap-2 font-mono text-[10px] font-semibold text-emerald-400">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400" />
+                    LEDGER ACTIVE
                   </div>
                 </div>
 
-                {/* Sub-header Tabs */}
-                <div className="border-border flex items-center justify-between border-b bg-surface px-4 py-2 text-xs">
-                  <div className="flex items-center gap-1">
+                {/* Sub-header Switcher */}
+                <div className="border-border bg-surface flex items-center justify-between border-b px-4 py-2 text-xs">
+                  <div className="flex items-center gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("vector")}
+                      className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
+                        activeTab === "vector"
+                          ? "text-text-primary bg-slate-100 shadow-2xs dark:bg-slate-800"
+                          : "text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      Topological Vector Mesh
+                    </button>
                     <button
                       type="button"
                       onClick={() => setActiveTab("stream")}
-                      className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                      className={`rounded-md px-3 py-1 text-xs font-semibold transition-colors ${
                         activeTab === "stream"
-                          ? "bg-surface-hover text-text-primary"
+                          ? "text-text-primary bg-slate-100 shadow-2xs dark:bg-slate-800"
                           : "text-text-secondary hover:text-text-primary"
                       }`}
                     >
-                      Alert Stream
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setActiveTab("topology")}
-                      className={`rounded-md px-3 py-1 font-medium transition-colors ${
-                        activeTab === "topology"
-                          ? "bg-surface-hover text-text-primary"
-                          : "text-text-secondary hover:text-text-primary"
-                      }`}
-                    >
-                      Network Topology
+                      Correspondent Triage Queue
                     </button>
                   </div>
-                  <span className="font-mono text-[10px] text-text-muted">
-                    FPS: 60 • 4 Nodes
+                  <span className="text-text-muted font-mono text-[10px] font-bold">
+                    FFIEC-GNN v2.4
                   </span>
                 </div>
 
-                {/* Content Area */}
-                {activeTab === "stream" ? (
-                  <div className="divide-border divide-y p-1">
+                {/* Content Area with Vector Art Intact */}
+                {activeTab === "vector" ? (
+                  <div className="bg-surface p-3">
+                    <HeroNetworkVectorArt className="rounded-lg shadow-inner" />
+                  </div>
+                ) : (
+                  <div className="divide-border bg-surface divide-y p-1">
                     {SIMULATED_ALERTS.map((alert) => (
                       <div
                         key={alert.id}
@@ -388,14 +417,14 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                           <RiskBadge category={alert.risk} />
                           <div>
                             <div className="flex items-center gap-2">
-                              <span className="text-text-primary text-xs font-semibold">
+                              <span className="text-text-primary text-xs font-bold">
                                 {alert.type}
                               </span>
-                              <span className="font-mono text-[10px] text-text-muted">
+                              <span className="text-text-muted font-mono text-[10px]">
                                 {alert.id}
                               </span>
                             </div>
-                            <p className="text-text-secondary text-[11px]">
+                            <p className="text-text-secondary text-[11px] font-medium">
                               {alert.entity}
                             </p>
                           </div>
@@ -404,36 +433,19 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                           <p className="text-text-primary font-mono text-xs font-bold">
                             {alert.amount}
                           </p>
-                          <span className="font-mono text-[10px] text-text-muted">
+                          <span className="text-text-muted font-mono text-[10px]">
                             {alert.time}
                           </span>
                         </div>
                       </div>
                     ))}
                   </div>
-                ) : (
-                  <div className="flex h-72 flex-col items-center justify-center p-6 text-center">
-                    <div className="border-border bg-surface-hover relative mb-3 flex h-24 w-24 items-center justify-center rounded-2xl border">
-                      <NetworkIcon className="h-12 w-12 text-brand-blue" />
-                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-blue opacity-75" />
-                        <span className="relative inline-flex h-3 w-3 rounded-full bg-brand-blue" />
-                      </span>
-                    </div>
-                    <p className="text-text-primary text-xs font-semibold">
-                      Graph Neural Subgraph Visualizer
-                    </p>
-                    <p className="text-text-secondary mt-1 max-w-xs text-[11px]">
-                      Connected topology across 3 synthetic shell layers and 48
-                      remittance vertices detected.
-                    </p>
-                  </div>
                 )}
 
                 {/* Footer status bar */}
-                <div className="border-border bg-surface-hover/30 flex items-center justify-between border-t px-4 py-2.5 font-mono text-[10px] text-text-muted">
-                  <span>Model: GNN-Surveillance-v4</span>
-                  <span>F1-Score: 0.941</span>
+                <div className="border-border bg-surface-hover/70 text-text-muted flex items-center justify-between border-t px-4 py-2.5 font-mono text-[10px]">
+                  <span>Rail: ISO 20022 Correspondent Protocol</span>
+                  <span>Scored: 50,000 tx/sec • 0 Drop</span>
                 </div>
               </div>
             </div>
@@ -441,106 +453,107 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
         </div>
       </section>
 
-      {/* 3. CAPABILITIES / FEATURES (4 Minimalist Border Cards) */}
+      {/* 3. BANKING CAPABILITIES WITH VECTOR SPOT ART */}
       <section
-        className="border-border relative scroll-mt-20 border-t py-20 lg:py-28"
+        className="border-border relative scroll-mt-20 border-t py-20 lg:py-24"
         id="features"
       >
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto mb-16 max-w-2xl text-center">
-            <span className="text-brand-blue text-[11px] font-semibold tracking-wider uppercase">
-              Core Capabilities
+            <span className="text-brand-blue text-[11px] font-bold tracking-wider uppercase">
+              Institutional Capabilities
             </span>
             <h2 className="text-text-primary mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Engineered to Eliminate False Positives
+              Engineered for Compliance Officers &amp; Chief Risk Executives
             </h2>
-            <p className="text-text-secondary mt-3 text-sm leading-relaxed">
-              Designed specifically for tier-1 compliance units and fintech
-              infrastructure handling millions of daily events.
+            <p className="text-text-secondary mt-3 text-sm leading-relaxed font-normal">
+              Eliminate up to 70% of false positive noise across ACH, Fedwire,
+              SWIFT, and SEPA rails without sacrificing audit defensibility.
             </p>
           </div>
 
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {/* Card 1 */}
-            <div className="border-border bg-surface hover:border-text-secondary/40 flex flex-col justify-between rounded-xl border p-6 shadow-2xs transition-all duration-200">
+            <div className="border-border bg-surface flex flex-col justify-between rounded-xl border p-6 shadow-xs transition-all duration-200 hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700">
               <div>
-                <div className="border-border bg-surface-hover text-text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-lg border">
-                  <ZapIcon className="h-5 w-5" />
+                <div className="border-border mb-4 overflow-hidden rounded-lg border bg-slate-50 p-1 dark:bg-slate-900/60">
+                  <RealTimeRadarArt />
                 </div>
                 <h3 className="text-text-primary mb-2 text-base font-bold">
-                  Sub-Second Triage
+                  Sub-Second Ledger Triage
                 </h3>
-                <p className="text-text-secondary text-xs leading-relaxed">
-                  Real-time transaction scoring across velocity clusters and
-                  threshold anomalies with under 18ms latency.
+                <p className="text-text-secondary text-xs leading-relaxed font-normal">
+                  Real-time transaction scoring across multi-corridor velocity
+                  clusters and threshold anomalies with under 18ms latency.
                 </p>
               </div>
-              <div className="border-border mt-6 border-t pt-4">
-                <span className="font-mono text-[10px] text-text-muted">
-                  LATENCY &lt; 18MS
+              <div className="border-border mt-6 border-t pt-3">
+                <span className="text-text-muted font-mono text-[10px] font-semibold">
+                  LATENCY &lt; 18MS • REAL-TIME ACH
                 </span>
               </div>
             </div>
 
             {/* Card 2 */}
-            <div className="border-border bg-surface hover:border-text-secondary/40 flex flex-col justify-between rounded-xl border p-6 shadow-2xs transition-all duration-200">
+            <div className="border-border bg-surface flex flex-col justify-between rounded-xl border p-6 shadow-xs transition-all duration-200 hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700">
               <div>
-                <div className="border-border bg-surface-hover text-text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-lg border">
-                  <NetworkIcon className="h-5 w-5" />
+                <div className="border-border mb-4 overflow-hidden rounded-lg border bg-slate-50 p-1 dark:bg-slate-900/60">
+                  <TopologyClusterArt />
                 </div>
                 <h3 className="text-text-primary mb-2 text-base font-bold">
-                  Graph Topology
+                  Multi-Hop Topology
                 </h3>
-                <p className="text-text-secondary text-xs leading-relaxed">
-                  Uncovers complex multi-hop layering, circular fund loops, and
-                  synthetic entity networks invisible to flat rules.
+                <p className="text-text-secondary text-xs leading-relaxed font-normal">
+                  Uncovers complex correspondent layering, circular fund loops,
+                  and synthetic entity networks invisible to flat rule engines.
                 </p>
               </div>
-              <div className="border-border mt-6 border-t pt-4">
-                <span className="font-mono text-[10px] text-text-muted">
-                  GNN SUBGRAPH EMBEDDINGS
+              <div className="border-border mt-6 border-t pt-3">
+                <span className="text-text-muted font-mono text-[10px] font-semibold">
+                  GNN SUBGRAPH RESOLUTION
                 </span>
               </div>
             </div>
 
             {/* Card 3 */}
-            <div className="border-border bg-surface hover:border-text-secondary/40 flex flex-col justify-between rounded-xl border p-6 shadow-2xs transition-all duration-200">
+            <div className="border-border bg-surface flex flex-col justify-between rounded-xl border p-6 shadow-xs transition-all duration-200 hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700">
               <div>
-                <div className="border-border bg-surface-hover text-text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-lg border">
-                  <ReportsIcon className="h-5 w-5" />
+                <div className="border-border mb-4 overflow-hidden rounded-lg border bg-slate-50 p-1 dark:bg-slate-900/60">
+                  <DossierSealArt />
                 </div>
                 <h3 className="text-text-primary mb-2 text-base font-bold">
-                  Audit-Ready SARs
+                  FinCEN &amp; FATF Filings
                 </h3>
-                <p className="text-text-secondary text-xs leading-relaxed">
-                  Automated narrative generation compiles comprehensive FinCEN
-                  and FATF compliant filing dossiers in one click.
+                <p className="text-text-secondary text-xs leading-relaxed font-normal">
+                  Automated narrative compilation drafts comprehensive SAR
+                  dossiers with chronological evidence chains in a single click.
                 </p>
               </div>
-              <div className="border-border mt-6 border-t pt-4">
-                <span className="font-mono text-[10px] text-text-muted">
-                  ONE-CLICK FINCEN EXPORT
+              <div className="border-border mt-6 border-t pt-3">
+                <span className="text-text-muted font-mono text-[10px] font-semibold">
+                  FORM 111 COMPLIANT EXPORT
                 </span>
               </div>
             </div>
 
             {/* Card 4 */}
-            <div className="border-border bg-surface hover:border-text-secondary/40 flex flex-col justify-between rounded-xl border p-6 shadow-2xs transition-all duration-200">
+            <div className="border-border bg-surface flex flex-col justify-between rounded-xl border p-6 shadow-xs transition-all duration-200 hover:border-slate-300 hover:shadow-md dark:hover:border-slate-700">
               <div>
-                <div className="border-border bg-surface-hover text-text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-lg border">
-                  <ShieldCheckIcon className="h-5 w-5" />
+                <div className="border-border mb-4 overflow-hidden rounded-lg border bg-slate-50 p-1 dark:bg-slate-900/60">
+                  <ExplainableShapArt />
                 </div>
                 <h3 className="text-text-primary mb-2 text-base font-bold">
-                  Explainable AI
+                  Examiner Audit Trail
                 </h3>
-                <p className="text-text-secondary text-xs leading-relaxed">
-                  Every alert risk score is broken down into auditable feature
-                  attributions and SHAP decision factors.
+                <p className="text-text-secondary text-xs leading-relaxed font-normal">
+                  Every alert risk classification is supported by clear SHAP
+                  decision factors, ensuring total defensibility during bank
+                  supervisory audits.
                 </p>
               </div>
-              <div className="border-border mt-6 border-t pt-4">
-                <span className="font-mono text-[10px] text-text-muted">
-                  100% REGULATORY AUDITABLE
+              <div className="border-border mt-6 border-t pt-3">
+                <span className="text-text-muted font-mono text-[10px] font-semibold">
+                  100% EXAMINER DEFENSIBLE
                 </span>
               </div>
             </div>
@@ -548,116 +561,95 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
         </div>
       </section>
 
-      {/* 4. ARCHITECTURE / ABOUT SECTION */}
+      {/* 4. BANKING ARCHITECTURE & PIPELINE VECTOR ART */}
       <section
-        className="border-border bg-surface-hover/30 relative scroll-mt-20 border-t py-20 lg:py-28"
+        className="border-border relative scroll-mt-20 border-t bg-slate-50/70 py-20 lg:py-28 dark:bg-slate-900/30"
         id="about"
       >
         <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
             {/* Left Narrative */}
-            <div className="lg:col-span-6">
-              <span className="text-brand-blue text-[11px] font-semibold tracking-wider uppercase">
-                System Architecture
+            <div className="lg:col-span-5">
+              <span className="text-brand-blue text-[11px] font-bold tracking-wider uppercase">
+                Core Banking Rails
               </span>
               <h2 className="text-text-primary mt-2 mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Built for High-Throughput Financial Rails
+                High-Throughput Intelligence for Capital Rails
               </h2>
-              <p className="text-text-secondary mb-6 text-sm leading-relaxed">
-                Legacy rules-based surveillance systems overwhelm compliance
-                officers with over 90% false positive noise. AML Sentinel
-                replaces brittle heuristics with deep topological intelligence
-                that learns evolving crime patterns.
+              <p className="text-text-secondary mb-6 text-sm leading-relaxed font-normal">
+                Legacy rules systems generate crushing backlogs of false alarms.
+                AML Sentinel integrates natively into your core banking bus to
+                verify and classify transactions with institutional accuracy.
               </p>
 
-              <div className="space-y-4">
-                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4">
-                  <div className="border-border bg-surface-hover text-text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
-                    <ActivityIcon className="h-4 w-4" />
+              <div className="space-y-3.5">
+                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4 shadow-2xs">
+                  <div className="border-border bg-surface-hover text-brand-blue flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold">
+                    01
                   </div>
                   <div>
                     <h3 className="text-text-primary text-xs font-bold">
-                      Dynamic Transaction Stream Ingestion
+                      ISO 20022 Financial Messaging Support
                     </h3>
                     <p className="text-text-secondary mt-0.5 text-xs">
-                      Kafka and REST streaming ingestion supporting up to
-                      50,000 events/second with zero packet drop.
+                      Native parsing for pacs.008, pacs.009, and camt.053
+                      settlement messages.
                     </p>
                   </div>
                 </div>
 
-                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4">
-                  <div className="border-border bg-surface-hover text-text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
-                    <NetworkIcon className="h-4 w-4" />
+                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4 shadow-2xs">
+                  <div className="border-border bg-surface-hover text-brand-blue flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold">
+                    02
                   </div>
                   <div>
                     <h3 className="text-text-primary text-xs font-bold">
-                      Graph Neural Embeddings
+                      Graph Entity Resolution
                     </h3>
                     <p className="text-text-secondary mt-0.5 text-xs">
-                      Real-time entity resolution connecting accounts, device
-                      fingerprints, and shared IBANs.
+                      Deep cross-account mapping linking ultimate beneficial
+                      owners, tax IDs, and IBANs.
                     </p>
                   </div>
                 </div>
 
-                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4">
-                  <div className="border-border bg-surface-hover text-text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
-                    <LockIcon className="h-4 w-4" />
+                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4 shadow-2xs">
+                  <div className="border-border bg-surface-hover text-brand-blue flex h-7 w-7 shrink-0 items-center justify-center rounded-md border text-xs font-bold">
+                    03
                   </div>
                   <div>
                     <h3 className="text-text-primary text-xs font-bold">
-                      End-to-End Cryptographic Auditability
+                      Cryptographic Case Ledger
                     </h3>
                     <p className="text-text-secondary mt-0.5 text-xs">
-                      Every analyst action, triage rationale, and decision
-                      override is stamped to an append-only ledger.
+                      Every compliance officer note and disposition is sealed
+                      with SHA-256 audit stamps.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Right Architecture Block */}
-            <div className="lg:col-span-6">
+            {/* Right: Pipeline Vector Graphic Intact */}
+            <div className="lg:col-span-7">
               <div className="border-border bg-surface rounded-xl border p-6 shadow-sm">
-                <div className="mb-4 flex items-center justify-between">
-                  <span className="text-text-primary text-xs font-bold">
-                    Surveillance Pipeline
-                  </span>
-                  <span className="font-mono text-[10px] text-text-muted">
-                    PIPELINE v4.2
+                <div className="border-border mb-4 flex items-center justify-between border-b pb-3">
+                  <div>
+                    <span className="text-text-primary text-xs font-bold">
+                      Correspondent Clearance Pipeline
+                    </span>
+                    <p className="text-text-secondary text-[11px]">
+                      Automated lifecycle from stream ingestion to SAR export
+                    </p>
+                  </div>
+                  <span className="text-text-muted font-mono text-[10px] font-bold">
+                    RAIL v4.2-PROD
                   </span>
                 </div>
 
-                <div className="space-y-3 font-mono text-xs">
-                  <div className="border-border bg-surface-hover/70 flex items-center justify-between rounded-lg border px-3.5 py-2.5">
-                    <span className="text-text-primary font-medium">
-                      01 Ingestion Rail
-                    </span>
-                    <span className="text-emerald-500 text-[11px]">Active (0.4ms)</span>
-                  </div>
-                  <div className="text-text-muted flex justify-center">↓</div>
-                  <div className="border-border bg-surface-hover/70 flex items-center justify-between rounded-lg border px-3.5 py-2.5">
-                    <span className="text-text-primary font-medium">
-                      02 Feature Attribution &amp; SHAP
-                    </span>
-                    <span className="text-emerald-500 text-[11px]">Computed (3.1ms)</span>
-                  </div>
-                  <div className="text-text-muted flex justify-center">↓</div>
-                  <div className="border-border bg-surface-hover/70 flex items-center justify-between rounded-lg border px-3.5 py-2.5">
-                    <span className="text-text-primary font-medium">
-                      03 Graph Neural Network Inference
-                    </span>
-                    <span className="text-emerald-500 text-[11px]">Scored (11.8ms)</span>
-                  </div>
-                  <div className="text-text-muted flex justify-center">↓</div>
-                  <div className="border-border bg-text-primary text-surface flex items-center justify-between rounded-lg border px-3.5 py-2.5">
-                    <span className="font-bold">
-                      04 Automated SAR Dossier Generation
-                    </span>
-                    <span className="text-[11px] opacity-80">Instant</span>
-                  </div>
+                {/* Vector Graphic Intact */}
+                <div className="p-2">
+                  <PipelineVectorArt />
                 </div>
               </div>
             </div>
@@ -665,157 +657,191 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
         </div>
       </section>
 
-      {/* 5. METRICS & SOLUTIONS SECTION */}
+      {/* 5. CAPITAL METRICS & BANKING SOLUTIONS */}
       <section
         className="border-border relative scroll-mt-20 border-t py-20 lg:py-24"
         id="solutions"
       >
         <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-2 gap-8 border-b border-border pb-16 lg:grid-cols-4">
+          <div className="border-border grid grid-cols-2 gap-8 border-b pb-16 lg:grid-cols-4">
             <div>
-              <p className="text-text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
+              <p className="text-text-primary text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl">
                 70%
               </p>
-              <p className="text-text-secondary mt-1 text-xs">
+              <p className="text-text-secondary mt-1 text-xs font-semibold">
                 False Positive Reduction
               </p>
             </div>
             <div>
-              <p className="text-text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
+              <p className="text-text-primary text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl">
                 &lt;18ms
               </p>
-              <p className="text-text-secondary mt-1 text-xs">
-                Average Scoring Latency
+              <p className="text-text-secondary mt-1 text-xs font-semibold">
+                Settlement Clearance Latency
               </p>
             </div>
             <div>
-              <p className="text-text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
+              <p className="text-text-primary text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl">
                 99.2%
               </p>
-              <p className="text-text-secondary mt-1 text-xs">
-                Recall on Layering Chains
+              <p className="text-text-secondary mt-1 text-xs font-semibold">
+                Recall on Layering Loops
               </p>
             </div>
             <div>
-              <p className="text-text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
-                $14B+
+              <p className="text-text-primary text-3xl font-extrabold tracking-tight tabular-nums sm:text-4xl">
+                $14.2B+
               </p>
-              <p className="text-text-secondary mt-1 text-xs">
-                Protected Transaction Flow
+              <p className="text-text-secondary mt-1 text-xs font-semibold">
+                Protected Capital Volume
               </p>
             </div>
           </div>
 
           <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
-            <div className="border-border bg-surface rounded-xl border p-6">
-              <h3 className="text-text-primary mb-2 text-sm font-bold">
-                Tier-1 Banks
+            <div className="border-border bg-surface rounded-xl border p-6 shadow-2xs">
+              <span className="text-brand-blue text-[10px] font-bold tracking-wider uppercase">
+                Enterprise Segment
+              </span>
+              <h3 className="text-text-primary mt-1 mb-2 text-sm font-bold">
+                Tier-1 Commercial Banks
               </h3>
-              <p className="text-text-secondary text-xs leading-relaxed">
-                Integrate directly into existing core banking rails without
-                disrupting ongoing FinCEN or FCA reporting workflows.
+              <p className="text-text-secondary text-xs leading-relaxed font-normal">
+                Direct integration into core banking engines and correspondent
+                gateways without disrupting existing FinCEN regulatory filing
+                queues.
               </p>
             </div>
-            <div className="border-border bg-surface rounded-xl border p-6">
-              <h3 className="text-text-primary mb-2 text-sm font-bold">
-                FinTech Unicorns
+            <div className="border-border bg-surface rounded-xl border p-6 shadow-2xs">
+              <span className="text-brand-blue text-[10px] font-bold tracking-wider uppercase">
+                Digital Rails
+              </span>
+              <h3 className="text-text-primary mt-1 mb-2 text-sm font-bold">
+                Regulated FinTechs &amp; Neobanks
               </h3>
-              <p className="text-text-secondary text-xs leading-relaxed">
-                Developer-first APIs, webhooks, and modern client SDKs to scale
-                compliance alongside rapid user growth.
+              <p className="text-text-secondary text-xs leading-relaxed font-normal">
+                Developer-first REST and webhook pipelines designed to scale
+                risk surveillance seamlessly as cardholder accounts multiply.
               </p>
             </div>
-            <div className="border-border bg-surface rounded-xl border p-6">
-              <h3 className="text-text-primary mb-2 text-sm font-bold">
+            <div className="border-border bg-surface rounded-xl border p-6 shadow-2xs">
+              <span className="text-brand-blue text-[10px] font-bold tracking-wider uppercase">
+                Global Clearing
+              </span>
+              <h3 className="text-text-primary mt-1 mb-2 text-sm font-bold">
                 Cross-Border Remittance
               </h3>
-              <p className="text-text-secondary text-xs leading-relaxed">
-                Multi-currency corridor scoring to flag sanctioned entities,
-                nested accounts, and high-velocity smurfing.
+              <p className="text-text-secondary text-xs leading-relaxed font-normal">
+                Multi-currency corridor scoring to instantly isolate sanctioned
+                entities, nested correspondent accounts, and high-velocity
+                smurfing.
               </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. MINIMALIST CTA SECTION */}
-      <section
-        className="border-border bg-surface relative scroll-mt-20 border-t py-20"
-        id="demo"
-      >
-        <div className="mx-auto max-w-4xl px-6 text-center">
-          <span className="text-brand-blue text-[11px] font-semibold tracking-wider uppercase">
-            Get Started
-          </span>
-          <h2 className="text-text-primary mt-2 mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-            Upgrade Your Financial Crime Defense
-          </h2>
-          <p className="text-text-secondary mx-auto mb-8 max-w-xl text-sm leading-relaxed">
-            Experience graph-enhanced AML surveillance configured directly
-            against your institutional transaction taxonomy.
-          </p>
+      {/* 6. INSTITUTIONAL BANKING CTA BANNER */}
+      <section className="relative scroll-mt-20 px-6 py-20" id="demo">
+        <div className="bg-brand-navy relative mx-auto max-w-5xl overflow-hidden rounded-2xl border border-slate-800 p-10 text-center text-white shadow-xl sm:p-14">
+          {/* Subtle Ambient Radial within Banking Banner */}
+          <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-blue-600/20 blur-3xl" />
+          <div className="pointer-events-none absolute -bottom-24 -left-24 h-64 w-64 rounded-full bg-emerald-600/20 blur-3xl" />
 
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            <Link
-              href={isAuthenticated ? "/dashboard" : "/signup"}
-              className="bg-text-primary text-surface hover:opacity-90 inline-flex items-center gap-2 rounded-lg px-6 py-3 text-xs font-semibold shadow-xs transition-all active:scale-[0.98]"
-            >
-              <span>{isAuthenticated ? "Go to Dashboard" : "Create Account"}</span>
-              <ArrowRightIcon className="h-4 w-4" />
-            </Link>
-            <a
-              href="#contact"
-              onClick={(e) => handleNavClick(e, "contact")}
-              className="border-border text-text-primary hover:bg-surface-hover inline-flex items-center gap-2 rounded-lg border px-6 py-3 text-xs font-medium transition-all active:scale-[0.98]"
-            >
-              <span>Contact Compliance Team</span>
-            </a>
+          <div className="relative z-10">
+            <span className="text-[11px] font-bold tracking-widest text-blue-400 uppercase">
+              INSTITUTIONAL ONBOARDING
+            </span>
+            <h2 className="mt-2 mb-4 text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+              Elevate Your Banking Surveillance Rails
+            </h2>
+            <p className="mx-auto mb-8 max-w-xl text-sm leading-relaxed font-normal text-slate-300">
+              Experience graph-enhanced anti-money laundering surveillance
+              configured directly against your institutional transaction
+              taxonomy.
+            </p>
+
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href={isAuthenticated ? "/dashboard" : "/signup"}
+                className="inline-flex items-center gap-2 rounded-md bg-white px-6 py-3 text-xs font-bold text-slate-950 shadow-xs transition-all hover:bg-slate-100 active:scale-[0.98]"
+              >
+                <span>
+                  {isAuthenticated
+                    ? "Enter Banking Portal"
+                    : "Provision Sandbox"}
+                </span>
+                <ArrowRightIcon className="h-4 w-4" />
+              </Link>
+              <a
+                href="#contact"
+                onClick={(e) => handleNavClick(e, "contact")}
+                className="inline-flex items-center gap-2 rounded-md border border-slate-700 bg-slate-800/80 px-6 py-3 text-xs font-semibold text-white transition-all hover:bg-slate-700 active:scale-[0.98]"
+              >
+                <span>Request Supervisory Briefing</span>
+              </a>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 7. FOOTER */}
+      {/* 7. CLEAN BANKING FOOTER */}
       <footer
-        className="border-border bg-bg relative scroll-mt-20 border-t py-12 text-xs"
+        className="border-border bg-surface relative scroll-mt-20 border-t py-12 text-xs"
         id="contact"
       >
         <div className="mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-4 pb-12 border-b border-border">
+          <div className="border-border grid grid-cols-1 gap-8 border-b pb-12 md:grid-cols-4">
             <div className="md:col-span-2">
-              <SentinelLogo size={22} subtitle="SURVEILLANCE" />
-              <p className="text-text-secondary mt-3 max-w-sm text-xs leading-relaxed">
+              <SentinelLogo size={22} subtitle="INSTITUTIONAL BANKING" />
+              <p className="text-text-secondary mt-3 max-w-sm text-xs leading-relaxed font-normal">
                 Institutional-grade financial crime intelligence platform
-                combining Graph Neural Networks and explainable transaction triage.
+                engineered for tier-1 commercial banking, regulatory triage, and
+                correspondent capital protection.
               </p>
-              <div className="mt-4 flex items-center gap-2 font-mono text-[11px] text-emerald-500">
+              <div className="mt-4 flex items-center gap-2 font-mono text-[11px] font-semibold text-emerald-600 dark:text-emerald-400">
                 <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                <span>All Surveillance Systems Operational</span>
+                <span>
+                  All Banking Surveillance Nodes Active • 18ms Latency
+                </span>
               </div>
             </div>
 
             <div>
               <h4 className="text-text-primary mb-3 text-xs font-bold tracking-wider uppercase">
-                Platform
+                Banking Portal
               </h4>
-              <ul className="space-y-2 text-text-secondary">
+              <ul className="text-text-secondary space-y-2 font-medium">
                 <li>
-                  <Link href="/dashboard" className="hover:text-text-primary transition-colors">
-                    Dashboard
+                  <Link
+                    href="/dashboard"
+                    className="hover:text-text-primary transition-colors"
+                  >
+                    Dashboard Overview
                   </Link>
                 </li>
                 <li>
-                  <Link href="/alerts" className="hover:text-text-primary transition-colors">
-                    Alert Triage
+                  <Link
+                    href="/alerts"
+                    className="hover:text-text-primary transition-colors"
+                  >
+                    Correspondent Triage
                   </Link>
                 </li>
                 <li>
-                  <Link href="/network" className="hover:text-text-primary transition-colors">
-                    Network Explorer
+                  <Link
+                    href="/network"
+                    className="hover:text-text-primary transition-colors"
+                  >
+                    Graph Topology Explorer
                   </Link>
                 </li>
                 <li>
-                  <Link href="/reports" className="hover:text-text-primary transition-colors">
-                    SAR Dossiers
+                  <Link
+                    href="/reports"
+                    className="hover:text-text-primary transition-colors"
+                  >
+                    FinCEN SAR Dossiers
                   </Link>
                 </li>
               </ul>
@@ -823,37 +849,40 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
             <div>
               <h4 className="text-text-primary mb-3 text-xs font-bold tracking-wider uppercase">
-                Compliance &amp; Security
+                Regulatory Standards
               </h4>
-              <ul className="space-y-2 text-text-secondary">
+              <ul className="text-text-secondary space-y-2 font-medium">
                 <li>
                   <span className="flex items-center gap-1.5">
-                    <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
-                    SOC2 Type II
+                    <CheckIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                    SOC2 Type II Certified
                   </span>
                 </li>
                 <li>
                   <span className="flex items-center gap-1.5">
-                    <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
-                    FinCEN Auditable
+                    <CheckIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                    FinCEN Form 111 Auditable
                   </span>
                 </li>
                 <li>
                   <span className="flex items-center gap-1.5">
-                    <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
-                    FATF Recommendation 16
+                    <CheckIcon className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" />
+                    FATF Recommendation 16 (Travel Rule)
                   </span>
                 </li>
               </ul>
             </div>
           </div>
 
-          <div className="mt-8 flex flex-col items-center justify-between gap-4 text-[11px] text-text-muted sm:flex-row">
-            <p>© {new Date().getFullYear()} AML Sentinel, Inc. All rights reserved.</p>
+          <div className="text-text-muted mt-8 flex flex-col items-center justify-between gap-4 font-mono text-[11px] sm:flex-row">
+            <p>
+              © {new Date().getFullYear()} AML Sentinel Banking Systems, Inc.
+              All rights reserved.
+            </p>
             <div className="flex items-center gap-4">
-              <span className="font-mono">BUILD: v2.4.0-PROD</span>
+              <span>FEDWIRE / ACH CORRESPONDENT READY</span>
               <span>•</span>
-              <span className="font-mono">ENCRYPTION: AES-256</span>
+              <span>AES-256 ENCRYPTION</span>
             </div>
           </div>
         </div>

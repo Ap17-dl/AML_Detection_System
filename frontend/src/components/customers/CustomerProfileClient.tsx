@@ -168,7 +168,7 @@ export default function CustomerProfileClient({
         <button
           onClick={handleRecalculate}
           disabled={recalculating}
-          className="bg-brand-navy hover:bg-brand-blue inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 disabled:opacity-50"
+          className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 disabled:opacity-50"
         >
           <span className="material-symbols-outlined text-[16px]">
             autorenew

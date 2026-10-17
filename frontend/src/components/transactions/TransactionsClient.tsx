@@ -177,7 +177,7 @@ export default function TransactionsClient({
         {canImport && (
           <Link
             href="/transactions/import"
-            className="bg-brand-navy hover:bg-brand-blue inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150"
+            className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all active:scale-[0.98]"
           >
             <span className="material-symbols-outlined text-[16px]">
               upload_file

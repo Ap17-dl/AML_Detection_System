@@ -43,6 +43,8 @@ export function DistributionChart({
             outerRadius={80}
             paddingAngle={3}
             dataKey="value"
+            stroke="var(--color-surface)"
+            strokeWidth={2}
           >
             {data.map((entry, index) => (
               <Cell key={`cell-${index}`} fill={entry.color} />
@@ -76,7 +78,7 @@ export function DistributionChart({
             verticalAlign="bottom"
             height={36}
             formatter={(value) => (
-              <span className="text-text-secondary text-xs capitalize">
+              <span className="text-text-secondary text-xs font-medium capitalize">
                 {value}
               </span>
             )}

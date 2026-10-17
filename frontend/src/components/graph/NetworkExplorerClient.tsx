@@ -142,7 +142,7 @@ export default function NetworkExplorerClient({
         </div>
         <button
           type="submit"
-          className="bg-brand-navy hover:bg-brand-blue inline-flex items-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150 active:scale-95"
+          className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-1.5 rounded-lg px-5 py-2 text-xs font-semibold text-white shadow-xs transition-all active:scale-[0.98]"
         >
           <span className="material-symbols-outlined text-[16px]">
             travel_explore

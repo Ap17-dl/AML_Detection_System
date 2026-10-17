@@ -28,6 +28,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     >
       <head>
         <Script
+          id="theme-initializer"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var stored = localStorage.getItem('aml-theme-preference');
+                  var theme = stored || (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+                  document.documentElement.setAttribute('data-theme', theme);
+                } catch (e) {}
+              })();
+            `,
+          }}
+        />
+        <Script
           id="firefox-perf-fix"
           strategy="beforeInteractive"
           dangerouslySetInnerHTML={{

@@ -10,19 +10,19 @@ import type { CurrentUser, Role } from "@/types/auth";
 
 const ROLE_BADGES: Record<Role, { label: string; badgeClass: string }> = {
   administrator: {
-    label: "Administrator",
+    label: "Chief Compliance Officer",
     badgeClass:
-      "bg-text-primary text-surface dark:bg-surface-hover dark:text-text-primary border-border",
+      "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-200 border-border font-bold",
   },
   aml_analyst: {
     label: "AML Analyst",
     badgeClass:
-      "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
+      "bg-blue-500/10 text-blue-700 dark:text-blue-300 border-blue-500/20 font-bold",
   },
   data_operator: {
-    label: "Data Operator",
+    label: "Settlement Operator",
     badgeClass:
-      "bg-surface-hover text-text-secondary border-border",
+      "bg-surface-hover text-text-secondary border-border font-medium",
   },
 };
 
@@ -55,18 +55,18 @@ export function Topbar({ user }: { user: CurrentUser }) {
   };
 
   return (
-    <header className="border-border bg-surface/90 sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b px-6 backdrop-blur-md transition-colors">
+    <header className="border-border bg-surface/95 sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b px-6 backdrop-blur-md transition-colors">
       {/* Left: Environment Node Indicator */}
       <div className="flex items-center gap-3">
-        <div className="border-border inline-flex items-center gap-2 rounded-full border bg-surface px-3 py-1 text-xs shadow-2xs">
+        <div className="border-border bg-surface inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs shadow-2xs">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-text-secondary font-mono text-[11px]">
+          <span className="text-text-secondary font-mono text-[11px] font-semibold">
             {process.env.NODE_ENV === "production"
-              ? "Cluster: Live US-East"
-              : "Cluster: Sandboxed Node"}
+              ? "Institutional Clearance: US-East Production"
+              : "Institutional Sandbox: ISO 20022 Testnet"}
           </span>
         </div>
       </div>
@@ -77,9 +77,9 @@ export function Topbar({ user }: { user: CurrentUser }) {
           <button
             type="button"
             onClick={() => setShowAdminModal(true)}
-            className="border-border text-text-primary hover:bg-surface-hover rounded-lg border bg-surface px-3 py-1.5 text-xs font-medium shadow-xs transition-colors active:scale-[0.98]"
+            className="border-border text-text-primary hover:bg-surface-hover bg-surface rounded-md border px-3 py-1.5 text-xs font-semibold shadow-xs transition-colors active:scale-[0.98]"
           >
-            Request Admin Access
+            Request Elevated Clearance
           </button>
         )}
 
@@ -88,7 +88,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
         {/* User Card */}
         <div className="border-border flex items-center gap-3 border-l pl-3 sm:pl-4">
           <div className="hidden flex-col items-end text-right sm:flex">
-            <p className="text-text-primary text-xs font-semibold leading-tight">
+            <p className="text-text-primary text-xs leading-tight font-bold">
               {user.full_name ?? user.email}
             </p>
             <span
@@ -108,7 +108,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
           <button
             type="button"
             onClick={handleSignOut}
-            className="border-border text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors active:scale-[0.98]"
+            className="border-border text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-colors active:scale-[0.98]"
           >
             Sign out
           </button>

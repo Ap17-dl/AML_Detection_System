@@ -73,17 +73,17 @@ export default function DashboardClient({
     {
       name: "High Risk",
       value: summary?.alerts_by_risk.high || 0,
-      color: "#f43f5e",
+      color: "#dc2626",
     },
     {
       name: "Medium Risk",
       value: summary?.alerts_by_risk.medium || 0,
-      color: "#f59e0b",
+      color: "#d97706",
     },
     {
       name: "Low Risk",
       value: summary?.alerts_by_risk.low || 0,
-      color: "#10b981",
+      color: "#059669",
     },
   ];
 
@@ -91,17 +91,17 @@ export default function DashboardClient({
     {
       name: "Open",
       value: summary?.alerts_by_status.open || 0,
-      color: "#3b82f6",
+      color: "#2563eb",
     },
     {
       name: "In Progress",
       value: summary?.alerts_by_status.in_progress || 0,
-      color: "#f59e0b",
+      color: "#d97706",
     },
     {
       name: "Closed",
       value: summary?.alerts_by_status.closed || 0,
-      color: "#10b981",
+      color: "#059669",
     },
   ];
 
@@ -114,7 +114,7 @@ export default function DashboardClient({
             <h1 className="text-text-primary text-2xl font-bold tracking-tight">
               Surveillance Operations
             </h1>
-            <span className="bg-brand-gold/15 border-brand-gold/30 rounded-full border px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-amber-800 uppercase dark:text-amber-300">
+            <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2.5 py-0.5 text-[11px] font-bold tracking-wider text-amber-700 uppercase dark:text-amber-400">
               Live Monitor
             </span>
           </div>
@@ -128,7 +128,7 @@ export default function DashboardClient({
           {(role === "data_operator" || role === "administrator") && (
             <Link
               href="/transactions/import"
-              className="border-border bg-surface text-text-primary flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold shadow-xs transition-all hover:bg-slate-100 dark:hover:bg-slate-800"
+              className="border-border bg-surface text-text-primary hover:bg-surface-hover flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold shadow-xs transition-all"
             >
               <span className="material-symbols-outlined text-[16px]">
                 upload_file
@@ -139,7 +139,7 @@ export default function DashboardClient({
           {role !== "data_operator" && (
             <Link
               href="/alerts"
-              className="bg-brand-navy hover:bg-brand-blue flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all duration-150"
+              className="bg-brand-blue hover:bg-brand-blueLight flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-xs transition-all active:scale-[0.98]"
             >
               <span>Alerts Queue</span>
               <span className="material-symbols-outlined text-[16px]">
@@ -150,16 +150,16 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* KPI Cards with Colored Top Accent Lines */}
+      {/* KPI Cards with Subtle Top Accent Lines */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Card 1: Open Alerts */}
         <div className="border-border bg-surface relative overflow-hidden rounded-xl border p-5 shadow-xs transition-all hover:shadow-md">
-          <div className="absolute inset-x-0 top-0 h-1 bg-amber-500" />
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-amber-500/80" />
           <div className="flex items-center justify-between">
             <span className="text-text-secondary text-xs font-semibold tracking-wider uppercase">
               Active Alerts
             </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-50 text-amber-600 dark:bg-amber-950/40 dark:text-amber-400">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-400">
               <span className="material-symbols-outlined text-[18px]">
                 notifications_active
               </span>
@@ -180,19 +180,19 @@ export default function DashboardClient({
 
         {/* Card 2: High-Risk Transactions */}
         <div className="border-border bg-surface relative overflow-hidden rounded-xl border p-5 shadow-xs transition-all hover:shadow-md">
-          <div className="absolute inset-x-0 top-0 h-1 bg-rose-500" />
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-rose-500/80" />
           <div className="flex items-center justify-between">
             <span className="text-text-secondary text-xs font-semibold tracking-wider uppercase">
               High-Risk Txns
             </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-50 text-rose-600 dark:bg-rose-950/40 dark:text-rose-400">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-400">
               <span className="material-symbols-outlined text-[18px]">
                 warning
               </span>
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="font-mono text-3xl font-extrabold tracking-tight text-rose-600 dark:text-rose-400">
+            <span className="text-text-primary font-mono text-3xl font-extrabold tracking-tight">
               {summary?.high_risk_txns_count ?? 0}
             </span>
             <span className="rounded-full border border-rose-500/20 bg-rose-500/10 px-2 py-0.5 text-[11px] font-semibold text-rose-700 dark:text-rose-300">
@@ -206,12 +206,12 @@ export default function DashboardClient({
 
         {/* Card 3: Total Ingested Volume */}
         <div className="border-border bg-surface relative overflow-hidden rounded-xl border p-5 shadow-xs transition-all hover:shadow-md">
-          <div className="bg-brand-blue absolute inset-x-0 top-0 h-1" />
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-blue-500/80" />
           <div className="flex items-center justify-between">
             <span className="text-text-secondary text-xs font-semibold tracking-wider uppercase">
               Ingested Volume
             </span>
-            <div className="text-brand-blue flex h-8 w-8 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-950/40 dark:text-blue-400">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-blue-500/20 bg-blue-500/10 text-blue-700 dark:text-blue-400">
               <span className="material-symbols-outlined text-[18px]">
                 swap_horiz
               </span>
@@ -232,12 +232,12 @@ export default function DashboardClient({
 
         {/* Card 4: Model Precision / FPR */}
         <div className="border-border bg-surface relative overflow-hidden rounded-xl border p-5 shadow-xs transition-all hover:shadow-md">
-          <div className="absolute inset-x-0 top-0 h-1 bg-emerald-500" />
+          <div className="absolute inset-x-0 top-0 h-0.5 bg-emerald-500/80" />
           <div className="flex items-center justify-between">
             <span className="text-text-secondary text-xs font-semibold tracking-wider uppercase">
               False Positive Rate
             </span>
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 dark:bg-emerald-950/40 dark:text-emerald-400">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400">
               <span className="material-symbols-outlined text-[18px]">
                 verified
               </span>
@@ -328,7 +328,7 @@ export default function DashboardClient({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
               <thead>
-                <tr className="border-border text-text-secondary border-b bg-slate-50/80 text-xs font-semibold tracking-wider uppercase dark:bg-slate-900/60">
+                <tr className="border-border text-text-secondary border-b bg-slate-100/70 text-xs font-semibold tracking-wider uppercase dark:bg-slate-800/40">
                   <th className="px-4 py-3">Alert ID</th>
                   <th className="px-4 py-3">Customer Entity</th>
                   <th className="px-4 py-3">Risk Tier</th>
@@ -359,10 +359,10 @@ export default function DashboardClient({
                   summary.recent_alerts.map((a) => (
                     <tr
                       key={a.alert_id}
-                      className="transition-colors hover:bg-slate-50/70 dark:hover:bg-slate-800/30"
+                      className="transition-colors hover:bg-slate-50 dark:hover:bg-slate-800/40"
                     >
                       <td className="text-text-secondary px-4 py-3 font-mono text-xs">
-                        <span className="rounded border border-slate-200 bg-slate-100 px-2 py-0.5 dark:border-slate-700 dark:bg-slate-800">
+                        <span className="border-border bg-surface-hover text-text-primary rounded border px-2 py-0.5">
                           {a.alert_id.slice(0, 8)}…
                         </span>
                       </td>

@@ -1,50 +1,52 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /*
- * Minimalist Design System & Theme Tokens
- * Inspired by Linear, Vercel, and Stripe's high-precision interfaces.
- * Monochromatic foundations with intentional semantic accents and hairline borders.
+ * Clean Banking Aesthetics Design System
+ * Tailored for Tier-1 Financial Institutions, Regulatory Surveillance & Modern FinTech Banking.
+ * Palette: Deep Institutional Navy, Crisp Porcelain White, Financial Sapphire & Bullion Gold.
  */
 :root {
-  --bg: #fafafa;
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --surface-hover: #f4f4f5;
-  --border: #e4e4e7;
-  --border-subtle: #f4f4f5;
-  --text-primary: #09090b;
-  --text-secondary: #71717a;
-  --text-muted: #a1a1aa;
-  --accent: #18181b;
+  --surface-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --text-primary: #0a1128;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --accent: #0b132b;
   --accent-foreground: #ffffff;
-  
-  --risk-low: #059669;
-  --risk-medium: #d97706;
-  --risk-high: #dc2626;
-  --status-open: #71717a;
-  --status-in-progress: #2563eb;
-  --status-closed: #059669;
 
-  /* Institutional brand colors refined for modern minimalism */
-  --brand-navy: #090a0f;
-  --brand-blue: #2563eb;
-  --brand-blue-light: #3b82f6;
-  --brand-gold: #f59e0b;
+  --risk-low: #047857;
+  --risk-medium: #b45309;
+  --risk-high: #b91c1c;
+  --status-open: #475569;
+  --status-in-progress: #1d4ed8;
+  --status-closed: #047857;
+
+  /* Institutional banking brand colors */
+  --brand-navy: #0b132b;
+  --brand-blue: #1d4ed8;
+  --brand-blue-light: #2563eb;
+  --brand-gold: #b45309;
   --brand-gold-light: #fef3c7;
-  --brand-gold-hover: #d97706;
+  --brand-gold-hover: #92400e;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #090a0f;
-    --surface: #11131a;
-    --surface-hover: #171a23;
-    --border: #1e232f;
-    --border-subtle: #151821;
+    --bg: #070c18;
+    --surface: #0e1626;
+    --surface-hover: #152238;
+    --border: #1e293b;
+    --border-subtle: #131c2d;
     --text-primary: #f8fafc;
     --text-secondary: #94a3b8;
     --text-muted: #64748b;
     --accent: #f8fafc;
-    --accent-foreground: #090a0f;
+    --accent-foreground: #070c18;
 
     --risk-low: #10b981;
     --risk-medium: #f59e0b;
@@ -53,7 +55,7 @@
     --status-in-progress: #3b82f6;
     --status-closed: #10b981;
 
-    --brand-navy: #11131a;
+    --brand-navy: #0e1626;
     --brand-blue: #3b82f6;
     --brand-blue-light: #60a5fa;
     --brand-gold: #fbbf24;
@@ -63,16 +65,16 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #090a0f;
-  --surface: #11131a;
-  --surface-hover: #171a23;
-  --border: #1e232f;
-  --border-subtle: #151821;
+  --bg: #070c18;
+  --surface: #0e1626;
+  --surface-hover: #152238;
+  --border: #1e293b;
+  --border-subtle: #131c2d;
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   --text-muted: #64748b;
   --accent: #f8fafc;
-  --accent-foreground: #090a0f;
+  --accent-foreground: #070c18;
 
   --risk-low: #10b981;
   --risk-medium: #f59e0b;
@@ -81,7 +83,7 @@
   --status-in-progress: #3b82f6;
   --status-closed: #10b981;
 
-  --brand-navy: #11131a;
+  --brand-navy: #0e1626;
   --brand-blue: #3b82f6;
   --brand-blue-light: #60a5fa;
   --brand-gold: #fbbf24;
@@ -90,30 +92,30 @@
 }
 
 :root[data-theme="light"] {
-  --bg: #fafafa;
+  --bg: #f8fafc;
   --surface: #ffffff;
-  --surface-hover: #f4f4f5;
-  --border: #e4e4e7;
-  --border-subtle: #f4f4f5;
-  --text-primary: #09090b;
-  --text-secondary: #71717a;
-  --text-muted: #a1a1aa;
-  --accent: #18181b;
+  --surface-hover: #f1f5f9;
+  --border: #e2e8f0;
+  --border-subtle: #f1f5f9;
+  --text-primary: #0a1128;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
+  --accent: #0b132b;
   --accent-foreground: #ffffff;
 
-  --risk-low: #059669;
-  --risk-medium: #d97706;
-  --risk-high: #dc2626;
-  --status-open: #71717a;
-  --status-in-progress: #2563eb;
-  --status-closed: #059669;
+  --risk-low: #047857;
+  --risk-medium: #b45309;
+  --risk-high: #b91c1c;
+  --status-open: #475569;
+  --status-in-progress: #1d4ed8;
+  --status-closed: #047857;
 
-  --brand-navy: #090a0f;
-  --brand-blue: #2563eb;
-  --brand-blue-light: #3b82f6;
-  --brand-gold: #f59e0b;
+  --brand-navy: #0b132b;
+  --brand-blue: #1d4ed8;
+  --brand-blue-light: #2563eb;
+  --brand-gold: #b45309;
   --brand-gold-light: #fef3c7;
-  --brand-gold-hover: #d97706;
+  --brand-gold-hover: #92400e;
 }
 
 @theme inline {
@@ -140,7 +142,7 @@
 
   --radius-card: 10px;
 
-  /* Backward compatible semantic aliases mapped to minimalist palette */
+  /* Backward compatible institutional aliases */
   --color-brand-gold: var(--brand-gold);
   --color-brand-goldLight: var(--brand-gold-light);
   --color-brand-goldHover: var(--brand-gold-hover);
@@ -189,24 +191,24 @@ body {
   background: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-sans), system-ui, sans-serif;
-  letter-spacing: -0.011em;
+  letter-spacing: -0.012em;
 }
 
-/* Minimalist technical grid background */
+/* Institutional banking technical grid background */
 .bg-grid-minimal {
-  background-size: 32px 32px;
-  background-image: 
-    linear-gradient(to right, rgba(120, 120, 140, 0.05) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(120, 120, 140, 0.05) 1px, transparent 1px);
+  background-size: 36px 36px;
+  background-image:
+    linear-gradient(to right, rgba(51, 65, 85, 0.07) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(51, 65, 85, 0.07) 1px, transparent 1px);
 }
 
-/* Minimalist ambient lighting */
+/* Institutional lighting */
 .ambient-glow-blue {
-  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
-}
-
-.ambient-glow-subtle {
-  background: radial-gradient(circle at top right, rgba(120, 130, 160, 0.08) 0%, transparent 60%);
+  background: radial-gradient(
+    circle at center,
+    rgba(29, 78, 216, 0.09) 0%,
+    transparent 70%
+  );
 }
 
 @keyframes fade-slide-up {

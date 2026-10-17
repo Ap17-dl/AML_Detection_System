@@ -94,7 +94,7 @@ export function SignUpForm() {
         </p>
         <Link
           href="/login"
-          className="bg-brand-navy hover:bg-brand-blue mt-3 inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150"
+          className="bg-brand-blue hover:bg-brand-blueLight mt-3 inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150"
         >
           Return to sign in
         </Link>
@@ -251,7 +251,7 @@ export function SignUpForm() {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="bg-brand-navy hover:bg-brand-blue mt-2 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60"
+        className="bg-brand-blue hover:bg-brand-blueLight mt-2 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60"
       >
         {isSubmitting && <Spinner className="size-4" />}
         {isSubmitting ? "Creating account…" : "Create account"}

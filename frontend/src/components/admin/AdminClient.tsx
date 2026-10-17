@@ -182,7 +182,7 @@ export default function AdminClient({
             <h1 className="text-text-primary text-2xl font-bold tracking-tight">
               Platform Administration
             </h1>
-            <span className="bg-brand-navy text-brand-gold border-brand-gold/30 rounded-full border px-2.5 py-0.5 text-[11px] font-bold">
+            <span className="border-border rounded-full border bg-slate-100 px-2.5 py-0.5 text-[11px] font-bold text-slate-800 dark:bg-slate-800 dark:text-slate-200">
               Root Authority
             </span>
           </div>
@@ -199,8 +199,8 @@ export default function AdminClient({
           onClick={() => setActiveTab("users")}
           className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "users"
-              ? "bg-brand-navy dark:bg-brand-blue/30 dark:text-brand-blueLight text-white shadow-xs"
-              : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
+              ? "bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/20 border-brand-blue/20 border font-bold shadow-2xs dark:text-blue-300"
+              : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
           }`}
         >
           <span className="material-symbols-outlined text-[16px]">
@@ -212,8 +212,8 @@ export default function AdminClient({
           onClick={() => setActiveTab("models")}
           className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "models"
-              ? "bg-brand-navy dark:bg-brand-blue/30 dark:text-brand-blueLight text-white shadow-xs"
-              : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
+              ? "bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/20 border-brand-blue/20 border font-bold shadow-2xs dark:text-blue-300"
+              : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
           }`}
         >
           <span className="material-symbols-outlined text-[16px]">
@@ -225,8 +225,8 @@ export default function AdminClient({
           onClick={() => setActiveTab("audit")}
           className={`flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold transition-all ${
             activeTab === "audit"
-              ? "bg-brand-navy dark:bg-brand-blue/30 dark:text-brand-blueLight text-white shadow-xs"
-              : "text-text-secondary hover:text-text-primary hover:bg-slate-100 dark:hover:bg-slate-800"
+              ? "bg-brand-blue/10 text-brand-blue dark:bg-brand-blue/20 border-brand-blue/20 border font-bold shadow-2xs dark:text-blue-300"
+              : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
           }`}
         >
           <span className="material-symbols-outlined text-[16px]">
@@ -430,7 +430,7 @@ export default function AdminClient({
               </button>
               <button
                 onClick={handleRoleChange}
-                className="bg-brand-navy hover:bg-brand-blue rounded-lg px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all active:scale-95"
+                className="bg-brand-blue hover:bg-brand-blueLight rounded-lg px-4 py-1.5 text-xs font-semibold text-white shadow-sm transition-all active:scale-95"
               >
                 Apply Change
               </button>
