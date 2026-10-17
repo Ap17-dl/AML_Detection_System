@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 
 import { SignUpForm } from "@/app/signup/SignUpForm";
+import { ArrowBackIcon, LockIcon, NetworkIcon, ShieldCheckIcon, UsersIcon } from "@/components/ui/icons";
+import { SentinelLogo } from "@/components/ui/SentinelLogo";
 
 export const metadata: Metadata = {
   title: "Create Account — AML Sentinel Surveillance Platform",
@@ -12,123 +13,105 @@ export const metadata: Metadata = {
 
 export default function SignUpPage() {
   return (
-    <div className="bg-brand-bgLight dark:bg-bg selection:bg-brand-gold selection:text-brand-navy flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="bg-bg text-text-primary flex min-h-screen flex-col justify-center py-12 sm:px-6 lg:px-8 transition-colors">
       {/* Top Header link */}
-      <div className="mx-auto mb-6 flex w-full max-w-5xl items-center justify-between px-4">
+      <div className="mx-auto mb-6 flex w-full max-w-4xl items-center justify-between px-4">
         <Link
           href="/"
-          className="text-text-secondary hover:text-brand-navy inline-flex items-center gap-2 text-xs font-semibold transition-colors dark:hover:text-white"
+          className="text-text-secondary hover:text-text-primary inline-flex items-center gap-2 text-xs font-medium transition-colors"
         >
-          <span className="material-symbols-outlined text-[16px]">
-            arrow_back
-          </span>
-          <span>Return to AML Sentinel Home</span>
+          <ArrowBackIcon className="h-4 w-4" />
+          <span>Back to Home</span>
         </Link>
-        <span className="font-mono text-[11px] text-slate-400">
-          NODE: SURVEILLANCE-REGISTRATION
+        <span className="font-mono text-[11px] text-text-muted">
+          NODE: REGISTRATION-CLUSTER
         </span>
       </div>
 
-      <div className="mx-auto w-full max-w-5xl px-4">
-        <div className="border-border bg-surface grid grid-cols-1 overflow-hidden rounded-2xl border shadow-xl lg:grid-cols-12">
+      <div className="mx-auto w-full max-w-4xl px-4">
+        <div className="border-border bg-surface grid grid-cols-1 overflow-hidden rounded-2xl border shadow-sm lg:grid-cols-12">
           {/* Left: Security Accreditation Column */}
-          <div className="bg-brand-navy relative flex flex-col justify-between overflow-hidden p-8 text-white lg:col-span-5 lg:p-10">
-            <div className="bg-brand-blue/20 pointer-events-none absolute -top-20 -right-20 h-64 w-64 rounded-full blur-3xl" />
-            <div className="bg-brand-gold/10 pointer-events-none absolute -bottom-20 -left-20 h-64 w-64 rounded-full blur-3xl" />
-
-            <div className="relative z-10">
-              <div className="mb-6 flex items-center gap-3">
-                <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-xl bg-white/10 p-1.5 ring-1 ring-white/20 backdrop-blur-sm">
-                  <Image
-                    src="/landing/logo.jpg"
-                    alt="AML Sentinel"
-                    width={48}
-                    height={48}
-                    className="h-full w-full object-contain"
-                    priority
-                  />
-                </div>
-                <div>
-                  <h1 className="text-xl font-extrabold tracking-tight text-white">
-                    AML Sentinel
-                  </h1>
-                  <span className="text-brand-gold text-[11px] font-medium tracking-wide">
-                    Staff Onboarding
-                  </span>
-                </div>
+          <div className="border-border relative flex flex-col justify-between border-b p-8 lg:col-span-5 lg:border-r lg:border-b-0 lg:p-10">
+            <div>
+              <div className="mb-8">
+                <SentinelLogo size={24} subtitle="STAFF ONBOARDING" />
               </div>
 
-              <h2 className="mb-3 text-2xl font-bold tracking-tight text-white">
-                Join the Compliance Operations Team
+              <h2 className="text-text-primary mb-3 text-xl font-bold tracking-tight">
+                Authorized Personnel Access
               </h2>
-              <p className="mb-8 text-xs leading-relaxed text-slate-300">
-                Request an authorized seat in the surveillance operations
-                center. Select your role to gain immediate sandbox access or
-                link to your organization&apos;s workspace.
+              <p className="text-text-secondary mb-8 text-xs leading-relaxed">
+                Configure your surveillance credentials to access the active
+                queue or link into your institution&apos;s workspace.
               </p>
 
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
-                  <div className="text-brand-gold flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/10">
-                    <span className="material-symbols-outlined text-[18px]">
-                      verified
-                    </span>
+                  <div className="border-border bg-surface-hover text-text-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border">
+                    <UsersIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="text-xs font-semibold text-white">
-                      Role-Based Access Control
+                    <h3 className="text-text-primary text-xs font-semibold">
+                      Role-Scoped Authorization
                     </h3>
-                    <p className="text-[11px] text-slate-300">
-                      Strict least-privilege scoping across alerts, SARs, and
-                      batch ingest.
+                    <p className="text-text-secondary text-[11px]">
+                      Strict least-privilege scoping across alerts, SARs, and batch ingestion.
                     </p>
                   </div>
                 </div>
 
                 <div className="flex items-start gap-3">
-                  <div className="text-brand-gold flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-white/10 ring-1 ring-white/10">
-                    <span className="material-symbols-outlined text-[18px]">
-                      history_edu
-                    </span>
+                  <div className="border-border bg-surface-hover text-text-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border">
+                    <NetworkIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <h3 className="text-xs font-semibold text-white">
-                      Immutable Audit Logging
+                    <h3 className="text-text-primary text-xs font-semibold">
+                      Immutable Audit Trail
                     </h3>
-                    <p className="text-[11px] text-slate-300">
-                      Every case note, triage action, and SAR export is
-                      cryptographically logged.
+                    <p className="text-text-secondary text-[11px]">
+                      Every triage decision, note, and SAR export is cryptographically logged.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex items-start gap-3">
+                  <div className="border-border bg-surface-hover text-text-primary flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border">
+                    <ShieldCheckIcon className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <h3 className="text-text-primary text-xs font-semibold">
+                      Regulatory Compliance
+                    </h3>
+                    <p className="text-text-secondary text-[11px]">
+                      Direct alignment with FinCEN, FATF, and EU 6AMLD standards.
                     </p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="relative z-10 mt-8 flex items-center justify-between border-t border-white/10 pt-6 text-[11px] text-slate-300">
+            <div className="border-border mt-8 flex items-center justify-between border-t pt-6 text-[11px] text-text-secondary">
               <span className="inline-flex items-center gap-1.5 font-medium">
-                <span className="material-symbols-outlined text-brand-gold text-[16px]">
-                  security
-                </span>
-                FinCEN & FATF Compliant
+                <LockIcon className="h-3.5 w-3.5" />
+                SOC2 Type II Certified
               </span>
-              <span className="font-mono text-[10px] text-slate-400">
-                Enterprise
+              <span className="font-mono text-[10px] text-text-muted">
+                v2.4.0
               </span>
             </div>
           </div>
 
           {/* Right: Registration Form */}
-          <div className="flex flex-col justify-center p-8 lg:col-span-7 lg:p-12">
+          <div className="flex flex-col justify-center p-8 lg:col-span-7 lg:p-10">
             <div className="mb-6">
-              <span className="text-brand-blue text-[11px] font-bold tracking-wider uppercase dark:text-blue-400">
-                Authorized Personnel
+              <span className="text-brand-blue text-[11px] font-semibold tracking-wider uppercase">
+                Account Provisioning
               </span>
-              <h2 className="text-text-primary mt-1 text-2xl font-bold tracking-tight">
+              <h1 className="text-text-primary mt-1 text-2xl font-bold tracking-tight">
                 Create Account
-              </h2>
+              </h1>
               <p className="text-text-secondary mt-1 text-xs">
-                Configure your surveillance credentials and select your
-                operational role.
+                Configure your surveillance credentials and select your operational role.
               </p>
             </div>
 

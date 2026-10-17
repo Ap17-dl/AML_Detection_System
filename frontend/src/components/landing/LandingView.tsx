@@ -1,8 +1,21 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+
+import { ThemeToggle } from "@/components/layout/ThemeToggle";
+import {
+  ActivityIcon,
+  ArrowRightIcon,
+  CheckIcon,
+  LockIcon,
+  NetworkIcon,
+  ReportsIcon,
+  ShieldCheckIcon,
+  ZapIcon,
+} from "@/components/ui/icons";
+import { RiskBadge } from "@/components/ui/RiskBadge";
+import { SentinelLogo } from "@/components/ui/SentinelLogo";
 
 interface LandingViewProps {
   isAuthenticated: boolean;
@@ -10,19 +23,53 @@ interface LandingViewProps {
 }
 
 const NAV_ITEMS = [
-  { label: "Home", href: "#home", id: "home" },
-  { label: "Features", href: "#features", id: "features" },
-  { label: "About", href: "#about", id: "about" },
-  { label: "Solutions", href: "#solutions", id: "solutions" },
+  { label: "Overview", href: "#home", id: "home" },
+  { label: "Capabilities", href: "#features", id: "features" },
+  { label: "Architecture", href: "#about", id: "about" },
+  { label: "Metrics", href: "#solutions", id: "solutions" },
   { label: "Contact", href: "#contact", id: "contact" },
+];
+
+const SIMULATED_ALERTS = [
+  {
+    id: "ALT-9204",
+    type: "Multi-Hop Layering",
+    amount: "$184,200",
+    risk: "high" as const,
+    time: "Just now",
+    entity: "Syndicate 0x8F..2A",
+  },
+  {
+    id: "ALT-9203",
+    type: "Structuring Rapid Velocity",
+    amount: "$9,850 x 8",
+    risk: "medium" as const,
+    time: "2m ago",
+    entity: "Apex Holdings LLC",
+  },
+  {
+    id: "ALT-9202",
+    type: "High-Risk Remittance Corridor",
+    amount: "$420,000",
+    risk: "critical" as const,
+    time: "5m ago",
+    entity: "Vanguard Transit Co",
+  },
+  {
+    id: "ALT-9201",
+    type: "Dormant Account Re-activation",
+    amount: "$54,100",
+    risk: "low" as const,
+    time: "12m ago",
+    entity: "Private Node #4910",
+  },
 ];
 
 export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [newsletterEmail, setNewsletterEmail] = useState("");
-  const [subscribed, setSubscribed] = useState(false);
   const [activeSection, setActiveSection] = useState("home");
   const [scrolled, setScrolled] = useState(false);
+  const [activeTab, setActiveTab] = useState<"stream" | "topology">("stream");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -70,48 +117,28 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
     }
   };
 
-  const handleNewsletterSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newsletterEmail.trim()) {
-      setSubscribed(true);
-      setNewsletterEmail("");
-    }
-  };
-
   return (
-    <div className="bg-brand-bgLight text-brand-dark selection:bg-brand-gold selection:text-brand-navy min-h-screen antialiased">
-      {/* 1. TOP NAVIGATION BAR */}
+    <div className="bg-bg text-text-primary min-h-screen selection:bg-brand-blue/20 selection:text-text-primary transition-colors">
+      {/* 1. MINIMALIST TOP NAVIGATION BAR */}
       <header
         className={`sticky top-0 z-50 transition-all duration-200 ${
           scrolled
-            ? "border-b border-slate-200/90 bg-white/95 py-3 shadow-md backdrop-blur-md"
-            : "border-b border-slate-200/60 bg-white/90 py-4 shadow-sm backdrop-blur-sm"
+            ? "border-b border-border/80 bg-surface/85 backdrop-blur-md shadow-2xs"
+            : "border-b border-transparent bg-bg/70 backdrop-blur-sm"
         }`}
       >
-        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6">
-          {/* Left: Logo & Brand Name */}
+        <div className="mx-auto flex w-full max-w-7xl items-center justify-between px-6 py-3.5">
+          {/* Brand Logo */}
           <Link
             href="#home"
             onClick={(e) => handleNavClick(e, "home")}
             className="group flex items-center gap-3 focus:outline-none"
           >
-            <div className="bg-brand-navy relative flex h-10 w-10 items-center justify-center overflow-hidden rounded-lg p-1 shadow-sm">
-              <Image
-                src="/landing/logo.jpg"
-                alt="AML Sentinel Brand Logo"
-                width={40}
-                height={40}
-                className="h-full w-full object-contain"
-                priority
-              />
-            </div>
-            <span className="text-brand-navy group-hover:text-brand-blueLight text-xl font-extrabold tracking-tight transition-colors">
-              AML Sentinel
-            </span>
+            <SentinelLogo size={22} subtitle="SURVEILLANCE" />
           </Link>
 
-          {/* Center: Navigation links sorted by scroll order with active indicator */}
-          <nav className="hidden items-center gap-8 text-sm font-medium md:flex">
+          {/* Navigation Links */}
+          <nav className="hidden items-center gap-7 text-xs font-medium md:flex">
             {NAV_ITEMS.map((item) => {
               const isActive = activeSection === item.id;
               return (
@@ -119,56 +146,51 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                   key={item.id}
                   href={item.href}
                   onClick={(e) => handleNavClick(e, item.id)}
-                  className={`relative py-1 transition-colors duration-150 ${
+                  className={`transition-colors duration-150 ${
                     isActive
-                      ? "text-brand-blue font-bold"
-                      : "hover:text-brand-navy text-slate-600"
+                      ? "text-text-primary font-semibold"
+                      : "text-text-secondary hover:text-text-primary"
                   }`}
                 >
                   {item.label}
-                  {isActive && (
-                    <span className="bg-brand-blue absolute inset-x-0 -bottom-1.5 h-0.5 rounded-full" />
-                  )}
                 </a>
               );
             })}
           </nav>
 
-          {/* Right: Action CTAs (Phone removed) */}
-          <div className="flex items-center gap-3 sm:gap-4">
+          {/* Right Header Actions */}
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+
             {isAuthenticated ? (
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
                 {userEmail && (
-                  <span className="hidden font-mono text-xs text-slate-500 xl:inline-block">
+                  <span className="hidden font-mono text-[11px] text-text-muted xl:inline-block">
                     {userEmail}
                   </span>
                 )}
                 <Link
                   href="/dashboard"
-                  className="bg-brand-navy hover:bg-brand-blue flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm transition-all duration-150 active:scale-[0.98] sm:text-sm"
+                  className="bg-text-primary text-surface hover:opacity-90 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold shadow-xs transition-all active:scale-[0.98]"
                 >
                   <span>Dashboard</span>
-                  <span className="material-symbols-outlined text-base leading-none">
-                    arrow_forward
-                  </span>
+                  <ArrowRightIcon className="h-3.5 w-3.5" />
                 </Link>
               </div>
             ) : (
-              <div className="flex items-center gap-2.5">
+              <div className="flex items-center gap-2">
                 <Link
                   href="/login"
-                  className="hover:text-brand-navy px-3 py-2 text-xs font-semibold text-slate-700 transition-colors sm:text-sm"
+                  className="text-text-secondary hover:text-text-primary px-3 py-1.5 text-xs font-medium transition-colors"
                 >
                   Sign In
                 </Link>
                 <Link
                   href="/signup"
-                  className="bg-brand-blue hover:bg-brand-blueLight flex items-center gap-2 rounded-full px-5 py-2.5 text-xs font-semibold tracking-wide text-white shadow-sm transition-all duration-150 active:scale-[0.98] sm:text-sm"
+                  className="bg-text-primary text-surface hover:opacity-90 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold shadow-xs transition-all active:scale-[0.98]"
                 >
                   <span>Get Started</span>
-                  <span className="material-symbols-outlined text-base leading-none">
-                    arrow_forward
-                  </span>
+                  <ArrowRightIcon className="h-3.5 w-3.5" />
                 </Link>
               </div>
             )}
@@ -177,42 +199,35 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
             <button
               type="button"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="flex h-9 w-9 items-center justify-center rounded-md border border-slate-200 text-slate-700 md:hidden"
+              className="border-border text-text-secondary hover:text-text-primary flex h-8 w-8 items-center justify-center rounded-lg border md:hidden"
               aria-label="Toggle navigation menu"
             >
-              <span className="material-symbols-outlined text-xl">
-                {mobileMenuOpen ? "close" : "menu"}
+              <span className="text-sm font-bold">
+                {mobileMenuOpen ? "✕" : "☰"}
               </span>
             </button>
           </div>
         </div>
 
-        {/* Mobile Dropdown Nav sorted by scroll order */}
+        {/* Mobile Dropdown Nav */}
         {mobileMenuOpen && (
-          <div className="border-t border-slate-200 bg-white px-6 py-4 md:hidden">
-            <div className="flex flex-col gap-3 font-medium text-slate-700">
-              {NAV_ITEMS.map((item) => {
-                const isActive = activeSection === item.id;
-                return (
-                  <a
-                    key={item.id}
-                    href={item.href}
-                    onClick={(e) => handleNavClick(e, item.id)}
-                    className={`py-1 transition-colors ${
-                      isActive
-                        ? "text-brand-blue font-bold"
-                        : "hover:text-brand-navy text-slate-600"
-                    }`}
-                  >
-                    {item.label}
-                  </a>
-                );
-              })}
-              <div className="mt-3 flex flex-col gap-2 border-t border-slate-100 pt-3">
+          <div className="border-border bg-surface border-b px-6 py-4 md:hidden">
+            <div className="flex flex-col gap-2.5 text-xs font-medium">
+              {NAV_ITEMS.map((item) => (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  onClick={(e) => handleNavClick(e, item.id)}
+                  className="text-text-secondary hover:text-text-primary py-1.5"
+                >
+                  {item.label}
+                </a>
+              ))}
+              <div className="border-border mt-2 flex flex-col gap-2 border-t pt-3">
                 {isAuthenticated ? (
                   <Link
                     href="/dashboard"
-                    className="bg-brand-navy flex justify-center rounded-full py-2.5 text-sm font-semibold text-white"
+                    className="bg-text-primary text-surface flex justify-center rounded-lg py-2 text-xs font-semibold"
                   >
                     Go to Dashboard
                   </Link>
@@ -220,13 +235,13 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
                   <>
                     <Link
                       href="/login"
-                      className="text-brand-navy flex justify-center rounded-full border border-slate-300 py-2 text-sm font-semibold"
+                      className="border-border text-text-primary flex justify-center rounded-lg border py-2 text-xs font-medium"
                     >
                       Sign In
                     </Link>
                     <Link
                       href="/signup"
-                      className="bg-brand-blue flex justify-center rounded-full py-2 text-sm font-semibold text-white"
+                      className="bg-text-primary text-surface flex justify-center rounded-lg py-2 text-xs font-semibold"
                     >
                       Sign Up
                     </Link>
@@ -240,464 +255,408 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
       {/* 2. HERO SECTION */}
       <section
-        className="bg-brand-bgLight relative scroll-mt-20 overflow-hidden pt-8 pb-16 lg:pt-14 lg:pb-24"
+        className="bg-grid-minimal relative scroll-mt-20 overflow-hidden pt-12 pb-20 lg:pt-20 lg:pb-32"
         id="home"
       >
-        {/* Golden Wave / Curved Organic Background Shape */}
-        <div className="pointer-events-none absolute top-0 bottom-0 left-0 z-0 w-full overflow-hidden lg:w-7/12">
-          <div className="hero-gold-blob -top-[10%] -left-[20%] h-[120%] w-[140%] -rotate-3 rounded-[38%_62%_63%_37%/41%_44%_56%_59%] opacity-95 transition-transform duration-1000" />
-        </div>
+        {/* Subtle Ambient Radial Lighting */}
+        <div className="ambient-glow-blue pointer-events-none absolute top-10 left-1/2 -translate-x-1/2 h-[450px] w-[700px] blur-3xl opacity-50" />
 
         <div className="relative z-10 mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-8">
-            {/* Left Side: Content Overlapping Golden Area */}
-            <div className="flex flex-col items-start pr-0 lg:col-span-6 lg:pr-4">
-              {/* Badge */}
-              <div className="bg-brand-navy/90 mb-6 inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 text-xs font-bold tracking-wider text-white uppercase shadow-sm">
-                <span className="material-symbols-outlined text-brand-gold text-sm">
-                  verified_user
+          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12 lg:gap-10">
+            {/* Left Side: Minimalist Value Proposition */}
+            <div className="flex flex-col items-start lg:col-span-6">
+              {/* Pill Status Badge */}
+              <div className="border-border bg-surface/90 text-text-primary mb-6 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold tracking-wide shadow-2xs backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
                 </span>
-                <span>NEXT-GEN FINANCIAL CRIME DETECTION</span>
+                <span>AML Sentinel 2.4</span>
+                <span className="text-text-muted">•</span>
+                <span className="text-text-secondary font-mono">Graph Intelligence</span>
               </div>
 
-              {/* Headline */}
-              <h1 className="text-brand-navy mb-6 text-4xl leading-[1.12] font-extrabold tracking-tight sm:text-5xl lg:text-[52px]">
-                Intelligent AML Detection at Your Fingertips
+              {/* Minimalist Display Headline */}
+              <h1 className="text-text-primary mb-5 text-4xl leading-[1.15] font-extrabold tracking-tight sm:text-5xl lg:text-[54px]">
+                Autonomous AML Detection Engineered for Precision.
               </h1>
 
               {/* Subtitle */}
-              <p className="mb-8 max-w-xl text-base leading-relaxed font-medium text-slate-800/90 sm:text-lg">
-                Harness explainable graph-enhanced machine learning to detect,
-                investigate, and resolve anti-money laundering alerts with
-                unprecedented accuracy.
+              <p className="text-text-secondary mb-8 max-w-xl text-base leading-relaxed sm:text-lg">
+                Harness explainable Graph Neural Networks and sub-second
+                transaction scoring to eliminate false positives and produce
+                audit-defensible SAR dossiers.
               </p>
 
-              {/* Dual CTA Buttons */}
-              <div className="mb-10 flex w-full flex-wrap items-center gap-4 sm:w-auto">
+              {/* CTAs */}
+              <div className="mb-10 flex w-full flex-wrap items-center gap-3 sm:w-auto">
                 <Link
                   href={isAuthenticated ? "/dashboard" : "/signup"}
-                  className="group bg-brand-navy hover:bg-brand-blue flex w-full items-center justify-center gap-2 rounded-full px-7 py-3.5 text-sm font-semibold tracking-wide text-white shadow-md transition-all duration-150 hover:shadow-lg active:scale-[0.98] sm:w-auto"
+                  className="bg-text-primary text-surface hover:opacity-90 inline-flex w-full items-center justify-center gap-2 rounded-lg px-6 py-3 text-xs font-semibold tracking-wide shadow-sm transition-all active:scale-[0.98] sm:w-auto"
                 >
                   <span>
-                    {isAuthenticated ? "Enter Dashboard" : "Request Demo"}
+                    {isAuthenticated ? "Launch Dashboard" : "Deploy Sandbox"}
                   </span>
-                  <span className="material-symbols-outlined text-base transition-transform group-hover:translate-x-0.5">
-                    arrow_forward
-                  </span>
+                  <ArrowRightIcon className="h-4 w-4" />
                 </Link>
 
                 <a
                   href="#features"
-                  className="text-brand-navy flex w-full items-center justify-center gap-2 rounded-full border border-slate-300 bg-white/90 px-7 py-3.5 text-sm font-semibold tracking-wide shadow-sm transition-all duration-150 hover:bg-white hover:shadow active:scale-[0.98] sm:w-auto"
+                  onClick={(e) => handleNavClick(e, "features")}
+                  className="border-border bg-surface text-text-primary hover:bg-surface-hover inline-flex w-full items-center justify-center gap-2 rounded-lg border px-6 py-3 text-xs font-semibold transition-all active:scale-[0.98] sm:w-auto"
                 >
-                  <span>Explore Platform</span>
-                  <span className="material-symbols-outlined text-base text-slate-500">
-                    open_in_new
-                  </span>
+                  <span>Explore Architecture</span>
                 </a>
               </div>
 
-              {/* Credibility Metric Badges */}
-              <div className="border-brand-navy/15 text-brand-navy flex w-full flex-wrap items-center gap-4 border-t pt-2 text-xs font-semibold sm:gap-6">
-                <div className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-brand-navy text-base">
-                    check_circle
-                  </span>
-                  <span className="font-bold tabular-nums">99.2% Accuracy</span>
+              {/* Metric Pillars */}
+              <div className="border-border flex w-full flex-wrap items-center gap-6 border-t pt-5 text-xs text-text-secondary">
+                <div className="flex items-center gap-1.5 font-medium">
+                  <CheckIcon className="h-4 w-4 text-emerald-500" />
+                  <span>99.2% Precision</span>
                 </div>
-                <span className="text-slate-400">•</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-brand-navy text-base">
-                    lock
-                  </span>
-                  <span>SOC2 Certified</span>
+                <div className="flex items-center gap-1.5 font-medium">
+                  <CheckIcon className="h-4 w-4 text-emerald-500" />
+                  <span>SOC2 Type II</span>
                 </div>
-                <span className="text-slate-400">•</span>
-                <div className="flex items-center gap-1.5">
-                  <span className="material-symbols-outlined text-brand-navy text-base">
-                    sync_saved_locally
-                  </span>
-                  <span>Zero Data Drift</span>
+                <div className="flex items-center gap-1.5 font-medium">
+                  <CheckIcon className="h-4 w-4 text-emerald-500" />
+                  <span>&lt;18ms Latency</span>
                 </div>
               </div>
             </div>
 
-            {/* Right Side: Framed Image with Live Floating Risk Badge */}
+            {/* Right Side: High-Precision Live Terminal / UI Mockup */}
             <div className="relative lg:col-span-6">
-              {/* Glassmorphism Outer Shell / Mockup Frame */}
-              <div className="relative rounded-2xl border border-slate-200 bg-white/80 p-3 shadow-2xl backdrop-blur-xl transition-all duration-300 sm:p-4">
-                {/* Browser / App Header bar */}
-                <div className="mb-2 flex items-center justify-between border-b border-slate-100 px-2 pb-3">
+              <div className="border-border bg-surface overflow-hidden rounded-xl border shadow-lg transition-all">
+                {/* Window Chrome Header */}
+                <div className="border-border bg-surface-hover/60 flex items-center justify-between border-b px-4 py-3">
                   <div className="flex items-center gap-2">
-                    <span className="inline-block h-3 w-3 rounded-full bg-red-400" />
-                    <span className="inline-block h-3 w-3 rounded-full bg-amber-400" />
-                    <span className="inline-block h-3 w-3 rounded-full bg-green-400" />
-                    <span className="ml-2 font-mono text-xs text-slate-400">
-                      aml-sentinel-v4.production.internal
+                    <span className="h-2.5 w-2.5 rounded-full bg-border" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-border" />
+                    <span className="h-2.5 w-2.5 rounded-full bg-border" />
+                    <span className="ml-2 font-mono text-[11px] text-text-muted">
+                      node://cluster-us-east/triage
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-[11px] font-semibold text-slate-500">
-                    <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-emerald-500" />
-                    Live Stream: Active
+                  <div className="flex items-center gap-2 font-mono text-[10px] text-emerald-500">
+                    <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-500" />
+                    INFERENCE LIVE
                   </div>
                 </div>
 
-                {/* Dashboard Visual Image */}
-                <div className="group relative overflow-hidden rounded-xl border border-slate-800 bg-slate-900">
-                  <div className="relative h-[320px] w-full sm:h-[400px]">
-                    <Image
-                      src="/landing/hero-dashboard.jpg"
-                      alt="AML Sentinel High-tech Financial Compliance Station"
-                      fill
-                      className="object-cover transition-transform duration-500 group-hover:scale-[1.01]"
-                    />
+                {/* Sub-header Tabs */}
+                <div className="border-border flex items-center justify-between border-b bg-surface px-4 py-2 text-xs">
+                  <div className="flex items-center gap-1">
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("stream")}
+                      className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                        activeTab === "stream"
+                          ? "bg-surface-hover text-text-primary"
+                          : "text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      Alert Stream
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setActiveTab("topology")}
+                      className={`rounded-md px-3 py-1 font-medium transition-colors ${
+                        activeTab === "topology"
+                          ? "bg-surface-hover text-text-primary"
+                          : "text-text-secondary hover:text-text-primary"
+                      }`}
+                    >
+                      Network Topology
+                    </button>
                   </div>
+                  <span className="font-mono text-[10px] text-text-muted">
+                    FPS: 60 • 4 Nodes
+                  </span>
+                </div>
 
-                  {/* Real-time Alert Notification floating over image */}
-                  <div className="border-risk-high bg-brand-navy/95 absolute top-4 right-4 max-w-xs rounded-lg border-l-4 p-3 text-white shadow-xl backdrop-blur-md">
-                    <div className="mb-1 flex items-center justify-between gap-3 text-[11px] font-bold tracking-wider text-slate-300 uppercase">
-                      <span className="text-risk-high flex items-center gap-1 font-bold">
-                        <span className="material-symbols-outlined text-sm">
-                          warning
-                        </span>
-                        CRITICAL RISK
-                      </span>
-                      <span className="font-mono text-slate-400">
-                        #ALT-20481
-                      </span>
-                    </div>
-                    <div className="mb-1 text-xs font-semibold text-white">
-                      Structuring Layer Identified
-                    </div>
-                    <div className="flex items-center justify-between text-[11px] text-slate-300">
-                      <span>Probability Score:</span>
-                      <span className="font-mono font-bold text-amber-400">
-                        94/100 (HIGH)
-                      </span>
-                    </div>
+                {/* Content Area */}
+                {activeTab === "stream" ? (
+                  <div className="divide-border divide-y p-1">
+                    {SIMULATED_ALERTS.map((alert) => (
+                      <div
+                        key={alert.id}
+                        className="hover:bg-surface-hover flex items-center justify-between p-3.5 transition-colors"
+                      >
+                        <div className="flex items-center gap-3">
+                          <RiskBadge category={alert.risk} />
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-text-primary text-xs font-semibold">
+                                {alert.type}
+                              </span>
+                              <span className="font-mono text-[10px] text-text-muted">
+                                {alert.id}
+                              </span>
+                            </div>
+                            <p className="text-text-secondary text-[11px]">
+                              {alert.entity}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <p className="text-text-primary font-mono text-xs font-bold">
+                            {alert.amount}
+                          </p>
+                          <span className="font-mono text-[10px] text-text-muted">
+                            {alert.time}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
                   </div>
+                ) : (
+                  <div className="flex h-72 flex-col items-center justify-center p-6 text-center">
+                    <div className="border-border bg-surface-hover relative mb-3 flex h-24 w-24 items-center justify-center rounded-2xl border">
+                      <NetworkIcon className="h-12 w-12 text-brand-blue" />
+                      <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-blue opacity-75" />
+                        <span className="relative inline-flex h-3 w-3 rounded-full bg-brand-blue" />
+                      </span>
+                    </div>
+                    <p className="text-text-primary text-xs font-semibold">
+                      Graph Neural Subgraph Visualizer
+                    </p>
+                    <p className="text-text-secondary mt-1 max-w-xs text-[11px]">
+                      Connected topology across 3 synthetic shell layers and 48
+                      remittance vertices detected.
+                    </p>
+                  </div>
+                )}
 
-                  {/* Bottom Data Ticker inside preview */}
-                  <div className="absolute inset-x-0 bottom-0 flex items-center justify-between border-t border-slate-800 bg-slate-950/90 px-4 py-2 font-mono text-[11px] text-slate-300 backdrop-blur-md">
-                    <div className="flex items-center gap-2">
-                      <span className="text-brand-gold">TXN_ID:</span>
-                      <span>0x981F...309E</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-slate-400">Entities:</span>
-                      <span className="font-bold text-emerald-400">
-                        14 Hops
-                      </span>
-                    </div>
-                    <div className="text-brand-gold flex items-center gap-1">
-                      <span className="material-symbols-outlined text-xs">
-                        analytics
-                      </span>
-                      <span>Graph Neural Engine</span>
-                    </div>
-                  </div>
+                {/* Footer status bar */}
+                <div className="border-border bg-surface-hover/30 flex items-center justify-between border-t px-4 py-2.5 font-mono text-[10px] text-text-muted">
+                  <span>Model: GNN-Surveillance-v4</span>
+                  <span>F1-Score: 0.941</span>
                 </div>
               </div>
             </div>
           </div>
         </div>
-
-        {/* Organic Wave Divider to Next Section */}
-        <div className="mt-12 -mb-1 w-full overflow-hidden leading-none text-white">
-          <svg
-            className="relative block h-10 w-full lg:h-16"
-            viewBox="0 0 1200 120"
-            preserveAspectRatio="none"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M0,0 C150,90 350,-40 500,60 C650,160 900,10 1200,40 L1200,120 L0,120 Z"
-              fill="#FFFFFF"
-            />
-          </svg>
-        </div>
       </section>
 
-      {/* 3. FEATURES SECTION (4 Icon Cards in a Row) */}
+      {/* 3. CAPABILITIES / FEATURES (4 Minimalist Border Cards) */}
       <section
-        className="relative scroll-mt-20 bg-white py-20 lg:py-24"
+        className="border-border relative scroll-mt-20 border-t py-20 lg:py-28"
         id="features"
       >
         <div className="mx-auto max-w-7xl px-6">
-          {/* Section Header */}
-          <div className="mx-auto mb-16 max-w-3xl text-center">
-            <div className="bg-brand-goldLight text-brand-dark mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold tracking-widest uppercase">
-              <span className="material-symbols-outlined text-brand-goldHover text-xs">
-                shield
-              </span>
-              KEY CAPABILITIES
-            </div>
-            <h2 className="text-brand-navy mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-              Engineered for Elite Compliance &amp; Financial Crime Units
+          <div className="mx-auto mb-16 max-w-2xl text-center">
+            <span className="text-brand-blue text-[11px] font-semibold tracking-wider uppercase">
+              Core Capabilities
+            </span>
+            <h2 className="text-text-primary mt-2 text-3xl font-extrabold tracking-tight sm:text-4xl">
+              Engineered to Eliminate False Positives
             </h2>
-            <p className="text-base font-normal text-slate-600">
-              Designed specifically to cut through noisy transaction backlogs
-              with auditable evidence and high-precision heuristic graphs.
+            <p className="text-text-secondary mt-3 text-sm leading-relaxed">
+              Designed specifically for tier-1 compliance units and fintech
+              infrastructure handling millions of daily events.
             </p>
           </div>
 
-          {/* 4 Icon Cards Grid */}
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
             {/* Card 1 */}
-            <div className="group bg-brand-bgLight flex flex-col justify-between rounded-xl border border-slate-200/90 p-8 shadow-sm transition-all duration-300 hover:bg-white hover:shadow-xl">
+            <div className="border-border bg-surface hover:border-text-secondary/40 flex flex-col justify-between rounded-xl border p-6 shadow-2xs transition-all duration-200">
               <div>
-                <div className="border-brand-gold mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 p-1 transition-transform group-hover:scale-105">
-                  <div className="bg-brand-blue flex h-full w-full items-center justify-center rounded-full text-white shadow-inner">
-                    <span className="material-symbols-outlined text-2xl">
-                      verified_user
-                    </span>
-                  </div>
+                <div className="border-border bg-surface-hover text-text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-lg border">
+                  <ZapIcon className="h-5 w-5" />
                 </div>
-                <h3 className="text-brand-navy mb-3 text-xl font-bold">
-                  Real-time Detection
+                <h3 className="text-text-primary mb-2 text-base font-bold">
+                  Sub-Second Triage
                 </h3>
-                <p className="mb-6 text-sm leading-relaxed text-slate-600">
-                  AI-powered monitoring of transactions for suspicious patterns
-                  with sub-second scoring and dynamic threshold management.
+                <p className="text-text-secondary text-xs leading-relaxed">
+                  Real-time transaction scoring across velocity clusters and
+                  threshold anomalies with under 18ms latency.
                 </p>
               </div>
-              <Link
-                href={isAuthenticated ? "/dashboard" : "/login"}
-                className="text-brand-blueLight hover:text-brand-blue inline-flex items-center gap-2 text-sm font-bold transition-all group-hover:translate-x-1"
-              >
-                <span>Explore Engine</span>
-                <span className="material-symbols-outlined text-base">
-                  arrow_forward
+              <div className="border-border mt-6 border-t pt-4">
+                <span className="font-mono text-[10px] text-text-muted">
+                  LATENCY &lt; 18MS
                 </span>
-              </Link>
+              </div>
             </div>
 
             {/* Card 2 */}
-            <div className="group bg-brand-bgLight flex flex-col justify-between rounded-xl border border-slate-200/90 p-8 shadow-sm transition-all duration-300 hover:bg-white hover:shadow-xl">
+            <div className="border-border bg-surface hover:border-text-secondary/40 flex flex-col justify-between rounded-xl border p-6 shadow-2xs transition-all duration-200">
               <div>
-                <div className="border-brand-gold mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 p-1 transition-transform group-hover:scale-105">
-                  <div className="bg-brand-blue flex h-full w-full items-center justify-center rounded-full text-white shadow-inner">
-                    <span className="material-symbols-outlined text-2xl">
-                      hub
-                    </span>
-                  </div>
+                <div className="border-border bg-surface-hover text-text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-lg border">
+                  <NetworkIcon className="h-5 w-5" />
                 </div>
-                <h3 className="text-brand-navy mb-3 text-xl font-bold">
-                  Graph Analytics
+                <h3 className="text-text-primary mb-2 text-base font-bold">
+                  Graph Topology
                 </h3>
-                <p className="mb-6 text-sm leading-relaxed text-slate-600">
-                  Visualize entity relationships, shell company hops, and hidden
-                  transaction networks across multi-jurisdictional borders.
+                <p className="text-text-secondary text-xs leading-relaxed">
+                  Uncovers complex multi-hop layering, circular fund loops, and
+                  synthetic entity networks invisible to flat rules.
                 </p>
               </div>
-              <Link
-                href={isAuthenticated ? "/network" : "/login"}
-                className="text-brand-blueLight hover:text-brand-blue inline-flex items-center gap-2 text-sm font-bold transition-all group-hover:translate-x-1"
-              >
-                <span>View Graph Tech</span>
-                <span className="material-symbols-outlined text-base">
-                  arrow_forward
+              <div className="border-border mt-6 border-t pt-4">
+                <span className="font-mono text-[10px] text-text-muted">
+                  GNN SUBGRAPH EMBEDDINGS
                 </span>
-              </Link>
+              </div>
             </div>
 
             {/* Card 3 */}
-            <div className="group bg-brand-bgLight flex flex-col justify-between rounded-xl border border-slate-200/90 p-8 shadow-sm transition-all duration-300 hover:bg-white hover:shadow-xl">
+            <div className="border-border bg-surface hover:border-text-secondary/40 flex flex-col justify-between rounded-xl border p-6 shadow-2xs transition-all duration-200">
               <div>
-                <div className="border-brand-gold mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 p-1 transition-transform group-hover:scale-105">
-                  <div className="bg-brand-blue flex h-full w-full items-center justify-center rounded-full text-white shadow-inner">
-                    <span className="material-symbols-outlined text-2xl">
-                      insights
-                    </span>
-                  </div>
+                <div className="border-border bg-surface-hover text-text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-lg border">
+                  <ReportsIcon className="h-5 w-5" />
                 </div>
-                <h3 className="text-brand-navy mb-3 text-xl font-bold">
-                  Explainable AI
+                <h3 className="text-text-primary mb-2 text-base font-bold">
+                  Audit-Ready SARs
                 </h3>
-                <p className="mb-6 text-sm leading-relaxed text-slate-600">
-                  Transparent model decisions with SHAP explanations and
-                  auditor-ready audit trails for regulatory certainty.
+                <p className="text-text-secondary text-xs leading-relaxed">
+                  Automated narrative generation compiles comprehensive FinCEN
+                  and FATF compliant filing dossiers in one click.
                 </p>
               </div>
-              <Link
-                href={isAuthenticated ? "/alerts" : "/login"}
-                className="text-brand-blueLight hover:text-brand-blue inline-flex items-center gap-2 text-sm font-bold transition-all group-hover:translate-x-1"
-              >
-                <span>See XAI Reports</span>
-                <span className="material-symbols-outlined text-base">
-                  arrow_forward
+              <div className="border-border mt-6 border-t pt-4">
+                <span className="font-mono text-[10px] text-text-muted">
+                  ONE-CLICK FINCEN EXPORT
                 </span>
-              </Link>
+              </div>
             </div>
 
             {/* Card 4 */}
-            <div className="group bg-brand-bgLight flex flex-col justify-between rounded-xl border border-slate-200/90 p-8 shadow-sm transition-all duration-300 hover:bg-white hover:shadow-xl">
+            <div className="border-border bg-surface hover:border-text-secondary/40 flex flex-col justify-between rounded-xl border p-6 shadow-2xs transition-all duration-200">
               <div>
-                <div className="border-brand-gold mb-6 flex h-16 w-16 items-center justify-center rounded-full border-2 p-1 transition-transform group-hover:scale-105">
-                  <div className="bg-brand-blue flex h-full w-full items-center justify-center rounded-full text-white shadow-inner">
-                    <span className="material-symbols-outlined text-2xl">
-                      schedule
-                    </span>
-                  </div>
+                <div className="border-border bg-surface-hover text-text-primary mb-5 flex h-10 w-10 items-center justify-center rounded-lg border">
+                  <ShieldCheckIcon className="h-5 w-5" />
                 </div>
-                <h3 className="text-brand-navy mb-3 text-xl font-bold">
-                  24/7 Monitoring
+                <h3 className="text-text-primary mb-2 text-base font-bold">
+                  Explainable AI
                 </h3>
-                <p className="mb-6 text-sm leading-relaxed text-slate-600">
-                  Continuous automated surveillance with instant alert
-                  generation, prioritization, and seamless workflow routing.
+                <p className="text-text-secondary text-xs leading-relaxed">
+                  Every alert risk score is broken down into auditable feature
+                  attributions and SHAP decision factors.
                 </p>
               </div>
-              <Link
-                href={isAuthenticated ? "/transactions" : "/login"}
-                className="text-brand-blueLight hover:text-brand-blue inline-flex items-center gap-2 text-sm font-bold transition-all group-hover:translate-x-1"
-              >
-                <span>Automate Triage</span>
-                <span className="material-symbols-outlined text-base">
-                  arrow_forward
+              <div className="border-border mt-6 border-t pt-4">
+                <span className="font-mono text-[10px] text-text-muted">
+                  100% REGULATORY AUDITABLE
                 </span>
-              </Link>
+              </div>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 4. ABOUT SECTION */}
+      {/* 4. ARCHITECTURE / ABOUT SECTION */}
       <section
-        className="relative scroll-mt-20 overflow-hidden bg-[#F0F4F8] py-20 lg:py-28"
+        className="border-border bg-surface-hover/30 relative scroll-mt-20 border-t py-20 lg:py-28"
         id="about"
       >
-        {/* Blue-gray wave divider at top */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 w-full overflow-hidden leading-none text-white">
-          <svg
-            className="relative block h-10 w-full lg:h-14"
-            preserveAspectRatio="none"
-            viewBox="0 0 1200 120"
-          >
-            <path
-              d="M0,0 C300,70 600,0 900,50 C1050,75 1150,30 1200,10 L1200,0 L0,0 Z"
-              fill="#FFFFFF"
-            />
-          </svg>
-        </div>
-
-        <div className="relative z-10 mx-auto max-w-7xl px-6">
+        <div className="mx-auto max-w-7xl px-6">
           <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
-            {/* Left Side: Narrative and Bullets */}
+            {/* Left Narrative */}
             <div className="lg:col-span-6">
-              <div className="bg-brand-gold text-brand-navy mb-6 inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-bold tracking-wider uppercase shadow-sm">
-                <span className="material-symbols-outlined text-sm font-semibold">
-                  shield
-                </span>
-                WHO WE ARE
-              </div>
-              <h2 className="text-brand-navy mb-6 text-3xl leading-tight font-extrabold tracking-tight sm:text-4xl">
-                Experience the Power of Compliance
+              <span className="text-brand-blue text-[11px] font-semibold tracking-wider uppercase">
+                System Architecture
+              </span>
+              <h2 className="text-text-primary mt-2 mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
+                Built for High-Throughput Financial Rails
               </h2>
-              <p className="mb-8 text-base leading-relaxed text-slate-700">
-                AML Sentinel is an institutional-grade intelligence platform
-                engineered to eliminate investigative gridlock. By merging graph
-                neural networks with deep regulatory topologies, we empower
-                tier-1 financial institutions and payment rails to decrease
-                false positive alert volumes by up to 70% while elevating SAR
-                audit defensibility.
+              <p className="text-text-secondary mb-6 text-sm leading-relaxed">
+                Legacy rules-based surveillance systems overwhelm compliance
+                officers with over 90% false positive noise. AML Sentinel
+                replaces brittle heuristics with deep topological intelligence
+                that learns evolving crime patterns.
               </p>
 
-              {/* Key Feature Bullets with Golden Shield Checkmarks */}
-              <div className="mb-8 space-y-4">
-                <div className="flex items-start gap-4">
-                  <div className="border-brand-gold bg-brand-goldLight mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border">
-                    <span className="material-symbols-outlined text-brand-blue text-base">
-                      check
-                    </span>
+              <div className="space-y-4">
+                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4">
+                  <div className="border-border bg-surface-hover text-text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
+                    <ActivityIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <h4 className="text-brand-navy text-sm font-bold">
-                      Proven Cycle Time Reduction
-                    </h4>
-                    <p className="text-sm text-slate-600">
-                      Compresses average analyst alert investigation cycle times
-                      from several hours to under eight minutes.
+                    <h3 className="text-text-primary text-xs font-bold">
+                      Dynamic Transaction Stream Ingestion
+                    </h3>
+                    <p className="text-text-secondary mt-0.5 text-xs">
+                      Kafka and REST streaming ingestion supporting up to
+                      50,000 events/second with zero packet drop.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="border-brand-gold bg-brand-goldLight mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border">
-                    <span className="material-symbols-outlined text-brand-blue text-base">
-                      check
-                    </span>
+                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4">
+                  <div className="border-border bg-surface-hover text-text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
+                    <NetworkIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <h4 className="text-brand-navy text-sm font-bold">
-                      Global Regulatory Standards
-                    </h4>
-                    <p className="text-sm text-slate-600">
-                      Full FinCEN, FATF, and FCA regulatory reporting compliance
-                      with automated SAR XML generation built-in.
+                    <h3 className="text-text-primary text-xs font-bold">
+                      Graph Neural Embeddings
+                    </h3>
+                    <p className="text-text-secondary mt-0.5 text-xs">
+                      Real-time entity resolution connecting accounts, device
+                      fingerprints, and shared IBANs.
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-start gap-4">
-                  <div className="border-brand-gold bg-brand-goldLight mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border">
-                    <span className="material-symbols-outlined text-brand-blue text-base">
-                      check
-                    </span>
+                <div className="border-border bg-surface flex items-start gap-3.5 rounded-lg border p-4">
+                  <div className="border-border bg-surface-hover text-text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
+                    <LockIcon className="h-4 w-4" />
                   </div>
                   <div>
-                    <h4 className="text-brand-navy text-sm font-bold">
-                      Core Banking Ingestion
-                    </h4>
-                    <p className="text-sm text-slate-600">
-                      Seamless high-throughput enterprise API integration
-                      directly into legacy core banking ledgers and Kafka
-                      queues.
+                    <h3 className="text-text-primary text-xs font-bold">
+                      End-to-End Cryptographic Auditability
+                    </h3>
+                    <p className="text-text-secondary mt-0.5 text-xs">
+                      Every analyst action, triage rationale, and decision
+                      override is stamped to an append-only ledger.
                     </p>
                   </div>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-6">
-                <a
-                  href="#contact"
-                  className="bg-brand-blue hover:bg-brand-blueLight rounded-full px-7 py-3 text-sm font-semibold text-white shadow-sm transition-all"
-                >
-                  Discover Our Architecture
-                </a>
-                <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500">
-                  <span className="h-2 w-2 rounded-full bg-emerald-500" />
-                  FCA &amp; FinCEN Benchmarked
                 </div>
               </div>
             </div>
 
-            {/* Right Side: Boardroom Collaboration Image with Stat Badge */}
-            <div className="relative lg:col-span-6">
-              <div className="relative overflow-hidden rounded-2xl border-4 border-white bg-white shadow-2xl">
-                <div className="relative h-[400px] w-full sm:h-[460px]">
-                  <Image
-                    src="/landing/about-meeting.jpg"
-                    alt="AML Sentinel Executive Financial Compliance Boardroom"
-                    fill
-                    className="object-cover"
-                  />
+            {/* Right Architecture Block */}
+            <div className="lg:col-span-6">
+              <div className="border-border bg-surface rounded-xl border p-6 shadow-sm">
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="text-text-primary text-xs font-bold">
+                    Surveillance Pipeline
+                  </span>
+                  <span className="font-mono text-[10px] text-text-muted">
+                    PIPELINE v4.2
+                  </span>
                 </div>
 
-                {/* Floating Stat Badge */}
-                <div className="absolute bottom-6 left-6 flex items-center gap-4 rounded-xl border border-slate-200 bg-white/95 p-4 shadow-xl backdrop-blur-md">
-                  <div className="bg-brand-gold text-brand-navy flex h-12 w-12 items-center justify-center rounded-full">
-                    <span className="material-symbols-outlined text-2xl font-bold">
-                      speed
+                <div className="space-y-3 font-mono text-xs">
+                  <div className="border-border bg-surface-hover/70 flex items-center justify-between rounded-lg border px-3.5 py-2.5">
+                    <span className="text-text-primary font-medium">
+                      01 Ingestion Rail
                     </span>
+                    <span className="text-emerald-500 text-[11px]">Active (0.4ms)</span>
                   </div>
-                  <div>
-                    <div className="font-tabular text-brand-navy text-2xl font-extrabold tracking-tight">
-                      4.2x Faster
-                    </div>
-                    <div className="text-xs font-medium text-slate-600">
-                      Alert Resolution &amp; Investigation Cycle
-                    </div>
+                  <div className="text-text-muted flex justify-center">↓</div>
+                  <div className="border-border bg-surface-hover/70 flex items-center justify-between rounded-lg border px-3.5 py-2.5">
+                    <span className="text-text-primary font-medium">
+                      02 Feature Attribution &amp; SHAP
+                    </span>
+                    <span className="text-emerald-500 text-[11px]">Computed (3.1ms)</span>
+                  </div>
+                  <div className="text-text-muted flex justify-center">↓</div>
+                  <div className="border-border bg-surface-hover/70 flex items-center justify-between rounded-lg border px-3.5 py-2.5">
+                    <span className="text-text-primary font-medium">
+                      03 Graph Neural Network Inference
+                    </span>
+                    <span className="text-emerald-500 text-[11px]">Scored (11.8ms)</span>
+                  </div>
+                  <div className="text-text-muted flex justify-center">↓</div>
+                  <div className="border-border bg-text-primary text-surface flex items-center justify-between rounded-lg border px-3.5 py-2.5">
+                    <span className="font-bold">
+                      04 Automated SAR Dossier Generation
+                    </span>
+                    <span className="text-[11px] opacity-80">Instant</span>
                   </div>
                 </div>
               </div>
@@ -706,226 +665,110 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
         </div>
       </section>
 
-      {/* 5. SOLUTIONS SECTION */}
+      {/* 5. METRICS & SOLUTIONS SECTION */}
       <section
-        className="bg-brand-cardBg relative scroll-mt-20 py-20 lg:py-28"
+        className="border-border relative scroll-mt-20 border-t py-20 lg:py-24"
         id="solutions"
       >
-        {/* Undulating header wave */}
-        <div className="pointer-events-none absolute inset-x-0 top-0 w-full overflow-hidden leading-none text-[#F0F4F8]">
-          <svg
-            className="relative block h-8 w-full lg:h-12"
-            preserveAspectRatio="none"
-            viewBox="0 0 1200 120"
-          >
-            <path
-              d="M0,0 C150,90 400,0 700,50 C950,90 1100,20 1200,0 L1200,0 L0,0 Z"
-              fill="#F0F4F8"
-            />
-          </svg>
-        </div>
-
-        <div className="relative z-10 mx-auto max-w-7xl px-6">
-          <div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-12">
-            {/* Left Column: Solutions Detail & Stats */}
-            <div className="lg:col-span-7">
-              <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-slate-200 px-3.5 py-1.5 text-xs font-bold tracking-widest text-slate-800 uppercase">
-                TAILORED DEPLOYMENT
-              </div>
-              <h2 className="text-brand-navy mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
-                Expert AML Solutions
-              </h2>
-              <p className="mb-8 max-w-2xl text-base leading-relaxed text-slate-600">
-                Custom-calibrated heuristic suites designed for Tier 1 Banks,
-                FinTech unicorns, and cross-border remittance providers handling
-                billions in monthly flow.
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid grid-cols-2 gap-8 border-b border-border pb-16 lg:grid-cols-4">
+            <div>
+              <p className="text-text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
+                70%
               </p>
-
-              {/* 3 Prominent Stat Counters */}
-              <div className="mb-8 grid grid-cols-3 gap-4 border-b border-slate-200 pb-8">
-                <div>
-                  <div className="font-tabular text-brand-navy text-3xl font-extrabold tracking-tight sm:text-4xl">
-                    99.4%
-                  </div>
-                  <div className="mt-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">
-                    Detection Accuracy
-                  </div>
-                </div>
-                <div>
-                  <div className="font-tabular text-brand-blueLight text-3xl font-extrabold tracking-tight sm:text-4xl">
-                    &lt;0.8s
-                  </div>
-                  <div className="mt-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">
-                    Latency per Txn
-                  </div>
-                </div>
-                <div>
-                  <div className="font-tabular text-brand-navy text-3xl font-extrabold tracking-tight sm:text-4xl">
-                    70%
-                  </div>
-                  <div className="mt-1 text-xs font-semibold tracking-wide text-slate-500 uppercase">
-                    Fewer False Positives
-                  </div>
-                </div>
-              </div>
-
-              {/* Checklist Items */}
-              <div className="mb-8 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-800">
-                  <span className="material-symbols-outlined text-lg text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Transaction Monitoring &amp; Batch Ingestion</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-800">
-                  <span className="material-symbols-outlined text-lg text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Sanctions &amp; PEP Screening Automation</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-800">
-                  <span className="material-symbols-outlined text-lg text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Graph-based Mule Account Rings</span>
-                </div>
-                <div className="flex items-center gap-2.5 text-sm font-semibold text-slate-800">
-                  <span className="material-symbols-outlined text-lg text-emerald-600">
-                    check_circle
-                  </span>
-                  <span>Direct Regulatory SAR Generation</span>
-                </div>
-              </div>
-
-              <Link
-                href={isAuthenticated ? "/dashboard" : "/signup"}
-                className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-2 rounded-full px-8 py-3.5 text-sm font-semibold text-white shadow-md transition-all hover:shadow-lg active:scale-[0.98]"
-              >
-                <span>
-                  {isAuthenticated ? "Open Dashboard" : "Free Consultation"}
-                </span>
-                <span className="material-symbols-outlined text-base">
-                  arrow_forward
-                </span>
-              </Link>
+              <p className="text-text-secondary mt-1 text-xs">
+                False Positive Reduction
+              </p>
             </div>
+            <div>
+              <p className="text-text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
+                &lt;18ms
+              </p>
+              <p className="text-text-secondary mt-1 text-xs">
+                Average Scoring Latency
+              </p>
+            </div>
+            <div>
+              <p className="text-text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
+                99.2%
+              </p>
+              <p className="text-text-secondary mt-1 text-xs">
+                Recall on Layering Chains
+              </p>
+            </div>
+            <div>
+              <p className="text-text-primary text-3xl font-extrabold tracking-tight sm:text-4xl">
+                $14B+
+              </p>
+              <p className="text-text-secondary mt-1 text-xs">
+                Protected Transaction Flow
+              </p>
+            </div>
+          </div>
 
-            {/* Right Column: Prominent Golden Testimonial Card */}
-            <div className="lg:col-span-5">
-              <div className="bg-brand-gold text-brand-navy relative flex flex-col justify-between rounded-3xl border border-amber-300 p-8 shadow-2xl sm:p-10">
-                {/* Top: Rating and Stamp */}
-                <div className="mb-8 flex items-center justify-between">
-                  <div className="text-brand-navy flex items-center gap-1">
-                    <span
-                      className="material-symbols-outlined text-xl"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
-                    <span
-                      className="material-symbols-outlined text-xl"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
-                    <span
-                      className="material-symbols-outlined text-xl"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
-                    <span
-                      className="material-symbols-outlined text-xl"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
-                    <span
-                      className="material-symbols-outlined text-xl"
-                      style={{ fontVariationSettings: "'FILL' 1" }}
-                    >
-                      star
-                    </span>
-                  </div>
-                  <div className="bg-brand-navy/10 text-brand-navy flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold tracking-wider uppercase">
-                    <span className="material-symbols-outlined text-sm">
-                      verified
-                    </span>
-                    <span>Verified Client</span>
-                  </div>
-                </div>
-
-                {/* Quote */}
-                <blockquote className="mb-8 text-xl leading-snug font-bold tracking-tight sm:text-2xl">
-                  &ldquo;AML Sentinel has completely transformed our SAR filing
-                  efficiency. We cut investigation time by 60% while detecting
-                  high-risk structuring cycles we previously missed.&rdquo;
-                </blockquote>
-
-                {/* Author info */}
-                <div className="border-brand-navy/20 flex items-center justify-between border-t pt-6">
-                  <div>
-                    <div className="text-brand-navy text-base font-extrabold">
-                      Sarah Jenkins
-                    </div>
-                    <div className="text-xs font-medium text-slate-800">
-                      Chief Compliance Officer at Apex Financial Global
-                    </div>
-                  </div>
-                  <div className="text-brand-navy flex h-10 w-10 items-center justify-center rounded-full bg-white/40 text-sm font-bold shadow-inner">
-                    AFG
-                  </div>
-                </div>
-              </div>
+          <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-3">
+            <div className="border-border bg-surface rounded-xl border p-6">
+              <h3 className="text-text-primary mb-2 text-sm font-bold">
+                Tier-1 Banks
+              </h3>
+              <p className="text-text-secondary text-xs leading-relaxed">
+                Integrate directly into existing core banking rails without
+                disrupting ongoing FinCEN or FCA reporting workflows.
+              </p>
+            </div>
+            <div className="border-border bg-surface rounded-xl border p-6">
+              <h3 className="text-text-primary mb-2 text-sm font-bold">
+                FinTech Unicorns
+              </h3>
+              <p className="text-text-secondary text-xs leading-relaxed">
+                Developer-first APIs, webhooks, and modern client SDKs to scale
+                compliance alongside rapid user growth.
+              </p>
+            </div>
+            <div className="border-border bg-surface rounded-xl border p-6">
+              <h3 className="text-text-primary mb-2 text-sm font-bold">
+                Cross-Border Remittance
+              </h3>
+              <p className="text-text-secondary text-xs leading-relaxed">
+                Multi-currency corridor scoring to flag sanctioned entities,
+                nested accounts, and high-velocity smurfing.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* 6. CTA BANNER SECTION */}
+      {/* 6. MINIMALIST CTA SECTION */}
       <section
-        className="bg-brand-navy relative scroll-mt-20 overflow-hidden py-20"
+        className="border-border bg-surface relative scroll-mt-20 border-t py-20"
         id="demo"
       >
-        {/* Golden ambient accent glow */}
-        <div className="bg-brand-gold/15 pointer-events-none absolute -top-20 -right-20 h-96 w-96 rounded-full blur-3xl" />
-        <div className="bg-brand-blueLight/20 pointer-events-none absolute -bottom-20 -left-20 h-96 w-96 rounded-full blur-3xl" />
-
-        <div className="relative z-10 mx-auto max-w-5xl px-6 text-center">
-          <div className="text-brand-gold mb-6 inline-flex items-center gap-2 rounded-full bg-white/10 px-3.5 py-1.5 text-xs font-bold tracking-widest uppercase">
-            <span className="material-symbols-outlined text-sm">
-              rocket_launch
-            </span>
-            RAPID IMPLEMENTATION
-          </div>
-          <h2 className="mb-6 text-3xl leading-tight font-extrabold tracking-tight text-white sm:text-5xl">
-            Ready to elevate your financial crime defense?
+        <div className="mx-auto max-w-4xl px-6 text-center">
+          <span className="text-brand-blue text-[11px] font-semibold tracking-wider uppercase">
+            Get Started
+          </span>
+          <h2 className="text-text-primary mt-2 mb-4 text-3xl font-extrabold tracking-tight sm:text-4xl">
+            Upgrade Your Financial Crime Defense
           </h2>
-          <p className="mx-auto mb-10 max-w-2xl text-base text-slate-300 sm:text-lg">
-            Connect with our principal compliance architects for an interactive
-            demonstration configured directly against your transaction taxonomy.
+          <p className="text-text-secondary mx-auto mb-8 max-w-xl text-sm leading-relaxed">
+            Experience graph-enhanced AML surveillance configured directly
+            against your institutional transaction taxonomy.
           </p>
 
-          <div className="flex flex-wrap items-center justify-center gap-4">
+          <div className="flex flex-wrap items-center justify-center gap-3">
             <Link
               href={isAuthenticated ? "/dashboard" : "/signup"}
-              className="bg-brand-gold text-brand-navy hover:bg-brand-goldHover flex items-center gap-2 rounded-full px-9 py-4 text-base font-extrabold tracking-wide shadow-xl transition-all hover:shadow-2xl active:scale-[0.98]"
+              className="bg-text-primary text-surface hover:opacity-90 inline-flex items-center gap-2 rounded-lg px-6 py-3 text-xs font-semibold shadow-xs transition-all active:scale-[0.98]"
             >
-              <span>
-                {isAuthenticated
-                  ? "Go to Dashboard"
-                  : "Schedule Your Live Demo"}
-              </span>
-              <span className="material-symbols-outlined font-bold">
-                arrow_forward
-              </span>
+              <span>{isAuthenticated ? "Go to Dashboard" : "Create Account"}</span>
+              <ArrowRightIcon className="h-4 w-4" />
             </Link>
             <a
               href="#contact"
               onClick={(e) => handleNavClick(e, "contact")}
-              className="rounded-full border border-white/20 bg-white/10 px-8 py-4 text-base font-semibold text-white transition-all hover:bg-white/20"
+              className="border-border text-text-primary hover:bg-surface-hover inline-flex items-center gap-2 rounded-lg border px-6 py-3 text-xs font-medium transition-all active:scale-[0.98]"
             >
-              Speak With An Analyst
+              <span>Contact Compliance Team</span>
             </a>
           </div>
         </div>
@@ -933,207 +776,84 @@ export function LandingView({ isAuthenticated, userEmail }: LandingViewProps) {
 
       {/* 7. FOOTER */}
       <footer
-        className="scroll-mt-20 border-t border-slate-800 bg-[#0B192C] text-sm text-slate-400"
+        className="border-border bg-bg relative scroll-mt-20 border-t py-12 text-xs"
         id="contact"
       >
-        <div className="mx-auto max-w-7xl px-6 py-16">
-          <div className="grid grid-cols-1 gap-10 border-b border-slate-800 pb-12 md:grid-cols-2 lg:grid-cols-12 lg:gap-8">
-            {/* Col 1: Brand & Security Badges (4 cols) */}
-            <div className="lg:col-span-4">
-              <div className="mb-5 flex items-center gap-3">
-                <div className="bg-brand-navy relative flex h-9 w-9 items-center justify-center overflow-hidden rounded-lg border border-slate-700 p-1">
-                  <Image
-                    src="/landing/logo.jpg"
-                    alt="AML Sentinel Brand Logo"
-                    width={36}
-                    height={36}
-                    className="h-full w-full object-contain"
-                  />
-                </div>
-                <span className="text-xl font-bold tracking-tight text-white">
-                  AML Sentinel
-                </span>
-              </div>
-              <p className="mb-6 text-xs leading-relaxed text-slate-400 sm:text-sm">
-                Institutional AML and fraud intelligence infrastructure
-                providing explainable graph machine learning for enterprise
-                banks and payment innovators.
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="grid grid-cols-1 gap-8 md:grid-cols-4 pb-12 border-b border-border">
+            <div className="md:col-span-2">
+              <SentinelLogo size={22} subtitle="SURVEILLANCE" />
+              <p className="text-text-secondary mt-3 max-w-sm text-xs leading-relaxed">
+                Institutional-grade financial crime intelligence platform
+                combining Graph Neural Networks and explainable transaction triage.
               </p>
-              {/* Security Badges */}
-              <div className="flex flex-wrap items-center gap-3 text-[11px] font-semibold text-slate-300">
-                <span className="rounded border border-slate-700/80 bg-slate-900 px-2.5 py-1">
-                  SOC2 Type II
-                </span>
-                <span className="rounded border border-slate-700/80 bg-slate-900 px-2.5 py-1">
-                  ISO 27001
-                </span>
-                <span className="rounded border border-slate-700/80 bg-slate-900 px-2.5 py-1">
-                  GDPR Compliant
-                </span>
+              <div className="mt-4 flex items-center gap-2 font-mono text-[11px] text-emerald-500">
+                <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                <span>All Surveillance Systems Operational</span>
               </div>
             </div>
 
-            {/* Col 2: Platform Links (2 cols) */}
-            <div className="lg:col-span-2">
-              <h5 className="mb-4 text-xs font-bold tracking-wider text-white uppercase">
+            <div>
+              <h4 className="text-text-primary mb-3 text-xs font-bold tracking-wider uppercase">
                 Platform
-              </h5>
-              <ul className="space-y-2.5 text-xs sm:text-sm">
+              </h4>
+              <ul className="space-y-2 text-text-secondary">
                 <li>
-                  <Link
-                    href="/dashboard"
-                    className="transition-colors hover:text-white"
-                  >
-                    Detection Engine
+                  <Link href="/dashboard" className="hover:text-text-primary transition-colors">
+                    Dashboard
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/network"
-                    className="transition-colors hover:text-white"
-                  >
-                    Graph Explorer
+                  <Link href="/alerts" className="hover:text-text-primary transition-colors">
+                    Alert Triage
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/alerts"
-                    className="transition-colors hover:text-white"
-                  >
-                    Explainable AI
+                  <Link href="/network" className="hover:text-text-primary transition-colors">
+                    Network Explorer
                   </Link>
                 </li>
                 <li>
-                  <Link
-                    href="/transactions"
-                    className="transition-colors hover:text-white"
-                  >
-                    Core Integrations
-                  </Link>
-                </li>
-                <li>
-                  <Link
-                    href="/admin"
-                    className="transition-colors hover:text-white"
-                  >
-                    Audit Trails
+                  <Link href="/reports" className="hover:text-text-primary transition-colors">
+                    SAR Dossiers
                   </Link>
                 </li>
               </ul>
             </div>
 
-            {/* Col 3: Solutions (2 cols) */}
-            <div className="lg:col-span-2">
-              <h5 className="mb-4 text-xs font-bold tracking-wider text-white uppercase">
-                Solutions
-              </h5>
-              <ul className="space-y-2.5 text-xs sm:text-sm">
+            <div>
+              <h4 className="text-text-primary mb-3 text-xs font-bold tracking-wider uppercase">
+                Compliance &amp; Security
+              </h4>
+              <ul className="space-y-2 text-text-secondary">
                 <li>
-                  <a
-                    href="#solutions"
-                    className="transition-colors hover:text-white"
-                  >
-                    Retail Banking
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#solutions"
-                    className="transition-colors hover:text-white"
-                  >
-                    FinTech &amp; Crypto
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#solutions"
-                    className="transition-colors hover:text-white"
-                  >
-                    Neobanks
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#solutions"
-                    className="transition-colors hover:text-white"
-                  >
-                    Global Payments
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#solutions"
-                    className="transition-colors hover:text-white"
-                  >
-                    Regulatory Compliance
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            {/* Col 4: Newsletter & Contact (4 cols) */}
-            <div className="lg:col-span-4">
-              <h5 className="mb-4 text-xs font-bold tracking-wider text-white uppercase">
-                Stay Informed
-              </h5>
-              <p className="mb-3 text-xs text-slate-400">
-                Subscribe to the AML Sentinel Monthly Regulatory Dispatch.
-              </p>
-
-              {subscribed ? (
-                <div className="mb-6 rounded-lg border border-emerald-500/40 bg-emerald-950/40 p-3 text-xs font-semibold text-emerald-300">
-                  ✓ Thank you! You&apos;ve subscribed to the regulatory
-                  dispatch.
-                </div>
-              ) : (
-                <form
-                  onSubmit={handleNewsletterSubmit}
-                  className="mb-6 flex items-center gap-2"
-                >
-                  <input
-                    className="focus:border-brand-gold w-full rounded-full border border-slate-700 bg-slate-900 px-4 py-2.5 text-xs text-white placeholder-slate-500 transition-colors focus:outline-none"
-                    placeholder="analyst@institution.com"
-                    required
-                    type="email"
-                    value={newsletterEmail}
-                    onChange={(e) => setNewsletterEmail(e.target.value)}
-                  />
-                  <button
-                    className="bg-brand-gold text-brand-navy hover:bg-brand-goldHover shrink-0 rounded-full px-4 py-2.5 text-xs font-bold transition-colors"
-                    type="submit"
-                  >
-                    Subscribe
-                  </button>
-                </form>
-              )}
-
-              <div className="space-y-1.5 text-xs text-slate-400">
-                <div className="flex items-center gap-2">
-                  <span className="material-symbols-outlined text-brand-gold text-sm">
-                    mail
+                  <span className="flex items-center gap-1.5">
+                    <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
+                    SOC2 Type II
                   </span>
-                  <span>compliance@amlsentinel.com</span>
-                </div>
-              </div>
+                </li>
+                <li>
+                  <span className="flex items-center gap-1.5">
+                    <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
+                    FinCEN Auditable
+                  </span>
+                </li>
+                <li>
+                  <span className="flex items-center gap-1.5">
+                    <CheckIcon className="h-3.5 w-3.5 text-emerald-500" />
+                    FATF Recommendation 16
+                  </span>
+                </li>
+              </ul>
             </div>
           </div>
 
-          {/* Copyright Bar */}
-          <div className="flex flex-col items-center justify-between gap-4 pt-8 text-xs text-slate-500 sm:flex-row">
-            <p>
-              © 2025 AML Sentinel Inc. All rights reserved. Enterprise-grade AML
-              &amp; Fraud Intelligence.
-            </p>
-            <div className="flex items-center gap-6">
-              <a className="transition-colors hover:text-slate-300" href="#">
-                Privacy Policy
-              </a>
-              <a className="transition-colors hover:text-slate-300" href="#">
-                Terms of Service
-              </a>
-              <a className="transition-colors hover:text-slate-300" href="#">
-                Security Disclosure
-              </a>
+          <div className="mt-8 flex flex-col items-center justify-between gap-4 text-[11px] text-text-muted sm:flex-row">
+            <p>© {new Date().getFullYear()} AML Sentinel, Inc. All rights reserved.</p>
+            <div className="flex items-center gap-4">
+              <span className="font-mono">BUILD: v2.4.0-PROD</span>
+              <span>•</span>
+              <span className="font-mono">ENCRYPTION: AES-256</span>
             </div>
           </div>
         </div>

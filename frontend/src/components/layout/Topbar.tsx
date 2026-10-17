@@ -12,17 +12,17 @@ const ROLE_BADGES: Record<Role, { label: string; badgeClass: string }> = {
   administrator: {
     label: "Administrator",
     badgeClass:
-      "bg-brand-navy text-brand-gold border-brand-gold/30 dark:bg-brand-gold/10 dark:text-brand-gold dark:border-brand-gold/20",
+      "bg-text-primary text-surface dark:bg-surface-hover dark:text-text-primary border-border",
   },
   aml_analyst: {
     label: "AML Analyst",
     badgeClass:
-      "bg-brand-blue/10 text-brand-blue dark:text-blue-300 border-brand-blue/20 dark:border-blue-800/40",
+      "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20",
   },
   data_operator: {
     label: "Data Operator",
     badgeClass:
-      "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+      "bg-surface-hover text-text-secondary border-border",
   },
 };
 
@@ -51,22 +51,22 @@ export function Topbar({ user }: { user: CurrentUser }) {
 
   const roleMeta = ROLE_BADGES[user.role] || {
     label: user.role,
-    badgeClass: "bg-slate-100 text-slate-700 border-slate-200",
+    badgeClass: "bg-surface-hover text-text-secondary border-border",
   };
 
   return (
-    <header className="border-border bg-surface/95 sticky top-0 z-40 flex h-16 shrink-0 items-center justify-between border-b px-6 backdrop-blur-md transition-colors">
+    <header className="border-border bg-surface/90 sticky top-0 z-40 flex h-14 shrink-0 items-center justify-between border-b px-6 backdrop-blur-md transition-colors">
       {/* Left: Environment Node Indicator */}
       <div className="flex items-center gap-3">
-        <div className="border-border inline-flex items-center gap-2 rounded-full border bg-slate-50/90 px-3 py-1 text-xs shadow-xs dark:bg-slate-900/60">
+        <div className="border-border inline-flex items-center gap-2 rounded-full border bg-surface px-3 py-1 text-xs shadow-2xs">
           <span className="relative flex h-2 w-2">
             <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
-          <span className="text-text-secondary font-medium">
+          <span className="text-text-secondary font-mono text-[11px]">
             {process.env.NODE_ENV === "production"
-              ? "Live Production Cluster"
-              : "Sandboxed Surveillance Node"}
+              ? "Cluster: Live US-East"
+              : "Cluster: Sandboxed Node"}
           </span>
         </div>
       </div>
@@ -77,7 +77,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
           <button
             type="button"
             onClick={() => setShowAdminModal(true)}
-            className="text-brand-blue border-brand-blue/30 bg-brand-blue/5 hover:bg-brand-blue rounded-lg border px-3 py-1.5 text-xs font-semibold shadow-xs transition-all duration-150 hover:text-white active:scale-[0.98] dark:text-blue-400"
+            className="border-border text-text-primary hover:bg-surface-hover rounded-lg border bg-surface px-3 py-1.5 text-xs font-medium shadow-xs transition-colors active:scale-[0.98]"
           >
             Request Admin Access
           </button>
@@ -88,11 +88,11 @@ export function Topbar({ user }: { user: CurrentUser }) {
         {/* User Card */}
         <div className="border-border flex items-center gap-3 border-l pl-3 sm:pl-4">
           <div className="hidden flex-col items-end text-right sm:flex">
-            <p className="text-text-primary text-sm leading-tight font-semibold">
+            <p className="text-text-primary text-xs font-semibold leading-tight">
               {user.full_name ?? user.email}
             </p>
             <span
-              className={`py-0.2 mt-0.5 inline-block rounded-full border px-2 text-[10px] font-semibold tracking-wide ${roleMeta.badgeClass}`}
+              className={`mt-0.5 inline-block rounded-full border px-2 py-0.5 text-[9px] font-semibold tracking-wider uppercase ${roleMeta.badgeClass}`}
             >
               {roleMeta.label}
             </span>
@@ -100,7 +100,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
 
           <div
             title={`${user.full_name ?? user.email} (${roleMeta.label})`}
-            className="bg-brand-navy text-brand-gold ring-brand-gold/20 flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold shadow-xs ring-2"
+            className="border-border bg-surface-hover text-text-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-full border text-xs font-bold shadow-2xs"
           >
             {userInitials}
           </div>
@@ -108,7 +108,7 @@ export function Topbar({ user }: { user: CurrentUser }) {
           <button
             type="button"
             onClick={handleSignOut}
-            className="border-border text-text-secondary hover:text-text-primary rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-all duration-150 hover:bg-slate-100 active:scale-[0.98] dark:hover:bg-slate-800"
+            className="border-border text-text-secondary hover:text-text-primary hover:bg-surface-hover rounded-lg border px-2.5 py-1.5 text-xs font-medium transition-colors active:scale-[0.98]"
           >
             Sign out
           </button>

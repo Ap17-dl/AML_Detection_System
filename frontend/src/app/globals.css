@@ -1,66 +1,133 @@
 @import "tailwindcss";
 
 /*
- * Design tokens — mirrors 04_Design_Scheme.md §2 exactly (colors, radii, elevation).
- * Light values live on :root; dark values apply automatically via prefers-color-scheme,
- * or explicitly via [data-theme="dark"]/[data-theme="light"] once a user picks a theme
- * from the topbar (see src/lib/theme.ts) — mirrors the artifact theming convention so the
- * app respects OS preference by default but can be overridden and persisted.
+ * Minimalist Design System & Theme Tokens
+ * Inspired by Linear, Vercel, and Stripe's high-precision interfaces.
+ * Monochromatic foundations with intentional semantic accents and hairline borders.
  */
 :root {
-  --bg: #f7f8fa;
+  --bg: #fafafa;
   --surface: #ffffff;
-  --border: #e2e5ea;
-  --text-primary: #14161a;
-  --text-secondary: #5b6270;
-  --accent: #2e5aac;
-  --risk-low: #1e8e5a;
-  --risk-medium: #b8791a;
-  --risk-high: #c23b3b;
-  --status-open: #5b6270;
-  --status-in-progress: #2e5aac;
-  --status-closed: #1e8e5a;
+  --surface-hover: #f4f4f5;
+  --border: #e4e4e7;
+  --border-subtle: #f4f4f5;
+  --text-primary: #09090b;
+  --text-secondary: #71717a;
+  --text-muted: #a1a1aa;
+  --accent: #18181b;
+  --accent-foreground: #ffffff;
+  
+  --risk-low: #059669;
+  --risk-medium: #d97706;
+  --risk-high: #dc2626;
+  --status-open: #71717a;
+  --status-in-progress: #2563eb;
+  --status-closed: #059669;
+
+  /* Institutional brand colors refined for modern minimalism */
+  --brand-navy: #090a0f;
+  --brand-blue: #2563eb;
+  --brand-blue-light: #3b82f6;
+  --brand-gold: #f59e0b;
+  --brand-gold-light: #fef3c7;
+  --brand-gold-hover: #d97706;
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0f1115;
-    --surface: #1a1d23;
-    --border: #2a2e37;
-    --text-primary: #edeff2;
-    --text-secondary: #9ba1ac;
-    --accent: #5b86d9;
-    --risk-low: #3fbe86;
-    --risk-medium: #e0a93c;
-    --risk-high: #e5615f;
-    --status-open: #9ba1ac;
-    --status-in-progress: #5b86d9;
-    --status-closed: #3fbe86;
+    --bg: #090a0f;
+    --surface: #11131a;
+    --surface-hover: #171a23;
+    --border: #1e232f;
+    --border-subtle: #151821;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --text-muted: #64748b;
+    --accent: #f8fafc;
+    --accent-foreground: #090a0f;
+
+    --risk-low: #10b981;
+    --risk-medium: #f59e0b;
+    --risk-high: #ef4444;
+    --status-open: #94a3b8;
+    --status-in-progress: #3b82f6;
+    --status-closed: #10b981;
+
+    --brand-navy: #11131a;
+    --brand-blue: #3b82f6;
+    --brand-blue-light: #60a5fa;
+    --brand-gold: #fbbf24;
+    --brand-gold-light: rgba(251, 191, 36, 0.1);
+    --brand-gold-hover: #f59e0b;
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #0f1115;
-  --surface: #1a1d23;
-  --border: #2a2e37;
-  --text-primary: #edeff2;
-  --text-secondary: #9ba1ac;
-  --accent: #5b86d9;
-  --risk-low: #3fbe86;
-  --risk-medium: #e0a93c;
-  --risk-high: #e5615f;
-  --status-open: #9ba1ac;
-  --status-in-progress: #5b86d9;
-  --status-closed: #3fbe86;
+  --bg: #090a0f;
+  --surface: #11131a;
+  --surface-hover: #171a23;
+  --border: #1e232f;
+  --border-subtle: #151821;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --accent: #f8fafc;
+  --accent-foreground: #090a0f;
+
+  --risk-low: #10b981;
+  --risk-medium: #f59e0b;
+  --risk-high: #ef4444;
+  --status-open: #94a3b8;
+  --status-in-progress: #3b82f6;
+  --status-closed: #10b981;
+
+  --brand-navy: #11131a;
+  --brand-blue: #3b82f6;
+  --brand-blue-light: #60a5fa;
+  --brand-gold: #fbbf24;
+  --brand-gold-light: rgba(251, 191, 36, 0.1);
+  --brand-gold-hover: #f59e0b;
+}
+
+:root[data-theme="light"] {
+  --bg: #fafafa;
+  --surface: #ffffff;
+  --surface-hover: #f4f4f5;
+  --border: #e4e4e7;
+  --border-subtle: #f4f4f5;
+  --text-primary: #09090b;
+  --text-secondary: #71717a;
+  --text-muted: #a1a1aa;
+  --accent: #18181b;
+  --accent-foreground: #ffffff;
+
+  --risk-low: #059669;
+  --risk-medium: #d97706;
+  --risk-high: #dc2626;
+  --status-open: #71717a;
+  --status-in-progress: #2563eb;
+  --status-closed: #059669;
+
+  --brand-navy: #090a0f;
+  --brand-blue: #2563eb;
+  --brand-blue-light: #3b82f6;
+  --brand-gold: #f59e0b;
+  --brand-gold-light: #fef3c7;
+  --brand-gold-hover: #d97706;
 }
 
 @theme inline {
   --color-bg: var(--bg);
   --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
   --color-border: var(--border);
+  --color-border-subtle: var(--border-subtle);
   --color-text-primary: var(--text-primary);
   --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+
   --color-risk-low: var(--risk-low);
   --color-risk-medium: var(--risk-medium);
   --color-risk-high: var(--risk-high);
@@ -71,27 +138,21 @@
   --font-sans: var(--font-inter);
   --font-mono: var(--font-jetbrains-mono);
 
-  /* Radius scale (§2.4): 6px inputs/buttons is Tailwind's default `rounded-md`, 12px
-     modals is the default `rounded-xl` — only the 10px card radius needs a custom token. */
   --radius-card: 10px;
 
-  /* Landing page brand colors matching StitchMCP institutional design */
-  --color-brand-gold: #ffd700;
-  --color-brand-goldLight: #fff8d6;
-  --color-brand-goldHover: #e5c100;
-  --color-brand-blue: #1a3a8a;
-  --color-brand-blueLight: #2e5aac;
-  --color-brand-navy: #0b192c;
-  --color-brand-dark: #14161a;
-  --color-brand-muted: #5b6270;
-  --color-brand-border: #e2e5ea;
-  --color-brand-bgLight: #f7f8fa;
-  --color-brand-cardBg: #f5f7fa;
-  --color-risk-crit: #8b1a1a;
-}
-
-.hero-gold-blob {
-  background: linear-gradient(135deg, #ffd700 0%, #ffca00 100%);
+  /* Backward compatible semantic aliases mapped to minimalist palette */
+  --color-brand-gold: var(--brand-gold);
+  --color-brand-goldLight: var(--brand-gold-light);
+  --color-brand-goldHover: var(--brand-gold-hover);
+  --color-brand-blue: var(--brand-blue);
+  --color-brand-blueLight: var(--brand-blue-light);
+  --color-brand-navy: var(--brand-navy);
+  --color-brand-dark: var(--text-primary);
+  --color-brand-muted: var(--text-secondary);
+  --color-brand-border: var(--border);
+  --color-brand-bgLight: var(--bg);
+  --color-brand-cardBg: var(--surface);
+  --color-risk-crit: var(--risk-high);
 }
 
 @font-face {
@@ -109,7 +170,7 @@
   font-family: "Material Symbols Outlined", sans-serif;
   font-weight: normal;
   font-style: normal;
-  font-size: 24px;
+  font-size: 20px;
   line-height: 1;
   letter-spacing: normal;
   text-transform: none;
@@ -128,14 +189,30 @@ body {
   background: var(--color-bg);
   color: var(--color-text-primary);
   font-family: var(--font-sans), system-ui, sans-serif;
+  letter-spacing: -0.011em;
 }
 
-/* Subtle entrance for cards/alerts. Guarded by prefers-reduced-motion so it's opt-in only when
-   the user hasn't asked the OS to reduce motion — no JS feature-detection needed. */
+/* Minimalist technical grid background */
+.bg-grid-minimal {
+  background-size: 32px 32px;
+  background-image: 
+    linear-gradient(to right, rgba(120, 120, 140, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(120, 120, 140, 0.05) 1px, transparent 1px);
+}
+
+/* Minimalist ambient lighting */
+.ambient-glow-blue {
+  background: radial-gradient(circle at center, rgba(59, 130, 246, 0.12) 0%, transparent 70%);
+}
+
+.ambient-glow-subtle {
+  background: radial-gradient(circle at top right, rgba(120, 130, 160, 0.08) 0%, transparent 60%);
+}
+
 @keyframes fade-slide-up {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(6px);
   }
   to {
     opacity: 1;
@@ -145,26 +222,28 @@ body {
 
 @media (prefers-reduced-motion: no-preference) {
   .animate-fade-slide-up {
-    animation: fade-slide-up 350ms ease-out both;
+    animation: fade-slide-up 250ms cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 }
 
-/* Typography scale (§2.2) — named to match the Design Scheme's own token names. */
 @layer utilities {
   .text-display {
     font-size: 28px;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.25;
+    letter-spacing: -0.025em;
   }
   .text-h2 {
     font-size: 20px;
     font-weight: 600;
     line-height: 1.3;
+    letter-spacing: -0.02em;
   }
   .text-h3 {
-    font-size: 16px;
+    font-size: 15px;
     font-weight: 600;
     line-height: 1.4;
+    letter-spacing: -0.015em;
   }
   .text-body {
     font-size: 14px;
@@ -177,10 +256,10 @@ body {
     line-height: 1.4;
   }
   .text-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 600;
     line-height: 1.3;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
   }
 }
