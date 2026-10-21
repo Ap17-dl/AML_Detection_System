@@ -36,7 +36,7 @@ export default function DashboardClient({
   const [loading, setLoading] = useState(true);
 
   // Ingestion state
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
@@ -56,6 +56,35 @@ export default function DashboardClient({
   const [drawerUploadError, setDrawerUploadError] = useState<string | null>(
     null,
   );
+
+  const handleFilesSelected = (files: FileList | File[]) => {
+    const newCsvs = Array.from(files).filter((f) =>
+      f.name.toLowerCase().endsWith(".csv"),
+    );
+    if (newCsvs.length === 0) {
+      setUploadError("Only .csv files are supported.");
+      setDrawerUploadError("Only .csv files are supported.");
+      return;
+    }
+    setSelectedFiles((prev) => {
+      const existingNames = new Set(prev.map((f) => f.name));
+      const uniqueNew = newCsvs.filter((f) => !existingNames.has(f.name));
+      const combined = [...prev, ...uniqueNew];
+      if (combined.length > 3) {
+        const msg = "Maximum 3 CSV files allowed at once. First 3 files kept.";
+        setUploadError(msg);
+        setDrawerUploadError(msg);
+        return combined.slice(0, 3);
+      }
+      setUploadError(null);
+      setDrawerUploadError(null);
+      return combined;
+    });
+  };
+
+  const handleRemoveFile = (indexToRemove: number) => {
+    setSelectedFiles((prev) => prev.filter((_, idx) => idx !== indexToRemove));
+  };
 
   const loadBatches = useCallback(async () => {
     setLoadingBatches(true);
@@ -93,12 +122,23 @@ export default function DashboardClient({
     loadBatches();
   }, [loadSummary, loadBatches]);
 
-  // Handle uploading user-provided batch CSV
-  async function handleUploadBatch(fileToUpload?: File) {
-    const file = fileToUpload || selectedFile;
-    if (!file) {
-      setUploadError("Please select a valid CSV batch file to upload.");
-      setDrawerUploadError("Please select a valid CSV batch file to upload.");
+  // Handle uploading user-provided batch CSVs (up to 3 files)
+  async function handleUploadBatch(filesToUpload?: File[]) {
+    const files =
+      filesToUpload && filesToUpload.length > 0 ? filesToUpload : selectedFiles;
+    if (!files || files.length === 0) {
+      setUploadError(
+        "Please select at least one valid CSV batch file to upload.",
+      );
+      setDrawerUploadError(
+        "Please select at least one valid CSV batch file to upload.",
+      );
+      return;
+    }
+
+    if (files.length > 3) {
+      setUploadError("You can upload a maximum of 3 files at once.");
+      setDrawerUploadError("You can upload a maximum of 3 files at once.");
       return;
     }
 
@@ -110,7 +150,9 @@ export default function DashboardClient({
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
 
       const res = await fetch(
         `${apiBaseUrl}/api/v1/transactions/initial-batch`,
@@ -133,10 +175,14 @@ export default function DashboardClient({
       }
 
       const report = await res.json();
-      const msg = `Batch successfully ingested: ${report.accepted_rows} transactions accepted, ${report.rejected_rows} rejected. Surveillance rails are now active.`;
+      const count = report.total_files || files.length;
+      const msg =
+        count > 1
+          ? `Successfully ingested ${count} batches: ${report.accepted_rows} transactions accepted, ${report.rejected_rows} rejected. Surveillance rails are now active.`
+          : `Batch successfully ingested: ${report.accepted_rows} transactions accepted, ${report.rejected_rows} rejected. Surveillance rails are now active.`;
       setUploadSuccess(msg);
       setDrawerUploadSuccess(msg);
-      setSelectedFile(null);
+      setSelectedFiles([]);
       // Refresh summary & batches to activate live dashboard
       await loadBatches();
       await loadSummary();
@@ -328,17 +374,11 @@ export default function DashboardClient({
                 onDrop={(e) => {
                   e.preventDefault();
                   setIsDragOver(false);
-                  const files = e.dataTransfer.files;
-                  if (files && files.length > 0) {
-                    if (files[0].name.toLowerCase().endsWith(".csv")) {
-                      setSelectedFile(files[0]);
-                      setUploadError(null);
-                    } else {
-                      setUploadError("Only .csv files are supported.");
-                    }
+                  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleFilesSelected(e.dataTransfer.files);
                   }
                 }}
-                className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 text-center transition-all ${
+                className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-all ${
                   isDragOver
                     ? "border-brand-blue bg-brand-blue/5 scale-[0.99]"
                     : "border-border bg-surface-hover/40 hover:bg-surface-hover/80"
@@ -351,40 +391,82 @@ export default function DashboardClient({
                 </div>
 
                 <p className="text-text-primary text-sm font-bold">
-                  {selectedFile
-                    ? selectedFile.name
-                    : "Drag & drop institutional CSV batch here"}
+                  {selectedFiles.length > 0
+                    ? `${selectedFiles.length} of 3 file${selectedFiles.length > 1 ? "s" : ""} selected`
+                    : "Drag & drop up to 3 CSV batch files at once"}
                 </p>
                 <p className="text-text-secondary mt-1 text-xs">
-                  {selectedFile
-                    ? `${(selectedFile.size / 1024).toFixed(1)} KB • Ready for validation and ingestion`
-                    : "Accepts standard CSV with headers (origin, dest, amount, occurred_at)"}
+                  {selectedFiles.length > 0
+                    ? "Review your files below or click browse to add more"
+                    : "Accepts up to 3 institutional CSVs with headers (origin, dest, amount, occurred_at)"}
                 </p>
 
-                <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
-                  <label className="bg-brand-blue hover:bg-brand-blueLight cursor-pointer rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all active:scale-95">
-                    Browse Local File
-                    <input
-                      type="file"
-                      accept=".csv"
-                      className="hidden"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) {
-                          setSelectedFile(file);
-                          setUploadError(null);
-                        }
-                      }}
-                    />
-                  </label>
+                {/* Selected Files List Chips */}
+                {selectedFiles.length > 0 && (
+                  <div className="mt-4 flex w-full max-w-lg flex-col gap-2">
+                    {selectedFiles.map((file, idx) => (
+                      <div
+                        key={`${file.name}-${idx}`}
+                        className="border-border bg-surface flex items-center justify-between rounded-lg border px-3 py-2 text-left shadow-2xs"
+                      >
+                        <div className="flex items-center gap-2.5 overflow-hidden">
+                          <span className="material-symbols-outlined text-brand-blue shrink-0 text-[18px]">
+                            description
+                          </span>
+                          <div className="min-w-0">
+                            <p className="text-text-primary truncate text-xs font-semibold">
+                              {file.name}
+                            </p>
+                            <p className="text-text-secondary text-[10px]">
+                              {(file.size / 1024).toFixed(1)} KB • Batch #
+                              {idx + 1}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFile(idx);
+                          }}
+                          className="hover:bg-surface-hover text-text-muted rounded p-1 text-xs transition-colors hover:text-rose-500"
+                          title="Remove this file"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
 
-                  {selectedFile && (
+                <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+                  {selectedFiles.length < 3 && (
+                    <label className="bg-brand-blue hover:bg-brand-blueLight cursor-pointer rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-sm transition-all active:scale-95">
+                      {selectedFiles.length === 0
+                        ? "Browse CSV Files (Max 3)"
+                        : `Add File (${3 - selectedFiles.length} remaining)`}
+                      <input
+                        type="file"
+                        accept=".csv"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            handleFilesSelected(e.target.files);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+                  )}
+
+                  {selectedFiles.length > 0 && (
                     <button
                       type="button"
-                      onClick={() => setSelectedFile(null)}
+                      onClick={() => setSelectedFiles([])}
                       className="border-border text-text-secondary hover:bg-surface rounded-lg border px-3 py-2 text-xs font-medium transition-colors"
                     >
-                      Clear Selection
+                      Clear All ({selectedFiles.length})
                     </button>
                   )}
                 </div>
@@ -395,7 +477,7 @@ export default function DashboardClient({
                 <button
                   type="button"
                   onClick={() => handleUploadBatch()}
-                  disabled={!selectedFile || isUploading}
+                  disabled={selectedFiles.length === 0 || isUploading}
                   className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-2 rounded-lg px-5 py-2.5 text-xs font-bold text-white shadow-xs transition-all active:scale-[0.98] disabled:opacity-50"
                 >
                   {isUploading && (
@@ -406,7 +488,9 @@ export default function DashboardClient({
                   <span>
                     {isUploading
                       ? "Ingesting & Scoring..."
-                      : "Ingest Batch & Initialize Surveillance"}
+                      : selectedFiles.length > 1
+                        ? `Ingest ${selectedFiles.length} Batches & Initialize Surveillance`
+                        : "Ingest Batch & Initialize Surveillance"}
                   </span>
                 </button>
 
@@ -772,43 +856,78 @@ export default function DashboardClient({
                     <span className="material-symbols-outlined text-brand-blue text-[16px]">
                       upload_file
                     </span>
-                    Upload New CSV File
+                    Upload CSV Files (Up to 3)
                   </span>
                   <span className="text-text-secondary text-[11px]">
-                    CSV schema required
+                    {selectedFiles.length}/3 selected
                   </span>
                 </div>
 
                 <div className="flex flex-col gap-3">
-                  <label className="border-border bg-surface hover:bg-surface-hover flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 text-center transition-colors">
-                    <span className="material-symbols-outlined text-brand-blue mb-1 text-2xl">
-                      cloud_upload
-                    </span>
-                    <span className="text-text-primary text-xs font-semibold">
-                      {selectedFile
-                        ? selectedFile.name
-                        : "Choose CSV or drag & drop"}
-                    </span>
-                    <span className="text-text-secondary mt-0.5 text-[10px]">
-                      {selectedFile
-                        ? `${(selectedFile.size / 1024).toFixed(1)} KB`
-                        : "Origin, destination, amount, timestamp columns"}
-                    </span>
-                    <input
-                      type="file"
-                      accept=".csv"
-                      className="hidden"
-                      onChange={(e) => {
-                        const f = e.target.files?.[0];
-                        if (f) setSelectedFile(f);
-                      }}
-                    />
-                  </label>
+                  {selectedFiles.length < 3 && (
+                    <label className="border-border bg-surface hover:bg-surface-hover flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 text-center transition-colors">
+                      <span className="material-symbols-outlined text-brand-blue mb-1 text-2xl">
+                        cloud_upload
+                      </span>
+                      <span className="text-text-primary text-xs font-semibold">
+                        {selectedFiles.length === 0
+                          ? "Choose up to 3 CSVs or drag & drop"
+                          : `Add more (${3 - selectedFiles.length} remaining)`}
+                      </span>
+                      <span className="text-text-secondary mt-0.5 text-[10px]">
+                        Origin, destination, amount, timestamp columns
+                      </span>
+                      <input
+                        type="file"
+                        accept=".csv"
+                        multiple
+                        className="hidden"
+                        onChange={(e) => {
+                          if (e.target.files && e.target.files.length > 0) {
+                            handleFilesSelected(e.target.files);
+                            e.target.value = "";
+                          }
+                        }}
+                      />
+                    </label>
+                  )}
+
+                  {/* Selected Files List Chips in Drawer */}
+                  {selectedFiles.length > 0 && (
+                    <div className="flex flex-col gap-1.5">
+                      {selectedFiles.map((f, idx) => (
+                        <div
+                          key={`${f.name}-${idx}`}
+                          className="border-border bg-surface flex items-center justify-between rounded-lg border px-2.5 py-1.5 text-xs shadow-2xs"
+                        >
+                          <div className="flex items-center gap-2 overflow-hidden">
+                            <span className="material-symbols-outlined text-brand-blue shrink-0 text-[16px]">
+                              description
+                            </span>
+                            <span className="text-text-primary truncate text-[11px] font-medium">
+                              {f.name}
+                            </span>
+                            <span className="text-text-muted shrink-0 text-[10px]">
+                              ({(f.size / 1024).toFixed(1)} KB)
+                            </span>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveFile(idx)}
+                            className="hover:bg-surface-hover text-text-muted rounded p-1 text-[11px] transition-colors hover:text-rose-500"
+                            title="Remove file"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
 
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      disabled={!selectedFile || isUploading}
+                      disabled={selectedFiles.length === 0 || isUploading}
                       onClick={async () => {
                         await handleUploadBatch();
                       }}
@@ -826,7 +945,11 @@ export default function DashboardClient({
                           <span className="material-symbols-outlined text-[16px]">
                             file_upload
                           </span>
-                          <span>Upload Batch</span>
+                          <span>
+                            {selectedFiles.length > 1
+                              ? `Upload ${selectedFiles.length} Batches at once`
+                              : "Upload Batch"}
+                          </span>
                         </>
                       )}
                     </button>

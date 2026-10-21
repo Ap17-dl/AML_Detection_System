@@ -144,3 +144,18 @@ async def test_ingest_csv_populates_multiple_tables(fake_session):
     assert Explanation in added_types
     assert Alert in added_types
     assert AuditLog in added_types
+
+
+async def test_initial_batch_rejects_more_than_3_files(fake_session):
+    csv_bytes = b"origin_account,destination_account,amount,occurred_at\nACC-1,ACC-2,100,2026-01-01T00:00:00Z"
+    files = [
+        ("files", ("f1.csv", io.BytesIO(csv_bytes), "text/csv")),
+        ("files", ("f2.csv", io.BytesIO(csv_bytes), "text/csv")),
+        ("files", ("f3.csv", io.BytesIO(csv_bytes), "text/csv")),
+        ("files", ("f4.csv", io.BytesIO(csv_bytes), "text/csv")),
+    ]
+    async with api_client(current_user=ANALYST, fake_session=fake_session) as client:
+        res = await client.post("/api/v1/transactions/initial-batch", files=files)
+        assert res.status_code == 422
+        data = res.json()
+        assert data["error"]["code"] == "too_many_files"

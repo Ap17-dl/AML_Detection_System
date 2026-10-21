@@ -110,6 +110,20 @@ class IngestionReportOut(BaseModel):
     errors: list[IngestionRowError] = []
 
 
+class MultiIngestionReportOut(BaseModel):
+    """Response shape for multiple batch files uploaded at once (up to 3 files)."""
+
+    total_files: int = 1
+    batches: list[IngestionReportOut] = []
+    batch_id: uuid.UUID | None = None
+    filename: str | None = None
+    total_rows: int = 0
+    accepted_rows: int = 0
+    rejected_rows: int = 0
+    status: str = "completed"
+    errors: list[IngestionRowError] = []
+
+
 class BatchOut(BaseModel):
     """Schema representing an uploaded batch and its processing details."""
 
@@ -132,4 +146,3 @@ class BatchListOut(BaseModel):
 
     items: list[BatchOut]
     total: int
-
