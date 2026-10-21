@@ -75,7 +75,9 @@ class FakeSession:
         self.committed = False
 
     async def execute(self, _stmt) -> FakeResult:
-        return self.execute_results.pop(0)
+        if self.execute_results:
+            return self.execute_results.pop(0)
+        return FakeResult()
 
     async def get(self, _model, obj_id):
         return self.get_results.get(obj_id)
