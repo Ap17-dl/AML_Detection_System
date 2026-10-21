@@ -212,6 +212,33 @@ export default function AlertsClient({
         )}
       </div>
 
+      {total === 0 && !statusFilter && !riskFilter && (
+        <div className="border-border bg-surface flex flex-col items-center justify-between gap-4 rounded-xl border p-5 shadow-xs sm:flex-row sm:text-left">
+          <div className="flex items-center gap-3">
+            <div className="border-brand-blue/20 bg-brand-blue/10 text-brand-blue flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border">
+              <span className="material-symbols-outlined text-[22px]">
+                notifications_off
+              </span>
+            </div>
+            <div>
+              <h3 className="text-text-primary text-xs font-bold">
+                No Alerts Generated Yet
+              </h3>
+              <p className="text-text-secondary text-[11px]">
+                Surveillance alerts appear here once transactions have been
+                ingested and evaluated by ML risk scoring.
+              </p>
+            </div>
+          </div>
+          <Link
+            href="/dashboard"
+            className="bg-brand-blue hover:bg-brand-blueLight shrink-0 rounded-lg px-4 py-2 text-xs font-semibold text-white shadow-xs"
+          >
+            Go to Ingestion Setup
+          </Link>
+        </div>
+      )}
+
       {/* Table */}
       <DataTable
         columns={columns}

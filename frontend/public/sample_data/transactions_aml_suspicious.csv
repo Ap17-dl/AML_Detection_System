@@ -1,0 +1,13 @@
+external_ref,origin_account,destination_account,amount,currency,transaction_type,channel,occurred_at,origin_customer_name,destination_customer_name,origin_customer_country,destination_customer_country
+TXN-STRUCT-001,ACC-SUSP-99001,ACC-SHELL-8001,9520.00,USD,transfer,branch,2026-03-02T20:12:00+00:00,Victor Vance (Front Corp),Holding Co 1,US,CY
+TXN-STRUCT-002,ACC-SUSP-99001,ACC-SHELL-8002,9640.00,USD,transfer,branch,2026-03-02T21:12:00+00:00,Victor Vance (Front Corp),Holding Co 2,US,CY
+TXN-STRUCT-003,ACC-SUSP-99001,ACC-SHELL-8003,9760.00,USD,transfer,branch,2026-03-02T22:12:00+00:00,Victor Vance (Front Corp),Holding Co 3,US,CY
+TXN-STRUCT-004,ACC-SUSP-99001,ACC-SHELL-8004,9880.00,USD,transfer,branch,2026-03-02T23:12:00+00:00,Victor Vance (Front Corp),Holding Co 4,US,CY
+TXN-CYCLE-01,ACC-CYCLE-1,ACC-CYCLE-2,48500.00,USD,wire,wire,2026-03-04T23:00:00+00:00,Alpha Logistics LLC,Beta Trading Ltd,US,PA
+TXN-CYCLE-02,ACC-CYCLE-2,ACC-CYCLE-3,48500.00,USD,wire,wire,2026-03-05T03:00:00+00:00,Beta Trading Ltd,Gamma Consulting SA,PA,KY
+TXN-CYCLE-03,ACC-CYCLE-3,ACC-CYCLE-1,48500.00,USD,wire,wire,2026-03-05T07:00:00+00:00,Gamma Consulting SA,Alpha Logistics LLC,KY,US
+TXN-ANOM-NIGHT-01,ACC-SUSP-77002,ACC-OFFSHORE-99,240000.00,USD,wire,wire,2026-03-06T12:24:00+00:00,Marcus Kane,Apex Holdings Offshore,US,SC
+TXN-FANIN-01,ACC-MULE-01,ACC-COLLECTOR-01,8050.00,USD,transfer,online,2026-03-07T18:15:00+00:00,Courier Agent 1,Central Nexus Inc,US,US
+TXN-FANIN-02,ACC-MULE-02,ACC-COLLECTOR-01,8300.00,USD,transfer,online,2026-03-07T19:15:00+00:00,Courier Agent 2,Central Nexus Inc,US,US
+TXN-FANIN-03,ACC-MULE-03,ACC-COLLECTOR-01,8550.00,USD,transfer,online,2026-03-07T20:15:00+00:00,Courier Agent 3,Central Nexus Inc,US,US
+TXN-FANIN-04,ACC-MULE-04,ACC-COLLECTOR-01,8800.00,USD,transfer,online,2026-03-07T21:15:00+00:00,Courier Agent 4,Central Nexus Inc,US,US

@@ -85,3 +85,5 @@ class DashboardSummaryOut(BaseModel):
     alerts_by_risk: dict[str, int]
     alerts_by_status: dict[str, int]
     recent_alerts: list[AlertOut] = []
+    has_uploaded_batches: bool = True
+    is_demo_user: bool = False

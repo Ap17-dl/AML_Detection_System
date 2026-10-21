@@ -64,9 +64,9 @@ export function Topbar({ user }: { user: CurrentUser }) {
             <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
           </span>
           <span className="text-text-secondary font-mono text-[11px] font-semibold">
-            {process.env.NODE_ENV === "production"
-              ? "Institutional Clearance: US-East Production"
-              : "Institutional Sandbox: ISO 20022 Testnet"}
+            {user.email?.endsWith("@aml.local")
+              ? "Demo Environment • Pre-loaded Data"
+              : "Institutional Profile • Dedicated Workspace"}
           </span>
         </div>
       </div>

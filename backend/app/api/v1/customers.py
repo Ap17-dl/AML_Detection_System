@@ -24,7 +24,7 @@ _READ_ROLES = require_role(RoleName.AML_ANALYST, RoleName.ADMINISTRATOR)
 @router.get("", response_model=CustomerListOut)
 async def list_customers(
     db: AsyncSession = Depends(get_db),
-    _: CurrentUser = Depends(_READ_ROLES),
+    current_user: CurrentUser = Depends(_READ_ROLES),
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=100),
     search: str | None = Query(None, description="Search by name, external_ref, or country"),
@@ -33,8 +33,30 @@ async def list_customers(
     order: str = Query("desc", description="Sort order: asc or desc"),
 ) -> CustomerListOut:
     """Lists customers with search, filter, and pagination."""
-    query = select(Customer)
-    count_query = select(func.count(Customer.customer_id))
+    if not current_user.is_demo:
+        from app.models.ingestion_batch import IngestionBatch
+        from app.models.transaction import Transaction
+
+        batch_res = await db.execute(
+            select(IngestionBatch.batch_id).where(
+                IngestionBatch.uploaded_by == current_user.user_id
+            )
+        )
+        user_batch_ids = batch_res.scalars().all()
+        if not user_batch_ids:
+            return CustomerListOut(items=[], total=0, page=page, page_size=page_size)
+
+        user_accts_subq = select(Transaction.origin_account_id).where(
+            Transaction.ingestion_batch_id.in_(user_batch_ids)
+        )
+        user_cust_subq = select(Account.customer_id).where(Account.account_id.in_(user_accts_subq))
+        query = select(Customer).where(Customer.customer_id.in_(user_cust_subq))
+        count_query = select(func.count(Customer.customer_id)).where(
+            Customer.customer_id.in_(user_cust_subq)
+        )
+    else:
+        query = select(Customer)
+        count_query = select(func.count(Customer.customer_id))
 
     if search:
         pattern = f"%{search}%"

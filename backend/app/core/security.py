@@ -20,6 +20,14 @@ from app.models.user import User
 _bearer_scheme = HTTPBearer(auto_error=False)
 
 
+def is_demo_user(email: str | None) -> bool:
+    """Returns True if the email belongs to a seeded demo persona or test runner."""
+    if not email:
+        return False
+    lower = email.lower()
+    return lower.endswith("@aml.local") or lower.endswith("@example.com")
+
+
 @dataclass(frozen=True)
 class CurrentUser:
     """The authenticated caller, resolved from a verified Supabase JWT + the local user profile."""
@@ -29,6 +37,10 @@ class CurrentUser:
     role_name: str
     full_name: str | None
     is_active: bool
+
+    @property
+    def is_demo(self) -> bool:
+        return is_demo_user(self.email)
 
 
 @lru_cache(maxsize=1)

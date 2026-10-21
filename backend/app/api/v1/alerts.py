@@ -44,6 +44,24 @@ async def list_alerts(
     query = select(Alert)
     count_query = select(func.count(Alert.alert_id))
 
+    if not current_user.is_demo:
+        from app.models.ingestion_batch import IngestionBatch
+
+        batch_res = await db.execute(
+            select(IngestionBatch.batch_id).where(
+                IngestionBatch.uploaded_by == current_user.user_id
+            )
+        )
+        user_batch_ids = batch_res.scalars().all()
+        if not user_batch_ids:
+            return AlertListOut(items=[], total=0, page=page, page_size=page_size)
+
+        user_txns_subq = select(Transaction.transaction_id).where(
+            Transaction.ingestion_batch_id.in_(user_batch_ids)
+        )
+        query = query.where(Alert.triggering_transaction_id.in_(user_txns_subq))
+        count_query = count_query.where(Alert.triggering_transaction_id.in_(user_txns_subq))
+
     if status:
         query = query.where(Alert.status == status)
         count_query = count_query.where(Alert.status == status)

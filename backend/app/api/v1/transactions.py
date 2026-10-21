@@ -83,10 +83,107 @@ async def import_csv(
     )
 
 
+@router.post("/initial-batch", response_model=IngestionReportOut, status_code=201)
+async def upload_initial_batch(
+    file: UploadFile = File(...),
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(_READ_ROLES),
+) -> IngestionReportOut:
+    """Allows any authenticated profile to upload their initial/required batch CSV files."""
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise ApiError(422, "invalid_file_type", "Only .csv files are accepted.")
+
+    csv_bytes = await file.read()
+    if len(csv_bytes) == 0:
+        raise ApiError(422, "empty_file", "The uploaded file is empty.")
+
+    batch, errors = await ingest_csv(
+        db,
+        csv_bytes=csv_bytes,
+        filename=file.filename,
+        uploaded_by=current_user.user_id,
+    )
+
+    await record_audit_log(
+        db,
+        actor_user_id=current_user.user_id,
+        action="csv_import",
+        entity_type="ingestion_batch",
+        entity_id=batch.batch_id,
+        details={
+            "filename": file.filename,
+            "total_rows": batch.total_rows,
+            "accepted_rows": batch.accepted_rows,
+            "rejected_rows": batch.rejected_rows,
+        },
+    )
+    await db.commit()
+
+    return IngestionReportOut(
+        batch_id=batch.batch_id,
+        filename=batch.filename,
+        total_rows=batch.total_rows,
+        accepted_rows=batch.accepted_rows,
+        rejected_rows=batch.rejected_rows,
+        status=batch.status,
+        errors=errors,
+    )
+
+
+@router.post("/load-sample", response_model=IngestionReportOut, status_code=201)
+async def load_sample_batch(
+    sample_type: str = Query("standard", pattern="^(standard|suspicious)$"),
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(_READ_ROLES),
+) -> IngestionReportOut:
+    """Convenience endpoint: loads standard or suspicious sample batch CSV directly for the user's profile."""
+    from pathlib import Path
+
+    filename = (
+        "transactions_aml_suspicious.csv"
+        if sample_type == "suspicious"
+        else "transactions_standard_batch.csv"
+    )
+
+    csv_path = Path("sample_data") / filename
+    if not csv_path.exists():
+        csv_path = Path("../sample_data") / filename
+    if not csv_path.exists():
+        raise ApiError(404, "file_not_found", f"Sample file {filename} not found.")
+
+    csv_bytes = csv_path.read_bytes()
+    batch, errors = await ingest_csv(
+        db,
+        csv_bytes=csv_bytes,
+        filename=filename,
+        uploaded_by=current_user.user_id,
+    )
+
+    await record_audit_log(
+        db,
+        actor_user_id=current_user.user_id,
+        action="load_sample_batch",
+        entity_type="ingestion_batch",
+        entity_id=batch.batch_id,
+        details={"filename": filename, "sample_type": sample_type},
+    )
+    await db.commit()
+
+    return IngestionReportOut(
+        batch_id=batch.batch_id,
+        filename=batch.filename,
+        total_rows=batch.total_rows,
+        accepted_rows=batch.accepted_rows,
+        rejected_rows=batch.rejected_rows,
+        status=batch.status,
+        errors=errors,
+    )
+
+
 @router.get("", response_model=TransactionListOut)
 async def list_transactions(
     db: AsyncSession = Depends(get_db),
-    _: CurrentUser = Depends(_READ_ROLES),
+    current_user: CurrentUser = Depends(_READ_ROLES),
     page: int = Query(1, ge=1),
     page_size: int = Query(25, ge=1, le=100),
     search: str | None = Query(None, description="Search by external_ref or account number"),
@@ -98,8 +195,26 @@ async def list_transactions(
     order: str = Query("desc", description="Sort order: asc or desc"),
 ) -> TransactionListOut:
     """Lists transactions with search, sort, filter, and pagination (AML-FR-06)."""
+    # For non-demo users, only list transactions belonging to batches they uploaded
+    user_batch_ids = None
+    if not current_user.is_demo:
+        from app.models.ingestion_batch import IngestionBatch
+
+        batch_res = await db.execute(
+            select(IngestionBatch.batch_id).where(
+                IngestionBatch.uploaded_by == current_user.user_id
+            )
+        )
+        user_batch_ids = batch_res.scalars().all()
+        if not user_batch_ids:
+            return TransactionListOut(items=[], total=0, page=page, page_size=page_size, pages=0)
+
     query = select(Transaction)
     count_query = select(func.count(Transaction.transaction_id))
+
+    if not current_user.is_demo and user_batch_ids is not None:
+        query = query.where(Transaction.ingestion_batch_id.in_(user_batch_ids))
+        count_query = count_query.where(Transaction.ingestion_batch_id.in_(user_batch_ids))
 
     # --- filters ---
     if search:

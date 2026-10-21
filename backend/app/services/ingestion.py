@@ -290,6 +290,12 @@ async def ingest_csv(
                     combined_risk_score=Decimal(f"{prob:.5f}"),
                 )
                 db.add(pred)
+                await db.flush()
+
+                if cat in ("high", "medium"):
+                    from app.services.alerting import create_alert_for_transaction
+
+                    await create_alert_for_transaction(db, txn, pred)
             except Exception:
                 # If model scoring fails, transaction is still safely accepted
                 pass
