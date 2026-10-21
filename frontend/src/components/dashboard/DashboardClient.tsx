@@ -6,6 +6,7 @@ import { DistributionChart } from "@/components/ui/DistributionChart";
 import { RiskBadge } from "@/components/ui/RiskBadge";
 import { StatusPill } from "@/components/ui/StatusPill";
 import type { AlertItem } from "@/components/alerts/AlertsClient";
+import type { IngestionBatchItem, BatchListResponse } from "@/types/data";
 
 interface DashboardSummary {
   open_alerts_count: number;
@@ -40,8 +41,38 @@ export default function DashboardClient({
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
   const [isDragOver, setIsDragOver] = useState(false);
-  const [showAdditionalUploadModal, setShowAdditionalUploadModal] =
-    useState(false);
+
+  // Batch Side Drawer & File Management state
+  const [isBatchDrawerOpen, setIsBatchDrawerOpen] = useState(false);
+  const [batches, setBatches] = useState<IngestionBatchItem[]>([]);
+  const [loadingBatches, setLoadingBatches] = useState(false);
+  const [batchToDelete, setBatchToDelete] = useState<IngestionBatchItem | null>(
+    null,
+  );
+  const [isDeletingBatch, setIsDeletingBatch] = useState(false);
+  const [drawerUploadSuccess, setDrawerUploadSuccess] = useState<string | null>(
+    null,
+  );
+  const [drawerUploadError, setDrawerUploadError] = useState<string | null>(
+    null,
+  );
+
+  const loadBatches = useCallback(async () => {
+    setLoadingBatches(true);
+    try {
+      const res = await fetch(`${apiBaseUrl}/api/v1/transactions/batches`, {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (res.ok) {
+        const data: BatchListResponse = await res.json();
+        setBatches(data.items || []);
+      }
+    } catch (err) {
+      console.error("Failed to fetch batches:", err);
+    } finally {
+      setLoadingBatches(false);
+    }
+  }, [accessToken, apiBaseUrl]);
 
   const loadSummary = useCallback(async () => {
     setLoading(true);
@@ -59,19 +90,23 @@ export default function DashboardClient({
 
   useEffect(() => {
     loadSummary();
-  }, [loadSummary]);
+    loadBatches();
+  }, [loadSummary, loadBatches]);
 
   // Handle uploading user-provided batch CSV
   async function handleUploadBatch(fileToUpload?: File) {
     const file = fileToUpload || selectedFile;
     if (!file) {
       setUploadError("Please select a valid CSV batch file to upload.");
+      setDrawerUploadError("Please select a valid CSV batch file to upload.");
       return;
     }
 
     setIsUploading(true);
     setUploadError(null);
     setUploadSuccess(null);
+    setDrawerUploadError(null);
+    setDrawerUploadSuccess(null);
 
     try {
       const formData = new FormData();
@@ -98,17 +133,18 @@ export default function DashboardClient({
       }
 
       const report = await res.json();
-      setUploadSuccess(
-        `Batch successfully ingested: ${report.accepted_rows} transactions accepted, ${report.rejected_rows} rejected. Surveillance rails are now active.`,
-      );
+      const msg = `Batch successfully ingested: ${report.accepted_rows} transactions accepted, ${report.rejected_rows} rejected. Surveillance rails are now active.`;
+      setUploadSuccess(msg);
+      setDrawerUploadSuccess(msg);
       setSelectedFile(null);
-      setShowAdditionalUploadModal(false);
-      // Refresh summary to activate live dashboard
+      // Refresh summary & batches to activate live dashboard
+      await loadBatches();
       await loadSummary();
     } catch (err: unknown) {
-      setUploadError(
-        err instanceof Error ? err.message : "Error uploading batch file.",
-      );
+      const errMsg =
+        err instanceof Error ? err.message : "Error uploading batch file.";
+      setUploadError(errMsg);
+      setDrawerUploadError(errMsg);
     } finally {
       setIsUploading(false);
     }
@@ -121,6 +157,8 @@ export default function DashboardClient({
     setIsUploading(true);
     setUploadError(null);
     setUploadSuccess(null);
+    setDrawerUploadError(null);
+    setDrawerUploadSuccess(null);
 
     try {
       const res = await fetch(
@@ -143,17 +181,54 @@ export default function DashboardClient({
       }
 
       const report = await res.json();
-      setUploadSuccess(
-        `Sample dataset '${sampleType}' ingested: ${report.accepted_rows} transactions processed, regulatory alerts generated.`,
-      );
-      setShowAdditionalUploadModal(false);
+      const msg = `Sample dataset '${sampleType}' ingested: ${report.accepted_rows} transactions processed, regulatory alerts generated.`;
+      setUploadSuccess(msg);
+      setDrawerUploadSuccess(msg);
+      await loadBatches();
       await loadSummary();
     } catch (err: unknown) {
-      setUploadError(
-        err instanceof Error ? err.message : "Error loading sample dataset.",
-      );
+      const errMsg =
+        err instanceof Error ? err.message : "Error loading sample dataset.";
+      setUploadError(errMsg);
+      setDrawerUploadError(errMsg);
     } finally {
       setIsUploading(false);
+    }
+  }
+
+  // Handle removing / deleting an uploaded batch
+  async function handleDeleteBatch(batchId: string) {
+    setIsDeletingBatch(true);
+    setDrawerUploadError(null);
+    setDrawerUploadSuccess(null);
+    try {
+      const res = await fetch(
+        `${apiBaseUrl}/api/v1/transactions/batches/${batchId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+          },
+        },
+      );
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(
+          errData?.error?.message || "Failed to remove batch file.",
+        );
+      }
+      setDrawerUploadSuccess(
+        "Batch file and all linked transactions, predictions, and alerts were purged.",
+      );
+      setBatchToDelete(null);
+      await loadBatches();
+      await loadSummary();
+    } catch (err: unknown) {
+      setDrawerUploadError(
+        err instanceof Error ? err.message : "Error deleting batch file.",
+      );
+    } finally {
+      setIsDeletingBatch(false);
     }
   }
 
@@ -558,13 +633,21 @@ export default function DashboardClient({
         <div className="flex items-center gap-2.5">
           <button
             type="button"
-            onClick={() => setShowAdditionalUploadModal(true)}
-            className="border-border bg-surface text-text-primary hover:bg-surface-hover flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold shadow-xs transition-all"
+            onClick={() => {
+              setIsBatchDrawerOpen(true);
+              loadBatches();
+            }}
+            className="border-border bg-surface text-text-primary hover:bg-surface-hover hover:border-brand-blue flex items-center gap-1.5 rounded-lg border px-3.5 py-2 text-xs font-semibold shadow-xs transition-all"
           >
-            <span className="material-symbols-outlined text-[16px]">
-              upload_file
+            <span className="material-symbols-outlined text-brand-blue text-[16px]">
+              folder_open
             </span>
-            <span>Ingest Batch CSV</span>
+            <span>Batch Files</span>
+            {batches.length > 0 && (
+              <span className="bg-brand-blue/10 text-brand-blue rounded-full px-2 py-0.5 text-[10px] font-bold">
+                {batches.length}
+              </span>
+            )}
           </button>
 
           {role !== "data_operator" && (
@@ -581,85 +664,399 @@ export default function DashboardClient({
         </div>
       </div>
 
-      {/* Upload Additional Batch Modal */}
-      {showAdditionalUploadModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/60 p-4 backdrop-blur-xs">
-          <div className="border-border bg-surface w-full max-w-lg rounded-2xl border p-6 shadow-2xl">
-            <div className="border-border flex items-center justify-between border-b pb-3">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-brand-blue text-[20px]">
-                  upload_file
-                </span>
-                <h3 className="text-text-primary text-base font-bold">
-                  Ingest Additional Batch CSV
-                </h3>
+      {/* Floating "Go To Side" Button on Right Viewport Edge */}
+      <button
+        type="button"
+        onClick={() => {
+          setIsBatchDrawerOpen(true);
+          loadBatches();
+        }}
+        className="border-brand-blue/40 bg-surface/95 text-text-primary hover:bg-brand-blue group fixed top-1/2 right-0 z-40 flex -translate-y-1/2 items-center gap-2 rounded-l-xl border-y border-l px-3 py-3 text-xs font-bold shadow-2xl backdrop-blur-md transition-all hover:text-white"
+        title="View Uploaded Batch Files, Details, Remove or Ingest new files"
+      >
+        <span className="material-symbols-outlined text-brand-blue text-[20px] group-hover:text-white">
+          folder_open
+        </span>
+        <span className="hidden font-semibold sm:inline">Uploaded Files</span>
+        {batches.length > 0 && (
+          <span className="bg-brand-blue group-hover:text-brand-blue rounded-full px-2 py-0.5 text-[10px] font-bold text-white group-hover:bg-white">
+            {batches.length}
+          </span>
+        )}
+      </button>
+
+      {/* Slide-over Side Drawer for Uploaded Batch Files */}
+      {isBatchDrawerOpen && (
+        <div className="animate-fade-slide-up fixed inset-0 z-50 flex justify-end bg-slate-950/60 backdrop-blur-xs transition-opacity">
+          <div
+            className="fixed inset-0"
+            onClick={() => setIsBatchDrawerOpen(false)}
+          />
+          <div className="border-border bg-surface relative z-10 flex h-full w-full max-w-xl flex-col border-l shadow-2xl">
+            {/* Drawer Header */}
+            <div className="border-border flex items-center justify-between border-b p-5">
+              <div className="flex items-center gap-3">
+                <div className="border-brand-blue/30 bg-brand-blue/10 text-brand-blue flex h-10 w-10 items-center justify-center rounded-xl border">
+                  <span className="material-symbols-outlined text-[22px]">
+                    folder_open
+                  </span>
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-text-primary text-base font-bold">
+                      Batch Files &amp; Datasets
+                    </h2>
+                    <span className="bg-brand-blue/10 text-brand-blue rounded-full px-2 py-0.5 text-[10px] font-bold">
+                      {batches.length} {batches.length === 1 ? "file" : "files"}
+                    </span>
+                  </div>
+                  <p className="text-text-secondary text-xs">
+                    Inspect uploaded batches, remove files, or upload new
+                    transaction batches.
+                  </p>
+                </div>
               </div>
               <button
                 type="button"
-                onClick={() => {
-                  setShowAdditionalUploadModal(false);
-                  setSelectedFile(null);
-                  setUploadError(null);
-                }}
-                className="text-text-secondary hover:text-text-primary text-lg font-bold"
+                onClick={() => setIsBatchDrawerOpen(false)}
+                className="text-text-secondary hover:text-text-primary hover:bg-surface-hover flex h-8 w-8 items-center justify-center rounded-lg transition-colors"
               >
-                ✕
+                <span className="material-symbols-outlined text-[20px]">
+                  close
+                </span>
               </button>
             </div>
 
-            <div className="mt-4">
-              <label className="border-border bg-surface-hover/30 hover:bg-surface-hover/60 flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed p-6 text-center transition-colors">
-                <span className="material-symbols-outlined text-brand-blue mb-2 text-3xl">
-                  cloud_upload
-                </span>
-                <span className="text-text-primary text-xs font-bold">
-                  {selectedFile
-                    ? selectedFile.name
-                    : "Select or Drop CSV Batch"}
-                </span>
-                <span className="text-text-muted mt-1 text-[11px]">
-                  {selectedFile
-                    ? `${(selectedFile.size / 1024).toFixed(1)} KB`
-                    : "Must have origin, dest, amount, occurred_at"}
-                </span>
-                <input
-                  type="file"
-                  accept=".csv"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) setSelectedFile(file);
-                  }}
-                />
-              </label>
-
-              {uploadError && (
-                <p className="mt-2 text-xs font-semibold text-rose-600">
-                  {uploadError}
-                </p>
-              )}
-
-              <div className="mt-5 flex items-center justify-end gap-2.5">
+            {/* Drawer Feedback Alerts */}
+            {drawerUploadSuccess && (
+              <div className="m-4 mb-0 flex items-center justify-between rounded-xl border border-emerald-500/30 bg-emerald-50/80 p-3 text-xs font-semibold text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px]">
+                    check_circle
+                  </span>
+                  <span>{drawerUploadSuccess}</span>
+                </div>
                 <button
                   type="button"
-                  onClick={() => {
-                    setShowAdditionalUploadModal(false);
-                    setSelectedFile(null);
-                    setUploadError(null);
-                  }}
-                  className="border-border text-text-secondary hover:bg-surface-hover rounded-lg border px-4 py-2 text-xs font-medium"
+                  onClick={() => setDrawerUploadSuccess(null)}
+                  className="text-emerald-700 dark:text-emerald-400"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleUploadBatch()}
-                  disabled={!selectedFile || isUploading}
-                  className="bg-brand-blue hover:bg-brand-blueLight rounded-lg px-5 py-2 text-xs font-bold text-white shadow-xs disabled:opacity-50"
-                >
-                  {isUploading ? "Ingesting..." : "Ingest Batch"}
+                  ✕
                 </button>
               </div>
+            )}
+            {drawerUploadError && (
+              <div className="m-4 mb-0 flex items-center justify-between rounded-xl border border-rose-500/30 bg-rose-50/80 p-3 text-xs font-semibold text-rose-800 dark:bg-rose-950/40 dark:text-rose-300">
+                <div className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-[18px]">
+                    error
+                  </span>
+                  <span>{drawerUploadError}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setDrawerUploadError(null)}
+                  className="text-rose-700 dark:text-rose-400"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
+            {/* Drawer Scrollable Content */}
+            <div className="flex-1 space-y-6 overflow-y-auto p-5">
+              {/* Option to Upload New Files */}
+              <div className="border-border bg-surface-hover/30 rounded-xl border p-4">
+                <div className="mb-3 flex items-center justify-between">
+                  <span className="text-text-primary flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase">
+                    <span className="material-symbols-outlined text-brand-blue text-[16px]">
+                      upload_file
+                    </span>
+                    Upload New CSV File
+                  </span>
+                  <span className="text-text-secondary text-[11px]">
+                    CSV schema required
+                  </span>
+                </div>
+
+                <div className="flex flex-col gap-3">
+                  <label className="border-border bg-surface hover:bg-surface-hover flex cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed p-4 text-center transition-colors">
+                    <span className="material-symbols-outlined text-brand-blue mb-1 text-2xl">
+                      cloud_upload
+                    </span>
+                    <span className="text-text-primary text-xs font-semibold">
+                      {selectedFile
+                        ? selectedFile.name
+                        : "Choose CSV or drag & drop"}
+                    </span>
+                    <span className="text-text-secondary mt-0.5 text-[10px]">
+                      {selectedFile
+                        ? `${(selectedFile.size / 1024).toFixed(1)} KB`
+                        : "Origin, destination, amount, timestamp columns"}
+                    </span>
+                    <input
+                      type="file"
+                      accept=".csv"
+                      className="hidden"
+                      onChange={(e) => {
+                        const f = e.target.files?.[0];
+                        if (f) setSelectedFile(f);
+                      }}
+                    />
+                  </label>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={!selectedFile || isUploading}
+                      onClick={async () => {
+                        await handleUploadBatch();
+                      }}
+                      className="bg-brand-blue hover:bg-brand-blueLight flex flex-1 items-center justify-center gap-1.5 rounded-lg py-2 text-xs font-semibold text-white shadow-xs transition-all disabled:opacity-50"
+                    >
+                      {isUploading ? (
+                        <>
+                          <span className="material-symbols-outlined animate-spin text-[16px]">
+                            progress_activity
+                          </span>
+                          <span>Uploading...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-[16px]">
+                            file_upload
+                          </span>
+                          <span>Upload Batch</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={async () => {
+                        await handleLoadSampleBatch("standard");
+                      }}
+                      className="border-border bg-surface hover:bg-surface-hover text-text-primary rounded-lg border px-3 py-2 text-xs font-medium transition-colors"
+                      title="Quick load standard sample batch"
+                    >
+                      + Standard
+                    </button>
+
+                    <button
+                      type="button"
+                      disabled={isUploading}
+                      onClick={async () => {
+                        await handleLoadSampleBatch("suspicious");
+                      }}
+                      className="border-border bg-surface hover:bg-surface-hover rounded-lg border px-3 py-2 text-xs font-medium text-rose-600 transition-colors dark:text-rose-400"
+                      title="Quick load suspicious sample batch"
+                    >
+                      + Suspicious
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Uploaded Files Section */}
+              <div>
+                <div className="mb-3 flex items-center justify-between">
+                  <h3 className="text-text-primary flex items-center gap-1.5 text-xs font-bold tracking-wider uppercase">
+                    <span className="material-symbols-outlined text-text-secondary text-[16px]">
+                      dataset
+                    </span>
+                    Uploaded Files ({batches.length})
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={loadBatches}
+                    className="text-text-secondary hover:text-text-primary flex items-center gap-1 text-[11px]"
+                  >
+                    <span
+                      className={`material-symbols-outlined text-[14px] ${loadingBatches ? "animate-spin" : ""}`}
+                    >
+                      refresh
+                    </span>
+                    Refresh
+                  </button>
+                </div>
+
+                {loadingBatches ? (
+                  <div className="space-y-3">
+                    {Array.from({ length: 2 }).map((_, i) => (
+                      <div
+                        key={i}
+                        className="border-border bg-surface h-24 animate-pulse rounded-xl border"
+                      />
+                    ))}
+                  </div>
+                ) : batches.length === 0 ? (
+                  <div className="border-border bg-surface rounded-xl border p-8 text-center">
+                    <span className="material-symbols-outlined text-text-secondary mb-2 text-3xl">
+                      inventory_2
+                    </span>
+                    <p className="text-text-primary text-xs font-semibold">
+                      No batch files uploaded
+                    </p>
+                    <p className="text-text-secondary mt-1 text-[11px]">
+                      Upload your first CSV file above to populate transaction
+                      surveillance.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    {batches.map((b) => (
+                      <div
+                        key={b.batch_id}
+                        className="border-border bg-surface hover:border-border/80 flex flex-col justify-between rounded-xl border p-4 shadow-xs transition-all"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-2.5">
+                            <div className="border-border bg-surface-hover flex h-9 w-9 items-center justify-center rounded-lg border">
+                              <span className="material-symbols-outlined text-brand-blue text-[20px]">
+                                description
+                              </span>
+                            </div>
+                            <div>
+                              <h4 className="text-text-primary text-xs font-bold">
+                                {b.filename || "transaction_batch.csv"}
+                              </h4>
+                              <p className="text-text-secondary text-[11px]">
+                                {new Date(b.started_at).toLocaleString([], {
+                                  dateStyle: "medium",
+                                  timeStyle: "short",
+                                })}
+                              </p>
+                            </div>
+                          </div>
+                          <span
+                            className={`rounded-full px-2 py-0.5 text-[10px] font-bold uppercase ${
+                              b.status === "completed"
+                                ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+                                : b.status === "failed"
+                                  ? "border border-rose-500/20 bg-rose-500/10 text-rose-600 dark:text-rose-400"
+                                  : "border border-amber-500/20 bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                            }`}
+                          >
+                            {b.status}
+                          </span>
+                        </div>
+
+                        {/* Metric stats */}
+                        <div className="border-border/60 bg-surface-hover/40 mt-3 grid grid-cols-3 gap-2 rounded-lg border p-2 text-center text-[11px]">
+                          <div>
+                            <span className="text-text-secondary block text-[10px]">
+                              Total
+                            </span>
+                            <span className="text-text-primary font-bold">
+                              {b.total_rows}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px] text-emerald-600 dark:text-emerald-400">
+                              Accepted
+                            </span>
+                            <span className="text-text-primary font-bold">
+                              {b.accepted_rows}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="block text-[10px] text-rose-600 dark:text-rose-400">
+                              Rejected
+                            </span>
+                            <span className="text-text-primary font-bold">
+                              {b.rejected_rows}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="border-border/60 mt-3 flex items-center justify-between border-t pt-2.5">
+                          <span className="text-text-muted font-mono text-[10px]">
+                            ID: {b.batch_id.slice(0, 8)}…
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setBatchToDelete(b)}
+                            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-xs font-semibold text-rose-600 transition-colors hover:bg-rose-50 dark:text-rose-400 dark:hover:bg-rose-950/40"
+                          >
+                            <span className="material-symbols-outlined text-[16px]">
+                              delete_outline
+                            </span>
+                            <span>Remove</span>
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal to Remove Batch */}
+      {batchToDelete && (
+        <div className="fixed inset-0 z-60 flex items-center justify-center bg-slate-950/70 p-4 backdrop-blur-xs">
+          <div className="border-border bg-surface animate-fade-slide-up w-full max-w-md rounded-2xl border p-6 shadow-2xl">
+            <div className="mb-3 flex items-center gap-3 text-rose-600 dark:text-rose-400">
+              <div className="rounded-xl border border-rose-500/20 bg-rose-500/10 p-2.5">
+                <span className="material-symbols-outlined text-[24px]">
+                  warning
+                </span>
+              </div>
+              <div>
+                <h3 className="text-text-primary text-base font-bold">
+                  Remove Batch File
+                </h3>
+                <p className="text-text-secondary text-xs">
+                  Purge transactions &amp; surveillance records
+                </p>
+              </div>
+            </div>
+
+            <p className="text-text-secondary text-xs leading-relaxed">
+              Are you sure you want to remove{" "}
+              <strong className="text-text-primary font-semibold">
+                {batchToDelete.filename || "this batch"}
+              </strong>
+              ? All {batchToDelete.accepted_rows} transactions, predictions, and
+              alerts generated from this batch will be permanently deleted from
+              the database.
+            </p>
+
+            <div className="mt-6 flex items-center justify-end gap-2.5">
+              <button
+                type="button"
+                disabled={isDeletingBatch}
+                onClick={() => setBatchToDelete(null)}
+                className="border-border text-text-secondary hover:bg-surface-hover rounded-lg border px-4 py-2 text-xs font-semibold transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                disabled={isDeletingBatch}
+                onClick={() => handleDeleteBatch(batchToDelete.batch_id)}
+                className="flex items-center gap-1.5 rounded-lg bg-rose-600 px-4 py-2 text-xs font-semibold text-white shadow-xs transition-colors hover:bg-rose-700 disabled:opacity-50"
+              >
+                {isDeletingBatch ? (
+                  <>
+                    <span className="material-symbols-outlined animate-spin text-[16px]">
+                      progress_activity
+                    </span>
+                    <span>Removing...</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-[16px]">
+                      delete
+                    </span>
+                    <span>Yes, Remove Batch</span>
+                  </>
+                )}
+              </button>
             </div>
           </div>
         </div>

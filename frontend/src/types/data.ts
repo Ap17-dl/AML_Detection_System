@@ -80,3 +80,21 @@ export interface IngestionReport {
   status: string;
   errors: IngestionRowError[];
 }
+
+export interface IngestionBatchItem {
+  batch_id: string;
+  filename: string | null;
+  source_type: string;
+  total_rows: number;
+  accepted_rows: number;
+  rejected_rows: number;
+  status: string;
+  uploaded_by: string;
+  started_at: string;
+  completed_at: string | null;
+}
+
+export interface BatchListResponse {
+  items: IngestionBatchItem[];
+  total: number;
+}

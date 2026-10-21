@@ -108,3 +108,28 @@ class IngestionReportOut(BaseModel):
     rejected_rows: int
     status: str
     errors: list[IngestionRowError] = []
+
+
+class BatchOut(BaseModel):
+    """Schema representing an uploaded batch and its processing details."""
+
+    batch_id: uuid.UUID
+    filename: str | None = None
+    source_type: str = "csv"
+    total_rows: int = 0
+    accepted_rows: int = 0
+    rejected_rows: int = 0
+    status: str
+    uploaded_by: uuid.UUID
+    started_at: datetime
+    completed_at: datetime | None = None
+
+    model_config = {"from_attributes": True}
+
+
+class BatchListOut(BaseModel):
+    """List response for uploaded batches."""
+
+    items: list[BatchOut]
+    total: int
+

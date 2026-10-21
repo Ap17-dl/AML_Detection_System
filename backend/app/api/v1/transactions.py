@@ -4,7 +4,7 @@ import uuid
 from typing import Any
 
 from fastapi import APIRouter, Depends, File, Query, UploadFile
-from sqlalchemy import func, or_, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit import record_audit_log
@@ -12,10 +12,13 @@ from app.core.errors import ApiError
 from app.core.security import CurrentUser, require_role
 from app.db.session import get_db
 from app.models.account import Account
+from app.models.ingestion_batch import IngestionBatch
 from app.models.prediction import Prediction
 from app.models.role import RoleName
 from app.models.transaction import Transaction
 from app.schemas.transaction import (
+    BatchListOut,
+    BatchOut,
     IngestionReportOut,
     TransactionDetailOut,
     TransactionListOut,
@@ -178,6 +181,88 @@ async def load_sample_batch(
         status=batch.status,
         errors=errors,
     )
+
+
+@router.get("/batches", response_model=BatchListOut)
+async def list_batches(
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(_READ_ROLES),
+) -> BatchListOut:
+    """Lists uploaded ingestion batches for the current profile (or all for demo/admin)."""
+    stmt = select(IngestionBatch)
+    if not current_user.is_demo and current_user.role_name != RoleName.ADMINISTRATOR:
+        stmt = stmt.where(IngestionBatch.uploaded_by == current_user.user_id)
+    stmt = stmt.order_by(IngestionBatch.started_at.desc())
+    res = await db.execute(stmt)
+    batches = res.scalars().all()
+    return BatchListOut(
+        items=[
+            BatchOut(
+                batch_id=b.batch_id,
+                filename=b.filename,
+                source_type=b.source_type,
+                total_rows=b.total_rows,
+                accepted_rows=b.accepted_rows,
+                rejected_rows=b.rejected_rows,
+                status=b.status,
+                uploaded_by=b.uploaded_by,
+                started_at=b.started_at,
+                completed_at=b.completed_at,
+            )
+            for b in batches
+        ],
+        total=len(batches),
+    )
+
+
+@router.delete("/batches/{batch_id}")
+async def delete_batch(
+    batch_id: uuid.UUID,
+    db: AsyncSession = Depends(get_db),
+    current_user: CurrentUser = Depends(_READ_ROLES),
+) -> dict[str, Any]:
+    """Removes an uploaded batch and its associated transactions, alerts, and predictions."""
+    batch = await db.get(IngestionBatch, batch_id)
+    if not batch:
+        raise ApiError(404, "batch_not_found", f"Batch {batch_id} not found.")
+
+    if (
+        not current_user.is_demo
+        and batch.uploaded_by != current_user.user_id
+        and current_user.role_name != RoleName.ADMINISTRATOR
+    ):
+        raise ApiError(403, "forbidden", "You cannot delete batches belonging to other profiles.")
+
+    # 1. Find all transactions in this batch
+    txn_res = await db.execute(
+        select(Transaction.transaction_id).where(Transaction.ingestion_batch_id == batch_id)
+    )
+    txn_ids = txn_res.scalars().all()
+
+    if txn_ids:
+        # Delete related alerts
+        from app.models.alert import Alert
+
+        await db.execute(delete(Alert).where(Alert.triggering_transaction_id.in_(txn_ids)))
+
+        # Delete related transactions (cascades to predictions and explanations)
+        await db.execute(delete(Transaction).where(Transaction.transaction_id.in_(txn_ids)))
+
+    # Delete the batch itself
+    await db.delete(batch)
+
+    # Record audit log
+    await record_audit_log(
+        db,
+        actor_user_id=current_user.user_id,
+        action="delete_batch",
+        entity_type="ingestion_batch",
+        entity_id=batch_id,
+        details={"filename": batch.filename, "deleted_transactions": len(txn_ids)},
+    )
+    await db.commit()
+
+    return {"deleted": True, "batch_id": str(batch_id)}
 
 
 @router.get("", response_model=TransactionListOut)
