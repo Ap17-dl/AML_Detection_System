@@ -17,6 +17,7 @@ async function apiFetch<T>(path: string, accessToken: string): Promise<T> {
   const response = await fetch(`${env.apiBaseUrl}${path}`, {
     headers: { Authorization: `Bearer ${accessToken}` },
     cache: "no-store",
+    signal: AbortSignal.timeout(5000),
   });
 
   if (!response.ok) {

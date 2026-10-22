@@ -19,17 +19,9 @@ export default async function AppLayout({ children }: { children: ReactNode }) {
   if (!accessToken) {
     const supabase = await createClient();
 
-    // getUser() re-validates the JWT against Supabase Auth (unlike getSession(), which only reads
-    // the local cookie) — the stronger check to gate on before trusting the session at all.
-    const {
-      data: { user: authUser },
-      error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !authUser) {
-      redirect("/login");
-    }
-
+    // getSession() reads the locally-cached cookie — the middleware (update-session.ts)
+    // already refreshes the JWT against Supabase Auth on every request, so we don't need
+    // the expensive getUser() network round-trip here.
     const {
       data: { session },
     } = await supabase.auth.getSession();

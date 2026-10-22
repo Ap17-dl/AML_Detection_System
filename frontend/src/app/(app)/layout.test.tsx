@@ -1,10 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 
-const { redirect, getUser, getSession, fetchCurrentUser } = vi.hoisted(() => ({
+const { redirect, getSession, fetchCurrentUser } = vi.hoisted(() => ({
   redirect: vi.fn((path: string) => {
     throw new Error(`REDIRECT:${path}`);
   }),
-  getUser: vi.fn(),
   getSession: vi.fn(),
   fetchCurrentUser: vi.fn(),
 }));
@@ -14,7 +13,7 @@ vi.mock("next/headers", () => ({
   cookies: async () => ({ get: () => undefined }),
 }));
 vi.mock("@/lib/supabase/server", () => ({
-  createClient: async () => ({ auth: { getUser, getSession } }),
+  createClient: async () => ({ auth: { getSession } }),
 }));
 vi.mock("@/lib/api", () => ({ fetchCurrentUser }));
 
@@ -22,9 +21,8 @@ import AppLayout from "@/app/(app)/layout";
 
 describe("(app) layout — protected route wrapper", () => {
   it("redirects unauthenticated visitors to /login without calling the API", async () => {
-    getUser.mockResolvedValue({
-      data: { user: null },
-      error: { message: "no session" },
+    getSession.mockResolvedValue({
+      data: { session: null },
     });
 
     await expect(AppLayout({ children: null })).rejects.toThrow(
@@ -34,7 +32,6 @@ describe("(app) layout — protected route wrapper", () => {
   });
 
   it("renders the app shell for an authenticated user", async () => {
-    getUser.mockResolvedValue({ data: { user: { id: "u1" } }, error: null });
     getSession.mockResolvedValue({
       data: { session: { access_token: "token-123" } },
     });
