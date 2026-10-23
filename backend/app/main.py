@@ -13,6 +13,7 @@ def create_app() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
+        allow_origin_regex=r"^https?://(localhost|127\.0\.0\.1)(:[0-9]+)?$",
         allow_credentials=True,
         allow_methods=["*"],
         allow_headers=["*"],
@@ -27,6 +28,17 @@ def create_app() -> FastAPI:
         else:
             body = {"error": {"code": "http_error", "message": str(detail), "details": None}}
         return JSONResponse(status_code=exc.status_code, content=body)
+
+    @app.exception_handler(Exception)
+    async def unhandled_exception_handler(_: Request, exc: Exception) -> JSONResponse:
+        """Catches unhandled errors and ensures CORS headers are returned along with error envelope."""
+        import logging
+        import traceback
+        logging.getLogger("uvicorn.error").error("Unhandled exception: %s\n%s", exc, traceback.format_exc())
+        return JSONResponse(
+            status_code=500,
+            content={"error": {"code": "internal_server_error", "message": str(exc), "details": None}},
+        )
 
     app.include_router(api_v1_router)
 

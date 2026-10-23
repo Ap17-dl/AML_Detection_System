@@ -189,8 +189,12 @@ export default function DashboardClient({
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Error uploading batch file.";
-      setUploadError(errMsg);
-      setDrawerUploadError(errMsg);
+      const friendlyMsg =
+        errMsg === "Failed to fetch"
+          ? `Failed to connect to backend server at ${apiBaseUrl}. Please verify the backend service is running.`
+          : errMsg;
+      setUploadError(friendlyMsg);
+      setDrawerUploadError(friendlyMsg);
     } finally {
       setIsUploading(false);
     }
@@ -235,8 +239,12 @@ export default function DashboardClient({
     } catch (err: unknown) {
       const errMsg =
         err instanceof Error ? err.message : "Error loading sample dataset.";
-      setUploadError(errMsg);
-      setDrawerUploadError(errMsg);
+      const friendlyMsg =
+        errMsg === "Failed to fetch"
+          ? `Failed to connect to backend server at ${apiBaseUrl}. Please verify the backend service is running.`
+          : errMsg;
+      setUploadError(friendlyMsg);
+      setDrawerUploadError(friendlyMsg);
     } finally {
       setIsUploading(false);
     }

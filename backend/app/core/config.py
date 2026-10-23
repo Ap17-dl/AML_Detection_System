@@ -12,7 +12,9 @@ class Settings(BaseSettings):
     supabase_jwt_secret: str = ""
     supabase_service_role_key: str = ""
     database_url: str = ""
-    cors_allow_origins: str = "http://localhost:3000"
+    cors_allow_origins: str = (
+        "http://localhost:3000,http://127.0.0.1:3000,http://localhost:3001,http://127.0.0.1:3001,http://localhost:8000,http://127.0.0.1:8000"
+    )
     resend_api_key: str = ""
     host_email: str = "ankushprathamswe@gmail.com"
     resend_from_email: str = "AML Detection System <onboarding@resend.dev>"

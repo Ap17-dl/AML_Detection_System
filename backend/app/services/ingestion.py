@@ -65,8 +65,67 @@ OPTIONAL_COLUMNS = {
 }
 
 
+COLUMN_ALIASES: dict[str, str] = {
+    # origin_account
+    "origin": "origin_account",
+    "origin_account_number": "origin_account",
+    "sender_account": "origin_account",
+    "source_account": "origin_account",
+    "from_account": "origin_account",
+    "sender": "origin_account",
+    "source": "origin_account",
+    "origin_acc": "origin_account",
+    "src_account": "origin_account",
+    # destination_account
+    "destination": "destination_account",
+    "destination_account_number": "destination_account",
+    "receiver_account": "destination_account",
+    "target_account": "destination_account",
+    "to_account": "destination_account",
+    "receiver": "destination_account",
+    "target": "destination_account",
+    "dest_account": "destination_account",
+    "dst_account": "destination_account",
+    # amount
+    "txn_amount": "amount",
+    "transaction_amount": "amount",
+    "amt": "amount",
+    "value": "amount",
+    # occurred_at
+    "timestamp": "occurred_at",
+    "datetime": "occurred_at",
+    "date_time": "occurred_at",
+    "txn_time": "occurred_at",
+    "transaction_time": "occurred_at",
+    "time": "occurred_at",
+    "date": "occurred_at",
+    "created_at": "occurred_at",
+    # external_ref
+    "reference": "external_ref",
+    "ref": "external_ref",
+    "txn_id": "external_ref",
+    "transaction_id": "external_ref",
+    "id": "external_ref",
+    # transaction_type
+    "type": "transaction_type",
+    "txn_type": "transaction_type",
+    # customer names & countries
+    "origin_name": "origin_customer_name",
+    "sender_name": "origin_customer_name",
+    "source_customer_name": "origin_customer_name",
+    "destination_name": "destination_customer_name",
+    "receiver_name": "destination_customer_name",
+    "target_customer_name": "destination_customer_name",
+    "origin_country": "origin_customer_country",
+    "sender_country": "origin_customer_country",
+    "destination_country": "destination_customer_country",
+    "receiver_country": "destination_customer_country",
+}
+
+
 def _normalise_header(header: str) -> str:
-    return header.strip().lower().replace(" ", "_").replace("-", "_")
+    cleaned = header.strip().lower().replace(" ", "_").replace("-", "_")
+    return COLUMN_ALIASES.get(cleaned, cleaned)
 
 
 async def _ensure_model_metadata(db: AsyncSession, model_version: str) -> None:
@@ -228,19 +287,28 @@ def _validate_row(
     # --- occurred_at ---
     occurred_raw = row["occurred_at"].strip()
     occurred_at = None
-    for fmt in (
-        "%Y-%m-%dT%H:%M:%S%z",
-        "%Y-%m-%dT%H:%M:%S",
-        "%Y-%m-%d %H:%M:%S",
-        "%Y-%m-%d",
-        "%m/%d/%Y %H:%M:%S",
-        "%m/%d/%Y",
-    ):
-        try:
-            occurred_at = datetime.strptime(occurred_raw, fmt)
-            break
-        except ValueError:
-            continue
+    try:
+        clean_iso = occurred_raw.replace("Z", "+00:00")
+        occurred_at = datetime.fromisoformat(clean_iso)
+    except (ValueError, TypeError):
+        pass
+
+    if occurred_at is None:
+        for fmt in (
+            "%Y-%m-%dT%H:%M:%S%z",
+            "%Y-%m-%dT%H:%M:%S",
+            "%Y-%m-%d %H:%M:%S",
+            "%Y-%m-%d",
+            "%m/%d/%Y %H:%M:%S",
+            "%m/%d/%Y",
+            "%d/%m/%Y %H:%M:%S",
+            "%d/%m/%Y",
+        ):
+            try:
+                occurred_at = datetime.strptime(occurred_raw, fmt)
+                break
+            except ValueError:
+                continue
     if occurred_at is None:
         errors.append(
             IngestionRowError(

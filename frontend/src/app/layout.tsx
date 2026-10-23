@@ -25,6 +25,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html
       lang="en"
       suppressHydrationWarning
+      data-scroll-behavior="smooth"
       className={`${inter.variable} ${jetbrainsMono.variable} h-full scroll-smooth antialiased`}
     >
       <head>
