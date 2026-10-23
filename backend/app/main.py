@@ -34,10 +34,15 @@ def create_app() -> FastAPI:
         """Catches unhandled errors and ensures CORS headers are returned along with error envelope."""
         import logging
         import traceback
-        logging.getLogger("uvicorn.error").error("Unhandled exception: %s\n%s", exc, traceback.format_exc())
+
+        logging.getLogger("uvicorn.error").error(
+            "Unhandled exception: %s\n%s", exc, traceback.format_exc()
+        )
         return JSONResponse(
             status_code=500,
-            content={"error": {"code": "internal_server_error", "message": str(exc), "details": None}},
+            content={
+                "error": {"code": "internal_server_error", "message": str(exc), "details": None}
+            },
         )
 
     app.include_router(api_v1_router)
