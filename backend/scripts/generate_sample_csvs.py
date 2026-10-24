@@ -1,8 +1,7 @@
 """Script to generate realistic sample CSVs for AML platform testing & demonstration.
 Creates:
-1. sample_data/transactions_standard_batch.csv
-2. sample_data/transactions_aml_suspicious.csv (structuring, circular flows, rapid movement)
-3. sample_data/transactions_validation_errors.csv (edge cases and invalid entries)
+1. sample_data/transactions_standard_batch.csv (standard clearing transactions)
+2. sample_data/transactions_aml_suspicious.csv (suspicious structuring, circular flows, rapid movement)
 """
 
 import csv
@@ -189,96 +188,9 @@ def generate_sample_datasets():
         writer.writeheader()
         writer.writerows(suspicious_rows)
 
-    # 3. Validation error test batch (for AML-FR-06 error reporting verification)
-    error_rows = [
-        # Valid row
-        {
-            "external_ref": "TXN-VALID-01",
-            "origin_account": "ACC-VALID-01",
-            "destination_account": "ACC-VALID-02",
-            "amount": "500.00",
-            "currency": "USD",
-            "transaction_type": "transfer",
-            "channel": "online",
-            "occurred_at": "2026-03-01T12:00:00Z",
-            "origin_customer_name": "John Doe",
-            "destination_customer_name": "Jane Doe",
-            "origin_customer_country": "US",
-            "destination_customer_country": "US",
-        },
-        # Missing destination_account
-        {
-            "external_ref": "TXN-ERR-MISSING-DEST",
-            "origin_account": "ACC-VALID-01",
-            "destination_account": "",
-            "amount": "1200.00",
-            "currency": "USD",
-            "transaction_type": "transfer",
-            "channel": "online",
-            "occurred_at": "2026-03-01T12:05:00Z",
-            "origin_customer_name": "John Doe",
-            "destination_customer_name": "",
-            "origin_customer_country": "US",
-            "destination_customer_country": "US",
-        },
-        # Negative amount
-        {
-            "external_ref": "TXN-ERR-NEG-AMOUNT",
-            "origin_account": "ACC-VALID-01",
-            "destination_account": "ACC-VALID-02",
-            "amount": "-450.00",
-            "currency": "USD",
-            "transaction_type": "transfer",
-            "channel": "online",
-            "occurred_at": "2026-03-01T12:10:00Z",
-            "origin_customer_name": "John Doe",
-            "destination_customer_name": "Jane Doe",
-            "origin_customer_country": "US",
-            "destination_customer_country": "US",
-        },
-        # Invalid date format
-        {
-            "external_ref": "TXN-ERR-BAD-DATE",
-            "origin_account": "ACC-VALID-01",
-            "destination_account": "ACC-VALID-02",
-            "amount": "300.00",
-            "currency": "USD",
-            "transaction_type": "transfer",
-            "channel": "online",
-            "occurred_at": "not-a-valid-date-time",
-            "origin_customer_name": "John Doe",
-            "destination_customer_name": "Jane Doe",
-            "origin_customer_country": "US",
-            "destination_customer_country": "US",
-        },
-        # Identical origin and destination account
-        {
-            "external_ref": "TXN-ERR-SELF-TRANSFER",
-            "origin_account": "ACC-SAME-01",
-            "destination_account": "ACC-SAME-01",
-            "amount": "250.00",
-            "currency": "USD",
-            "transaction_type": "transfer",
-            "channel": "online",
-            "occurred_at": "2026-03-01T12:20:00Z",
-            "origin_customer_name": "John Doe",
-            "destination_customer_name": "John Doe",
-            "origin_customer_country": "US",
-            "destination_customer_country": "US",
-        },
-    ]
-
-    with open(
-        out_dir / "transactions_validation_errors.csv", "w", newline="", encoding="utf-8"
-    ) as f:
-        writer = csv.DictWriter(f, fieldnames=fieldnames)
-        writer.writeheader()
-        writer.writerows(error_rows)
-
     print("Generated sample datasets:")
     print("1. sample_data/transactions_standard_batch.csv (60 transactions)")
     print("2. sample_data/transactions_aml_suspicious.csv (12 suspicious AML patterns)")
-    print("3. sample_data/transactions_validation_errors.csv (5 rows: 1 valid, 4 error cases)")
 
 
 if __name__ == "__main__":

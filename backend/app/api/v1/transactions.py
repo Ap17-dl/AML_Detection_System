@@ -33,60 +33,94 @@ _IMPORT_ROLES = require_role(RoleName.DATA_OPERATOR, RoleName.ADMINISTRATOR)
 _READ_ROLES = require_role(RoleName.AML_ANALYST, RoleName.DATA_OPERATOR, RoleName.ADMINISTRATOR)
 
 
-@router.post("/import", response_model=IngestionReportOut, status_code=201)
+@router.post("/import", response_model=MultiIngestionReportOut, status_code=201)
 async def import_csv(
-    file: UploadFile = File(...),
+    files: list[UploadFile] = File(default=[]),
+    file: UploadFile | None = File(default=None),
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_IMPORT_ROLES),
-) -> IngestionReportOut:
-    """Imports a CSV file of transactions with row-level validation (AML-FR-04/05/06).
+) -> MultiIngestionReportOut:
+    """Imports one or more CSV files of transactions with row-level validation (AML-FR-04/05/06).
 
-    Returns an ingestion report with accepted/rejected counts and per-row errors.
+    Returns an ingestion report with accepted/rejected counts, per-file batches, and per-row errors.
     """
-    if not file.filename or not file.filename.lower().endswith(".csv"):
-        raise ApiError(
-            422,
-            "invalid_file_type",
-            "Only .csv files are accepted.",
+    file_list: list[UploadFile] = []
+    if files:
+        file_list.extend(files)
+    if file and file not in file_list:
+        file_list.append(file)
+
+    if not file_list:
+        raise ApiError(422, "no_files", "Please provide at least one CSV file to upload.")
+
+    reports: list[IngestionReportOut] = []
+    total_accepted = 0
+    total_rejected = 0
+    total_all_rows = 0
+
+    for upload in file_list:
+        if not upload.filename or not upload.filename.lower().endswith(".csv"):
+            raise ApiError(
+                422,
+                "invalid_file_type",
+                f"File '{upload.filename}' is not a valid .csv file.",
+            )
+
+        csv_bytes = await upload.read()
+        if len(csv_bytes) == 0:
+            raise ApiError(422, "empty_file", f"Uploaded file '{upload.filename}' is empty.")
+
+        batch, errors = await ingest_csv(
+            db,
+            csv_bytes=csv_bytes,
+            filename=upload.filename,
+            uploaded_by=current_user.user_id,
+            organization_id=current_user.organization_id,
         )
 
-    csv_bytes = await file.read()
-    if len(csv_bytes) == 0:
-        raise ApiError(422, "empty_file", "The uploaded file is empty.")
+        await record_audit_log(
+            db,
+            actor_user_id=current_user.user_id,
+            organization_id=current_user.organization_id,
+            action="csv_import",
+            entity_type="ingestion_batch",
+            entity_id=batch.batch_id,
+            details={
+                "filename": upload.filename,
+                "total_rows": batch.total_rows,
+                "accepted_rows": batch.accepted_rows,
+                "rejected_rows": batch.rejected_rows,
+                "organization_id": str(current_user.organization_id),
+            },
+        )
+        reports.append(
+            IngestionReportOut(
+                batch_id=batch.batch_id,
+                filename=batch.filename,
+                total_rows=batch.total_rows,
+                accepted_rows=batch.accepted_rows,
+                rejected_rows=batch.rejected_rows,
+                status=batch.status,
+                errors=errors,
+            )
+        )
+        total_accepted += batch.accepted_rows
+        total_rejected += batch.rejected_rows
+        total_all_rows += batch.total_rows
 
-    batch, errors = await ingest_csv(
-        db,
-        csv_bytes=csv_bytes,
-        filename=file.filename,
-        uploaded_by=current_user.user_id,
-        organization_id=current_user.organization_id,
-    )
-
-    await record_audit_log(
-        db,
-        actor_user_id=current_user.user_id,
-        organization_id=current_user.organization_id,
-        action="csv_import",
-        entity_type="ingestion_batch",
-        entity_id=batch.batch_id,
-        details={
-            "filename": file.filename,
-            "total_rows": batch.total_rows,
-            "accepted_rows": batch.accepted_rows,
-            "rejected_rows": batch.rejected_rows,
-            "organization_id": str(current_user.organization_id),
-        },
-    )
     await db.commit()
 
-    return IngestionReportOut(
-        batch_id=batch.batch_id,
-        filename=batch.filename,
-        total_rows=batch.total_rows,
-        accepted_rows=batch.accepted_rows,
-        rejected_rows=batch.rejected_rows,
-        status=batch.status,
-        errors=errors,
+    first_batch = reports[0] if reports else None
+    return MultiIngestionReportOut(
+        total_files=len(reports),
+        batches=reports,
+        batch_id=first_batch.batch_id if first_batch else None,
+        filename=", ".join(r.filename or "batch.csv" for r in reports),
+        total_rows=total_all_rows,
+        accepted_rows=total_accepted,
+        rejected_rows=total_rejected,
+        status="completed" if total_accepted > 0 else "failed",
+        errors=[e for r in reports for e in r.errors],
     )
 
 

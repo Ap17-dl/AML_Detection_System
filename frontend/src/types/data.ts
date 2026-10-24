@@ -79,6 +79,8 @@ export interface IngestionReport {
   rejected_rows: number;
   status: string;
   errors: IngestionRowError[];
+  total_files?: number;
+  batches?: IngestionReport[];
 }
 
 export interface IngestionBatchItem {
