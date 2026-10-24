@@ -145,18 +145,22 @@ async def get_dashboard_summary(
                 status_counts[st] = count
 
         recent_res = await db.execute(
-            select(Alert)
+            select(Alert, Customer.full_name)
+            .outerjoin(Customer, Alert.customer_id == Customer.customer_id)
             .where(Alert.triggering_transaction_id.in_(user_txn_ids))
             .order_by(Alert.created_at.desc())
             .limit(5)
         )
-        recent = recent_res.scalars().all()
         recent_outs = []
-        for a in recent:
-            cust_name = None
-            if a.customer_id:
-                cust = await db.get(Customer, a.customer_id)
-                cust_name = cust.full_name if cust else None
+        for item in recent_res.all():
+            if isinstance(item, Alert):
+                a, cust_name = item, None
+            elif isinstance(item, tuple) and len(item) == 2:
+                a, cust_name = item
+            else:
+                a, cust_name = getattr(item, "_mapping", {}).get("Alert", item[0]), getattr(
+                    item, "_mapping", {}
+                ).get("full_name", None)
 
             recent_outs.append(
                 AlertOut(
@@ -240,14 +244,22 @@ async def get_dashboard_summary(
             status_counts[st] = count
 
     # 8. Recent 5 alerts
-    recent_res = await db.execute(select(Alert).order_by(Alert.created_at.desc()).limit(5))
-    recent = recent_res.scalars().all()
+    recent_res = await db.execute(
+        select(Alert, Customer.full_name)
+        .outerjoin(Customer, Alert.customer_id == Customer.customer_id)
+        .order_by(Alert.created_at.desc())
+        .limit(5)
+    )
     recent_outs = []
-    for a in recent:
-        cust_name = None
-        if a.customer_id:
-            cust = await db.get(Customer, a.customer_id)
-            cust_name = cust.full_name if cust else None
+    for item in recent_res.all():
+        if isinstance(item, Alert):
+            a, cust_name = item, None
+        elif isinstance(item, tuple) and len(item) == 2:
+            a, cust_name = item
+        else:
+            a, cust_name = getattr(item, "_mapping", {}).get("Alert", item[0]), getattr(
+                item, "_mapping", {}
+            ).get("full_name", None)
 
         recent_outs.append(
             AlertOut(

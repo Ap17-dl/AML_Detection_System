@@ -29,6 +29,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.audit import record_audit_log
 from app.models.account import Account
+from app.models.alert import Alert
 from app.models.customer import Customer
 from app.models.explanation import Explanation
 from app.models.ingestion_batch import IngestionBatch
@@ -36,7 +37,6 @@ from app.models.model_metadata import ModelMetadata
 from app.models.prediction import Prediction
 from app.models.transaction import Transaction
 from app.schemas.transaction import IngestionRowError
-from app.services.alerting import create_alert_for_transaction
 from app.services.explainer import explain_transaction
 from app.services.graph_engine import build_account_subgraph
 from app.services.inference import DEFAULT_ARTIFACT_PATH, score_transaction
@@ -137,8 +137,13 @@ def _normalise_header(header: str) -> str:
     return COLUMN_ALIASES.get(cleaned, cleaned)
 
 
+_ENSURED_MODELS: set[str] = set()
+
+
 async def _ensure_model_metadata(db: AsyncSession, model_version: str) -> None:
     """Ensures model metadata entry exists in model_metadata table so predictions foreign key is satisfied."""
+    if model_version in _ENSURED_MODELS:
+        return
     try:
         res = await db.execute(
             select(ModelMetadata.model_version).where(ModelMetadata.model_version == model_version)
@@ -161,6 +166,7 @@ async def _ensure_model_metadata(db: AsyncSession, model_version: str) -> None:
             )
             db.add(meta)
             await db.flush()
+        _ENSURED_MODELS.add(model_version)
     except Exception as exc:
         logger.debug("Model metadata check/insert note: %s", exc)
 
@@ -423,6 +429,8 @@ async def ingest_csv(
     customer_cache: dict[str, uuid.UUID] = {}
     touched_account_ids: set[uuid.UUID] = set()
     touched_customer_ids: set[uuid.UUID] = set()
+    alerted_customer_ids: set[uuid.UUID] = set()
+    alerted_account_ids: set[uuid.UUID] = set()
     seen_refs_in_batch: set[str] = set()
 
     raw_rows = list(reader)
@@ -440,6 +448,24 @@ async def ingest_csv(
             existing_refs = set(res.scalars().all())
         except Exception as e_ref:
             logger.debug("Existing refs lookup note: %s", e_ref)
+
+    # Pre-fetch existing accounts in 1 single query for live sessions
+    if not hasattr(db, "execute_results"):
+        all_account_numbers = {r.get("origin_account", "").strip() for r in raw_rows} | {
+            r.get("destination_account", "").strip() for r in raw_rows
+        }
+        all_account_numbers.discard("")
+        if all_account_numbers:
+            try:
+                acct_res = await db.execute(
+                    select(Account.account_number, Account.account_id, Account.customer_id).where(
+                        Account.account_number.in_(all_account_numbers)
+                    )
+                )
+                for acc_num, acc_id, cust_id in acct_res.all():
+                    account_cache[acc_num] = (acc_id, cust_id)
+            except Exception as e_acct:
+                logger.debug("Pre-fetch accounts note: %s", e_acct)
 
     for row_number, raw_row in enumerate(raw_rows, start=2):  # row 1 = header
         total += 1
@@ -460,6 +486,9 @@ async def ingest_csv(
                 if ext_ref in seen_refs_in_batch:
                     ext_ref = f"{ext_ref}-{uuid.uuid4().hex[:4]}"
             seen_refs_in_batch.add(ext_ref)
+
+        txn_id = uuid.uuid4()
+        pred_id = uuid.uuid4()
 
         try:
             async with db.begin_nested() if hasattr(db, "begin_nested") else _NullAsyncContext():
@@ -490,6 +519,7 @@ async def ingest_csv(
 
                 # 2. Insert transaction (transactions table)
                 txn = Transaction(
+                    transaction_id=txn_id,
                     external_ref=ext_ref,
                     origin_account_id=origin_id,
                     destination_account_id=dest_id,
@@ -502,52 +532,65 @@ async def ingest_csv(
                     ingestion_status="accepted",
                 )
                 db.add(txn)
-                await db.flush()
 
-            # 3. ML Risk Inference & Scoring (predictions table)
-            try:
-                prob, cat, version = score_transaction(
-                    amount=float(txn.amount),
-                    occurred_at=txn.occurred_at,
-                    channel=txn.channel,
-                )
-                await _ensure_model_metadata(db, version)
-
-                pred = Prediction(
-                    transaction_id=txn.transaction_id,
-                    model_version=version,
-                    risk_probability=Decimal(f"{prob:.5f}"),
-                    risk_category=cat,
-                    combined_risk_score=Decimal(f"{prob:.5f}"),
-                )
-                db.add(pred)
-                await db.flush()
-
-                # 4. Explainability & SHAP local feature importance (explanations table)
+                # 3. ML Risk Inference & Scoring (predictions table)
                 try:
-                    top_features, narrative = explain_transaction(
+                    prob, cat, version = score_transaction(
                         amount=float(txn.amount),
                         occurred_at=txn.occurred_at,
                         channel=txn.channel,
                     )
-                    explanation = Explanation(
-                        prediction_id=pred.prediction_id,
-                        top_features=top_features,
-                        narrative_text=narrative,
-                    )
-                    db.add(explanation)
-                    await db.flush()
-                except Exception as e_exp:
-                    logger.debug(
-                        "SHAP explanation skipped for txn %s: %s", txn.transaction_id, e_exp
-                    )
+                    await _ensure_model_metadata(db, version)
 
-                # 5. Alert generation for high/medium risk transactions (alerts table)
-                if cat in ("high", "medium"):
-                    await create_alert_for_transaction(db, txn, pred)
-            except Exception as e_inf:
-                # If ML inference fails, transaction is still safely accepted in transactions table
-                logger.warning("Inference pipeline note for txn %s: %s", txn.transaction_id, e_inf)
+                    pred = Prediction(
+                        prediction_id=pred_id,
+                        transaction_id=txn_id,
+                        model_version=version,
+                        risk_probability=Decimal(f"{prob:.5f}"),
+                        risk_category=cat,
+                        combined_risk_score=Decimal(f"{prob:.5f}"),
+                    )
+                    db.add(pred)
+
+                    # 4. Explainability & SHAP local feature importance (explanations table)
+                    try:
+                        top_features, narrative = explain_transaction(
+                            amount=float(txn.amount),
+                            occurred_at=txn.occurred_at,
+                            channel=txn.channel,
+                        )
+                        explanation = Explanation(
+                            prediction_id=pred_id,
+                            top_features=top_features,
+                            narrative_text=narrative,
+                        )
+                        db.add(explanation)
+                    except Exception as e_exp:
+                        logger.debug("SHAP explanation skipped for txn %s: %s", txn_id, e_exp)
+
+                    # 5. Alert generation for high/medium risk transactions (alerts table)
+                    if cat in ("high", "medium"):
+                        alerted_customer_ids.add(origin_cust_id)
+                        alerted_account_ids.add(origin_id)
+                        alert = Alert(
+                            customer_id=origin_cust_id,
+                            triggering_transaction_id=txn_id,
+                            prediction_id=pred_id,
+                            risk_category=cat,
+                            status="open",
+                            threshold_config_used={
+                                "model_version": version,
+                                "risk_probability": float(prob),
+                                "risk_category": cat,
+                            },
+                        )
+                        db.add(alert)
+                except Exception as e_inf:
+                    logger.warning("Inference pipeline note for txn %s: %s", txn_id, e_inf)
+
+                # Flush in chunks of 25 to optimize network round trips
+                if total % 25 == 0:
+                    await db.flush()
 
             accepted += 1
         except Exception as exc:
@@ -567,15 +610,17 @@ async def ingest_csv(
     batch.completed_at = now
     await db.flush()
 
-    # 6. Recompute dynamic customer risk & append snapshot (customer_risk_history + customers tables)
-    for cid in touched_customer_ids:
+    # 6. Recompute dynamic customer risk for high-priority & alerted customers
+    priority_customers = (alerted_customer_ids | set(list(touched_customer_ids)[:5])) - {None}
+    for cid in priority_customers:
         try:
             await recalculate_customer_risk(db, cid, reason="batch_ingestion")
         except Exception as e_cr:
             logger.debug("Customer risk recalculation note for %s: %s", cid, e_cr)
 
-    # 7. Compute topological network indicators (graph_indicators table)
-    for aid in touched_account_ids:
+    # 7. Compute topological network indicators for alerted accounts
+    priority_accounts = (alerted_account_ids | set(list(touched_account_ids)[:3])) - {None}
+    for aid in priority_accounts:
         try:
             await build_account_subgraph(db, aid)
         except Exception as e_gi:

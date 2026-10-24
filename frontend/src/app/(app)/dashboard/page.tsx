@@ -2,7 +2,6 @@ import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 
 import DashboardClient from "@/components/dashboard/DashboardClient";
-import { fetchCurrentUser } from "@/lib/api";
 import { env } from "@/lib/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -11,15 +10,19 @@ export default async function DashboardPage() {
   const devToken = cookieStore.get("aml_dev_token")?.value;
 
   let accessToken = devToken;
-  let role = "data_operator";
+  let role = "aml_analyst";
 
   if (devToken) {
-    // Dev mode — use the dev token directly, fetch role from backend
     try {
-      const user = await fetchCurrentUser(devToken);
-      role = user.role;
+      const payloadBase64 = devToken.split(".")[1];
+      if (payloadBase64) {
+        const payload = JSON.parse(
+          Buffer.from(payloadBase64, "base64").toString("utf8"),
+        );
+        role = payload.role || payload.role_name || "aml_analyst";
+      }
     } catch {
-      // Backend may be down; continue with default role
+      role = "aml_analyst";
     }
   } else {
     // Production mode — get session from Supabase (layout already validated auth,
@@ -36,10 +39,20 @@ export default async function DashboardPage() {
     accessToken = session.access_token;
 
     try {
-      const user = await fetchCurrentUser(session.access_token);
-      role = user.role;
+      const payloadBase64 = session.access_token.split(".")[1];
+      if (payloadBase64) {
+        const payload = JSON.parse(
+          Buffer.from(payloadBase64, "base64").toString("utf8"),
+        );
+        role =
+          payload.user_metadata?.role_name ||
+          payload.app_metadata?.role_name ||
+          (payload.user_metadata?.role_id === 3
+            ? "data_operator"
+            : "aml_analyst");
+      }
     } catch {
-      // Layout already validated auth — if fetchCurrentUser fails here, use default role
+      role = "aml_analyst";
     }
   }
 
