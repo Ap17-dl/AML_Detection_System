@@ -21,12 +21,10 @@ from decimal import Decimal
 
 import pytest
 
-from app.core.security import CurrentUser, get_current_user
 from app.core.supabase_admin import get_supabase_admin_client
 from app.main import app
 from app.models.alert import Alert
 from app.models.customer import Customer
-from app.models.organization import Organization, OrganizationStatus
 from app.models.role import RoleName
 from app.models.transaction import Transaction
 from app.models.user import User
@@ -37,16 +35,28 @@ ORG_A_ID = uuid.UUID("a0000000-0000-0000-0000-000000000001")
 ORG_B_ID = uuid.UUID("b0000000-0000-0000-0000-000000000002")
 
 # Personas for Org A
-ADMIN_A = make_current_user(RoleName.ADMINISTRATOR, email="admin@org-a.com", organization_id=ORG_A_ID)
-ANALYST_A = make_current_user(RoleName.AML_ANALYST, email="analyst@org-a.com", organization_id=ORG_A_ID)
-OPERATOR_A = make_current_user(RoleName.DATA_OPERATOR, email="operator@org-a.com", organization_id=ORG_A_ID)
+ADMIN_A = make_current_user(
+    RoleName.ADMINISTRATOR, email="admin@org-a.com", organization_id=ORG_A_ID
+)
+ANALYST_A = make_current_user(
+    RoleName.AML_ANALYST, email="analyst@org-a.com", organization_id=ORG_A_ID
+)
+OPERATOR_A = make_current_user(
+    RoleName.DATA_OPERATOR, email="operator@org-a.com", organization_id=ORG_A_ID
+)
 
 # Personas for Org B
-ADMIN_B = make_current_user(RoleName.ADMINISTRATOR, email="admin@org-b.com", organization_id=ORG_B_ID)
-ANALYST_B = make_current_user(RoleName.AML_ANALYST, email="analyst@org-b.com", organization_id=ORG_B_ID)
+ADMIN_B = make_current_user(
+    RoleName.ADMINISTRATOR, email="admin@org-b.com", organization_id=ORG_B_ID
+)
+ANALYST_B = make_current_user(
+    RoleName.AML_ANALYST, email="analyst@org-b.com", organization_id=ORG_B_ID
+)
 
 
-def _make_user(org_id: uuid.UUID, role_id: int = 2, is_active: bool = True, email: str | None = None) -> User:
+def _make_user(
+    org_id: uuid.UUID, role_id: int = 2, is_active: bool = True, email: str | None = None
+) -> User:
     return User(
         user_id=uuid.uuid4(),
         organization_id=org_id,
@@ -76,7 +86,9 @@ async def test_org_a_admin_can_manage_users_within_org_a(fake_session):
     # 2. Update user status in Org A
     fake_session.get_results[user_a.user_id] = user_a
     async with api_client(current_user=ADMIN_A, fake_session=fake_session) as client:
-        res = await client.patch(f"/api/v1/users/{user_a.user_id}/status", json={"is_active": False})
+        res = await client.patch(
+            f"/api/v1/users/{user_a.user_id}/status", json={"is_active": False}
+        )
         assert res.status_code == 200
         assert user_a.is_active is False
         assert fake_session.committed
@@ -107,7 +119,11 @@ async def test_org_a_admin_cannot_access_org_b_users(fake_session):
         assert res_del.status_code == 404
 
     # Verify failed cross-organization audit logs were recorded
-    cross_org_logs = [obj for obj in fake_session.added if getattr(obj, "action", None) == "failed_cross_org_access"]
+    cross_org_logs = [
+        obj
+        for obj in fake_session.added
+        if getattr(obj, "action", None) == "failed_cross_org_access"
+    ]
     assert len(cross_org_logs) >= 3
 
 
@@ -129,7 +145,11 @@ async def test_aml_analysts_access_only_own_organization_data(fake_session):
         res = await client.get(f"/api/v1/alerts/{alert_b.alert_id}")
         assert res.status_code == 404
 
-    cross_logs = [obj for obj in fake_session.added if getattr(obj, "action", None) == "failed_cross_org_access"]
+    cross_logs = [
+        obj
+        for obj in fake_session.added
+        if getattr(obj, "action", None) == "failed_cross_org_access"
+    ]
     assert len(cross_logs) == 1
 
 
@@ -224,7 +244,12 @@ async def test_database_trigger_enforces_max_two_admins():
     """Verifies that the PostgreSQL function and trigger contract exists in migration 0008."""
     from pathlib import Path
 
-    migration_file = Path(__file__).resolve().parent.parent.parent / "alembic" / "versions" / "0008_organizations_and_scoping.py"
+    migration_file = (
+        Path(__file__).resolve().parent.parent.parent
+        / "alembic"
+        / "versions"
+        / "0008_organizations_and_scoping.py"
+    )
     assert migration_file.exists()
     content = migration_file.read_text()
 
@@ -239,7 +264,9 @@ async def test_database_trigger_enforces_max_two_admins():
 # Scenario 8: Deactivated users cannot access protected resources
 # ==============================================================================
 async def test_deactivated_users_cannot_access_protected_resources(fake_session):
-    inactive_user = make_current_user(RoleName.AML_ANALYST, email="inactive@org-a.com", is_active=False)
+    inactive_user = make_current_user(
+        RoleName.AML_ANALYST, email="inactive@org-a.com", is_active=False
+    )
 
     # Simulate get_current_user logic for inactive user
     from app.core.errors import ApiError
@@ -275,10 +302,10 @@ async def test_suspended_organizations_cannot_access(fake_session):
 # ==============================================================================
 async def test_reports_and_graph_queries_remain_organization_scoped(fake_session):
     # Reports summary: total_alerts, closed_alerts, confirmed, false_positives, escalation_rate
-    fake_session.execute_results.append(FakeResult(scalar=5))   # total_alerts
-    fake_session.execute_results.append(FakeResult(scalar=1))   # closed_alerts
-    fake_session.execute_results.append(FakeResult(scalar=1))   # confirmed
-    fake_session.execute_results.append(FakeResult(scalar=0))   # false_positives
+    fake_session.execute_results.append(FakeResult(scalar=5))  # total_alerts
+    fake_session.execute_results.append(FakeResult(scalar=1))  # closed_alerts
+    fake_session.execute_results.append(FakeResult(scalar=1))  # confirmed
+    fake_session.execute_results.append(FakeResult(scalar=0))  # false_positives
 
     async with api_client(current_user=ADMIN_A, fake_session=fake_session) as client:
         res = await client.get("/api/v1/reports/summary")

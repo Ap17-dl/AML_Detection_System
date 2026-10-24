@@ -200,7 +200,9 @@ describe("SignUpForm", () => {
     render(<SignUpForm />);
 
     // Switch to Register New Organization tab
-    fireEvent.click(screen.getByRole("button", { name: "Register New Organization" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Register New Organization" }),
+    );
 
     expect(screen.getByLabelText(/Organization name/i)).toBeInTheDocument();
 
@@ -220,7 +222,9 @@ describe("SignUpForm", () => {
       target: { value: "securepass123" },
     });
 
-    fireEvent.click(screen.getByRole("button", { name: "Register organization" }));
+    fireEvent.click(
+      screen.getByRole("button", { name: "Register organization" }),
+    );
 
     await waitFor(() => {
       expect(screen.getByText("Organization Registered")).toBeInTheDocument();
@@ -233,4 +237,3 @@ describe("SignUpForm", () => {
     );
   });
 });
-

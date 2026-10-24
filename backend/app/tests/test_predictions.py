@@ -128,11 +128,14 @@ async def test_prediction_cross_org_access_logged_and_rejected(fake_session):
         res = await client.get(f"/api/v1/transactions/{txn_id}/prediction")
         assert res.status_code == 404
 
-    audit_logs = [obj for obj in fake_session.added if getattr(obj, "action", None) == "failed_cross_org_access"]
+    audit_logs = [
+        obj
+        for obj in fake_session.added
+        if getattr(obj, "action", None) == "failed_cross_org_access"
+    ]
     assert len(audit_logs) == 1
     assert audit_logs[0].entity_type == "transaction"
     assert audit_logs[0].entity_id == txn_id
     assert audit_logs[0].user_id == ANALYST.user_id
     assert audit_logs[0].organization_id == ANALYST.organization_id
     assert fake_session.committed is True
-

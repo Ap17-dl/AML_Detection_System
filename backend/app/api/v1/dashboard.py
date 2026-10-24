@@ -37,9 +37,7 @@ async def get_dashboard_summary(
 
     # 2. Total transactions
     total_txns_res = await db.execute(
-        select(func.count(Transaction.transaction_id)).where(
-            Transaction.organization_id == org_id
-        )
+        select(func.count(Transaction.transaction_id)).where(Transaction.organization_id == org_id)
     )
     total_txns = total_txns_res.scalar() or 0
 
@@ -54,9 +52,7 @@ async def get_dashboard_summary(
 
     # 4. Monitored customers
     cust_res = await db.execute(
-        select(func.count(Customer.customer_id)).where(
-            Customer.organization_id == org_id
-        )
+        select(func.count(Customer.customer_id)).where(Customer.organization_id == org_id)
     )
     cust_count = cust_res.scalar() or 0
 

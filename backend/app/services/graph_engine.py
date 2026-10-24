@@ -35,7 +35,11 @@ async def build_account_subgraph(
     """
     target_str = str(account_id)
     target_acct = await db.get(Account, account_id)
-    org_id = target_acct.organization_id if target_acct else uuid.UUID("a0000000-0000-0000-0000-000000000001")
+    org_id = (
+        target_acct.organization_id
+        if target_acct
+        else uuid.UUID("a0000000-0000-0000-0000-000000000001")
+    )
 
     # 1. Fetch relevant transactions touching account_id or its direct neighbors
     txn_res = await db.execute(

@@ -213,4 +213,6 @@ async def trigger_recalculate_risk(
     await recalculate_customer_risk(db=db, customer_id=customer_id, reason="manual_request")
     await db.commit()
 
-    return await get_customer_risk_profile(customer_id=customer_id, db=db, current_user=current_user)
+    return await get_customer_risk_profile(
+        customer_id=customer_id, db=db, current_user=current_user
+    )

@@ -26,7 +26,6 @@ from app.db.session import get_db  # noqa: E402
 from app.main import app  # noqa: E402
 from app.models.role import RoleName  # noqa: E402
 
-
 DEFAULT_ORG_ID = uuid.UUID("a0000000-0000-0000-0000-000000000001")
 
 

@@ -63,7 +63,9 @@ export function SignUpForm() {
       if (!res.ok) {
         const err = await res.json();
         setIsSubmitting(false);
-        setError(err.message || err.detail || "Failed to register organization.");
+        setError(
+          err.message || err.detail || "Failed to register organization.",
+        );
         return;
       }
 
@@ -133,17 +135,17 @@ export function SignUpForm() {
   if (orgSuccess) {
     return (
       <div className="flex flex-col gap-4 py-4 text-center">
-        <div className="bg-emerald-500/10 text-emerald-600 ring-emerald-500/20 mx-auto flex size-14 items-center justify-center rounded-2xl ring-1">
-          <span className="material-symbols-outlined text-3xl">
-            verified
-          </span>
+        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-emerald-500/10 text-emerald-600 ring-1 ring-emerald-500/20">
+          <span className="material-symbols-outlined text-3xl">verified</span>
         </div>
         <h2 className="text-text-primary text-xl font-bold">
           Organization Registered
         </h2>
         <p className="text-text-secondary mx-auto max-w-sm text-sm leading-relaxed">
-          <span className="text-text-primary font-semibold">{orgName}</span> has been successfully provisioned with administrator{" "}
-          <span className="text-text-primary font-semibold">{email}</span>. You can now log in to manage your organization.
+          <span className="text-text-primary font-semibold">{orgName}</span> has
+          been successfully provisioned with administrator{" "}
+          <span className="text-text-primary font-semibold">{email}</span>. You
+          can now log in to manage your organization.
         </p>
         <Link
           href="/login"
@@ -185,14 +187,14 @@ export function SignUpForm() {
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
       {/* Onboarding Mode Selector */}
-      <div className="flex rounded-lg border border-border bg-surface-hover p-1 gap-1">
+      <div className="border-border bg-surface-hover flex gap-1 rounded-lg border p-1">
         <button
           type="button"
           onClick={() => {
             setMode("staff");
             setError(null);
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+          className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-all ${
             mode === "staff"
               ? "bg-surface text-text-primary shadow-xs"
               : "text-text-secondary hover:text-text-primary"
@@ -206,7 +208,7 @@ export function SignUpForm() {
             setMode("organization");
             setError(null);
           }}
-          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+          className={`flex-1 rounded-md py-1.5 text-xs font-semibold transition-all ${
             mode === "organization"
               ? "bg-surface text-text-primary shadow-xs"
               : "text-text-secondary hover:text-text-primary"
@@ -414,8 +416,8 @@ export function SignUpForm() {
             ? "Registering organization…"
             : "Creating account…"
           : mode === "organization"
-          ? "Register organization"
-          : "Create account"}
+            ? "Register organization"
+            : "Create account"}
       </button>
 
       <p className="text-text-secondary pt-1 text-center text-xs">

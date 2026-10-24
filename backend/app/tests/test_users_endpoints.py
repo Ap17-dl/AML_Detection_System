@@ -11,10 +11,7 @@ from app.core.supabase_admin import get_supabase_admin_client
 from app.main import app
 from app.models.role import RoleName
 from app.models.user import User
-from app.tests.conftest import ADMIN, ANALYST, FakeResult, api_client
-
-
-from app.tests.conftest import DEFAULT_ORG_ID
+from app.tests.conftest import ADMIN, ANALYST, DEFAULT_ORG_ID, FakeResult, api_client
 
 
 def _make_user(**overrides) -> User:

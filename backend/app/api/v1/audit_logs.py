@@ -47,7 +47,9 @@ async def list_audit_logs(
     current_user: CurrentUser = Depends(_ADMIN_ONLY),
 ) -> AuditLogListOut:
     query = select(AuditLog).where(AuditLog.organization_id == current_user.organization_id)
-    count_query = select(func.count(AuditLog.audit_id)).where(AuditLog.organization_id == current_user.organization_id)
+    count_query = select(func.count(AuditLog.audit_id)).where(
+        AuditLog.organization_id == current_user.organization_id
+    )
 
     if action:
         query = query.where(AuditLog.action == action)

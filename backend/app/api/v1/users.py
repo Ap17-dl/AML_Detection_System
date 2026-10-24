@@ -60,9 +60,7 @@ async def list_users(
 
     if search:
         pattern = f"%{search}%"
-        query = query.where(
-            or_(User.email.ilike(pattern), User.full_name.ilike(pattern))
-        )
+        query = query.where(or_(User.email.ilike(pattern), User.full_name.ilike(pattern)))
 
     if role:
         query = query.where(Role.role_name == role)

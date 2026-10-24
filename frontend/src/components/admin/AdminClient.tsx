@@ -17,7 +17,7 @@ interface OrganizationStats {
     action: string;
     entity_type?: string | null;
     user_email?: string | null;
-    details?: any;
+    details?: Record<string, unknown> | null;
     created_at?: string | null;
   }>;
 }
@@ -64,7 +64,9 @@ export default function AdminClient({
   accessToken,
   apiBaseUrl,
 }: AdminClientProps) {
-  const [activeTab, setActiveTab] = useState<"organization" | "users" | "models" | "audit">("users");
+  const [activeTab, setActiveTab] = useState<
+    "organization" | "users" | "models" | "audit"
+  >("users");
 
   // Organization stats
   const [orgStats, setOrgStats] = useState<OrganizationStats | null>(null);
@@ -78,7 +80,8 @@ export default function AdminClient({
   const [statusFilter, setStatusFilter] = useState("all");
 
   // User Actions State
-  const [selectedUserToChangeRole, setSelectedUserToChangeRole] = useState<UserItem | null>(null);
+  const [selectedUserToChangeRole, setSelectedUserToChangeRole] =
+    useState<UserItem | null>(null);
   const [newRoleVal, setNewRoleVal] = useState<string>("aml_analyst");
   const [roleChangeError, setRoleChangeError] = useState<string | null>(null);
 
@@ -194,7 +197,9 @@ export default function AdminClient({
         fetchOrgStats();
       } else {
         const err = await res.json();
-        setRoleChangeError(err.message || err.detail || "Failed to update role");
+        setRoleChangeError(
+          err.message || err.detail || "Failed to update role",
+        );
       }
     } catch {
       setRoleChangeError("Network error while updating role.");
@@ -286,7 +291,8 @@ export default function AdminClient({
       const matchesSearch =
         searchQuery === "" ||
         u.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (u.full_name && u.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
+        (u.full_name &&
+          u.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
 
       const matchesRole = roleFilter === "all" || u.role === roleFilter;
       const matchesStatus =
@@ -304,11 +310,11 @@ export default function AdminClient({
       label: "Staff Member",
       render: (u) => (
         <div className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-100 font-bold text-xs text-slate-700 dark:bg-slate-800 dark:text-slate-300 border border-border">
+          <div className="border-border flex h-8 w-8 shrink-0 items-center justify-center rounded-full border bg-slate-100 text-xs font-bold text-slate-700 dark:bg-slate-800 dark:text-slate-300">
             {(u.full_name || u.email).slice(0, 2).toUpperCase()}
           </div>
           <div className="flex flex-col">
-            <span className="font-semibold text-text-primary text-xs">
+            <span className="text-text-primary text-xs font-semibold">
               {u.full_name || "—"}
             </span>
             <span className="text-text-secondary font-mono text-[11px]">
@@ -322,16 +328,20 @@ export default function AdminClient({
       key: "role",
       label: "Platform Role",
       render: (u) => {
-        let badgeStyle = "bg-slate-100 text-slate-700 border-border dark:bg-slate-800 dark:text-slate-300";
+        let badgeStyle =
+          "bg-slate-100 text-slate-700 border-border dark:bg-slate-800 dark:text-slate-300";
         let label = "Staff";
         if (u.role === "administrator") {
-          badgeStyle = "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
+          badgeStyle =
+            "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/20";
           label = "Administrator";
         } else if (u.role === "aml_analyst") {
-          badgeStyle = "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
+          badgeStyle =
+            "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/20";
           label = "AML Analyst";
         } else if (u.role === "data_operator") {
-          badgeStyle = "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
+          badgeStyle =
+            "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/20";
           label = "Data Operator";
         }
         return (
@@ -350,8 +360,8 @@ export default function AdminClient({
         <span
           className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold ${
             u.is_active
-              ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
-              : "bg-rose-500/10 text-rose-700 dark:text-rose-400 border border-rose-500/20"
+              ? "border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400"
+              : "border border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-400"
           }`}
         >
           <span
@@ -367,7 +377,7 @@ export default function AdminClient({
       key: "created_at",
       label: "Joined",
       render: (u) => (
-        <span className="text-text-secondary text-xs font-mono">
+        <span className="text-text-secondary font-mono text-xs">
           {new Date(u.created_at).toLocaleDateString()}
         </span>
       ),
@@ -383,7 +393,7 @@ export default function AdminClient({
               setNewRoleVal(u.role);
               setRoleChangeError(null);
             }}
-            className="text-brand-blue hover:text-brand-blueLight dark:text-blue-400 text-xs font-semibold hover:underline"
+            className="text-brand-blue hover:text-brand-blueLight text-xs font-semibold hover:underline dark:text-blue-400"
           >
             Change Role
           </button>
@@ -401,7 +411,7 @@ export default function AdminClient({
           <span className="text-text-secondary text-xs opacity-40">•</span>
           <button
             onClick={() => setConfirmModal({ type: "delete", user: u })}
-            className="text-text-secondary hover:text-rose-600 text-xs font-semibold hover:underline"
+            className="text-text-secondary text-xs font-semibold hover:text-rose-600 hover:underline"
           >
             Revoke
           </button>
@@ -424,7 +434,8 @@ export default function AdminClient({
             </span>
           </div>
           <p className="text-text-secondary mt-1 text-xs">
-            Manage your institution&apos;s staff members, role hierarchy, and organization-scoped governance.
+            Manage your institution&apos;s staff members, role hierarchy, and
+            organization-scoped governance.
           </p>
         </div>
 
@@ -437,7 +448,9 @@ export default function AdminClient({
               }}
               className="bg-brand-blue hover:bg-brand-blueLight inline-flex items-center gap-2 rounded-lg px-3.5 py-2 text-xs font-semibold text-white shadow-sm transition-all active:scale-95"
             >
-              <span className="material-symbols-outlined text-[16px]">person_add</span>
+              <span className="material-symbols-outlined text-[16px]">
+                person_add
+              </span>
               <span>Invite Staff Member</span>
             </button>
           </div>
@@ -450,18 +463,18 @@ export default function AdminClient({
           {/* Org Card */}
           <div className="border-border bg-surface flex flex-col justify-between rounded-[var(--radius-card)] border p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">
+              <span className="text-text-secondary text-xs font-medium tracking-wider uppercase">
                 Organization
               </span>
-              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase font-mono">
+              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 font-mono text-[10px] font-bold text-emerald-600 uppercase dark:text-emerald-400">
                 {orgStats.status}
               </span>
             </div>
             <div className="mt-2">
-              <h3 className="text-text-primary text-base font-bold truncate">
+              <h3 className="text-text-primary truncate text-base font-bold">
                 {orgStats.name}
               </h3>
-              <p className="text-text-secondary font-mono text-[11px] truncate">
+              <p className="text-text-secondary truncate font-mono text-[11px]">
                 slug: {orgStats.slug}
               </p>
             </div>
@@ -470,15 +483,15 @@ export default function AdminClient({
           {/* Administrators Card */}
           <div className="border-border bg-surface flex flex-col justify-between rounded-[var(--radius-card)] border p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">
+              <span className="text-text-secondary text-xs font-medium tracking-wider uppercase">
                 Administrators
               </span>
-              <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400 border border-amber-500/20">
+              <span className="rounded-full border border-amber-500/20 bg-amber-500/10 px-2 py-0.5 text-[10px] font-bold text-amber-700 dark:text-amber-400">
                 Limit: 2 Max
               </span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-text-primary text-2xl font-bold font-mono">
+              <span className="text-text-primary font-mono text-2xl font-bold">
                 {orgStats.admin_count}
               </span>
               <span className="text-text-secondary text-xs">
@@ -490,15 +503,15 @@ export default function AdminClient({
           {/* AML Analysts Card */}
           <div className="border-border bg-surface flex flex-col justify-between rounded-[var(--radius-card)] border p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">
+              <span className="text-text-secondary text-xs font-medium tracking-wider uppercase">
                 AML Analysts
               </span>
-              <span className="rounded-full bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-400 border border-blue-500/20">
+              <span className="rounded-full border border-blue-500/20 bg-blue-500/10 px-2 py-0.5 text-[10px] font-bold text-blue-700 dark:text-blue-400">
                 Investigations
               </span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-text-primary text-2xl font-bold font-mono">
+              <span className="text-text-primary font-mono text-2xl font-bold">
                 {orgStats.analyst_count}
               </span>
               <span className="text-text-secondary text-xs">Assigned</span>
@@ -508,15 +521,15 @@ export default function AdminClient({
           {/* Data Operators Card */}
           <div className="border-border bg-surface flex flex-col justify-between rounded-[var(--radius-card)] border p-4 shadow-sm">
             <div className="flex items-center justify-between">
-              <span className="text-text-secondary text-xs font-medium uppercase tracking-wider">
+              <span className="text-text-secondary text-xs font-medium tracking-wider uppercase">
                 Data Operators
               </span>
-              <span className="rounded-full bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-bold text-emerald-700 dark:text-emerald-400">
                 Ingestion
               </span>
             </div>
             <div className="mt-2 flex items-baseline gap-2">
-              <span className="text-text-primary text-2xl font-bold font-mono">
+              <span className="text-text-primary font-mono text-2xl font-bold">
                 {orgStats.operator_count}
               </span>
               <span className="text-text-secondary text-xs">Assigned</span>
@@ -535,7 +548,9 @@ export default function AdminClient({
               : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
           }`}
         >
-          <span className="material-symbols-outlined text-[16px]">manage_accounts</span>
+          <span className="material-symbols-outlined text-[16px]">
+            manage_accounts
+          </span>
           <span>Staff Directory ({users.length})</span>
         </button>
         <button
@@ -557,7 +572,9 @@ export default function AdminClient({
               : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
           }`}
         >
-          <span className="material-symbols-outlined text-[16px]">model_training</span>
+          <span className="material-symbols-outlined text-[16px]">
+            model_training
+          </span>
           <span>Model Governance &amp; Thresholds</span>
         </button>
         <button
@@ -568,7 +585,9 @@ export default function AdminClient({
               : "text-text-secondary hover:text-text-primary hover:bg-surface-hover"
           }`}
         >
-          <span className="material-symbols-outlined text-[16px]">security</span>
+          <span className="material-symbols-outlined text-[16px]">
+            security
+          </span>
           <span>Organization Audit Trail</span>
         </button>
       </div>
@@ -578,20 +597,20 @@ export default function AdminClient({
         <div className="flex flex-col gap-4">
           {/* Filters Bar */}
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex items-center gap-2 flex-1 max-w-md">
+            <div className="flex max-w-md flex-1 items-center gap-2">
               <input
                 type="text"
                 placeholder="Search staff by name or email…"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full text-xs rounded-lg border border-border bg-surface px-3 py-2 text-text-primary outline-none focus:border-brand-blue focus:ring-1 focus:ring-brand-blue/20"
+                className="border-border bg-surface text-text-primary focus:border-brand-blue focus:ring-brand-blue/20 w-full rounded-lg border px-3 py-2 text-xs outline-none focus:ring-1"
               />
             </div>
             <div className="flex items-center gap-2">
               <select
                 value={roleFilter}
                 onChange={(e) => setRoleFilter(e.target.value)}
-                className="text-xs rounded-lg border border-border bg-surface px-3 py-2 text-text-primary outline-none cursor-pointer"
+                className="border-border bg-surface text-text-primary cursor-pointer rounded-lg border px-3 py-2 text-xs outline-none"
               >
                 <option value="all">All Roles</option>
                 <option value="administrator">Administrators</option>
@@ -601,7 +620,7 @@ export default function AdminClient({
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="text-xs rounded-lg border border-border bg-surface px-3 py-2 text-text-primary outline-none cursor-pointer"
+                className="border-border bg-surface text-text-primary cursor-pointer rounded-lg border px-3 py-2 text-xs outline-none"
               >
                 <option value="all">All Statuses</option>
                 <option value="active">Active</option>
@@ -623,70 +642,96 @@ export default function AdminClient({
       )}
 
       {/* Tab 2: Organization Governance */}
-      {activeTab === "organization" && (
-        <div className="flex flex-col gap-6">
-          <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
-            <h3 className="text-text-primary text-base font-bold mb-4">
-              Organization Scope &amp; Hierarchy
-            </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
-              <div className="flex flex-col gap-1 p-3 rounded-lg bg-surface-hover border border-border">
-                <span className="text-text-secondary font-medium">Institution Name</span>
-                <span className="text-text-primary font-bold text-sm">{orgStats?.name}</span>
-              </div>
-              <div className="flex flex-col gap-1 p-3 rounded-lg bg-surface-hover border border-border">
-                <span className="text-text-secondary font-medium">Unique Organization Slug</span>
-                <span className="text-text-primary font-mono font-bold text-sm">{orgStats?.slug}</span>
-              </div>
-              <div className="flex flex-col gap-1 p-3 rounded-lg bg-surface-hover border border-border">
-                <span className="text-text-secondary font-medium">Data Isolation Boundary</span>
-                <span className="text-emerald-700 dark:text-emerald-400 font-semibold">
-                  Enforced via RLS &amp; Backend Scoping (Strict Isolation)
-                </span>
-              </div>
-              <div className="flex flex-col gap-1 p-3 rounded-lg bg-surface-hover border border-border">
-                <span className="text-text-secondary font-medium">Administrator Constraint</span>
-                <span className="text-amber-700 dark:text-amber-400 font-semibold">
-                  Max 2 active administrators enforced atomically via DB row-locking
-                </span>
+      {activeTab === "organization" &&
+        (loadingOrg && !orgStats ? (
+          <div className="border-border bg-surface text-text-muted rounded-[var(--radius-card)] border p-8 text-center text-sm">
+            Loading organization governance...
+          </div>
+        ) : (
+          <div className="flex flex-col gap-6">
+            <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
+              <h3 className="text-text-primary mb-4 text-base font-bold">
+                Organization Scope &amp; Hierarchy
+              </h3>
+              <div className="grid grid-cols-1 gap-4 text-xs md:grid-cols-2">
+                <div className="bg-surface-hover border-border flex flex-col gap-1 rounded-lg border p-3">
+                  <span className="text-text-secondary font-medium">
+                    Institution Name
+                  </span>
+                  <span className="text-text-primary text-sm font-bold">
+                    {orgStats?.name}
+                  </span>
+                </div>
+                <div className="bg-surface-hover border-border flex flex-col gap-1 rounded-lg border p-3">
+                  <span className="text-text-secondary font-medium">
+                    Unique Organization Slug
+                  </span>
+                  <span className="text-text-primary font-mono text-sm font-bold">
+                    {orgStats?.slug}
+                  </span>
+                </div>
+                <div className="bg-surface-hover border-border flex flex-col gap-1 rounded-lg border p-3">
+                  <span className="text-text-secondary font-medium">
+                    Data Isolation Boundary
+                  </span>
+                  <span className="font-semibold text-emerald-700 dark:text-emerald-400">
+                    Enforced via RLS &amp; Backend Scoping (Strict Isolation)
+                  </span>
+                </div>
+                <div className="bg-surface-hover border-border flex flex-col gap-1 rounded-lg border p-3">
+                  <span className="text-text-secondary font-medium">
+                    Administrator Constraint
+                  </span>
+                  <span className="font-semibold text-amber-700 dark:text-amber-400">
+                    Max 2 active administrators enforced atomically via DB
+                    row-locking
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Recent Organization Activity */}
-          <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
-            <h3 className="text-text-primary text-base font-bold mb-4">
-              Recent Organization Security Events
-            </h3>
-            {orgStats?.recent_activity?.length ? (
-              <div className="flex flex-col divide-y divide-border">
-                {orgStats.recent_activity.map((act) => (
-                  <div key={act.audit_id} className="py-2.5 flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-3">
-                      <span className="material-symbols-outlined text-[16px] text-brand-blue">
-                        verified_user
-                      </span>
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-text-primary font-mono">
-                          {act.action}
+            {/* Recent Organization Activity */}
+            <div className="border-border bg-surface rounded-[var(--radius-card)] border p-6 shadow-sm">
+              <h3 className="text-text-primary mb-4 text-base font-bold">
+                Recent Organization Security Events
+              </h3>
+              {orgStats?.recent_activity?.length ? (
+                <div className="divide-border flex flex-col divide-y">
+                  {orgStats.recent_activity.map((act) => (
+                    <div
+                      key={act.audit_id}
+                      className="flex items-center justify-between py-2.5 text-xs"
+                    >
+                      <div className="flex items-center gap-3">
+                        <span className="material-symbols-outlined text-brand-blue text-[16px]">
+                          verified_user
                         </span>
-                        <span className="text-text-secondary text-[11px]">
-                          Actor: {act.user_email || "System"} • Entity: {act.entity_type || "—"}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className="text-text-primary font-mono font-semibold">
+                            {act.action}
+                          </span>
+                          <span className="text-text-secondary text-[11px]">
+                            Actor: {act.user_email || "System"} • Entity:{" "}
+                            {act.entity_type || "—"}
+                          </span>
+                        </div>
                       </div>
+                      <span className="text-text-secondary font-mono text-[11px]">
+                        {act.created_at
+                          ? new Date(act.created_at).toLocaleString()
+                          : "—"}
+                      </span>
                     </div>
-                    <span className="text-text-secondary font-mono text-[11px]">
-                      {act.created_at ? new Date(act.created_at).toLocaleString() : "—"}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-text-secondary text-xs">No recent activity recorded.</p>
-            )}
+                  ))}
+                </div>
+              ) : (
+                <p className="text-text-secondary text-xs">
+                  No recent activity recorded.
+                </p>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        ))}
 
       {/* Tab 3: Models & Thresholds */}
       {activeTab === "models" && (
@@ -715,13 +760,17 @@ export default function AdminClient({
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-text-secondary block">Precision Score</span>
+                    <span className="text-text-secondary block">
+                      Precision Score
+                    </span>
                     <span className="font-mono text-sm font-semibold">
                       {m.precision_score ?? "1.000"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary block">Recall Score</span>
+                    <span className="text-text-secondary block">
+                      Recall Score
+                    </span>
                     <span className="font-mono text-sm font-semibold">
                       {m.recall_score ?? "1.000"}
                     </span>
@@ -733,19 +782,25 @@ export default function AdminClient({
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary block">PR-AUC / ROC-AUC</span>
+                    <span className="text-text-secondary block">
+                      PR-AUC / ROC-AUC
+                    </span>
                     <span className="font-mono text-sm font-semibold">
                       {m.pr_auc ?? "1.00"} / {m.roc_auc ?? "1.00"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary block">Low Risk Threshold</span>
+                    <span className="text-text-secondary block">
+                      Low Risk Threshold
+                    </span>
                     <span className="font-mono text-sm font-semibold">
                       &le; {m.threshold_low_max}
                     </span>
                   </div>
                   <div>
-                    <span className="text-text-secondary block">Medium Risk Threshold</span>
+                    <span className="text-text-secondary block">
+                      Medium Risk Threshold
+                    </span>
                     <span className="font-mono text-sm font-semibold">
                       &le; {m.threshold_medium_max}
                     </span>
@@ -854,7 +909,7 @@ export default function AdminClient({
                   value={inviteName}
                   onChange={(e) => setInviteName(e.target.value)}
                   placeholder="e.g. Jordan Lee"
-                  className="rounded-lg border border-border bg-surface px-3 py-2 text-xs text-text-primary outline-none focus:border-brand-blue"
+                  className="border-border bg-surface text-text-primary focus:border-brand-blue rounded-lg border px-3 py-2 text-xs outline-none"
                 />
               </div>
 
@@ -868,7 +923,7 @@ export default function AdminClient({
                   value={inviteEmail}
                   onChange={(e) => setInviteEmail(e.target.value)}
                   placeholder="jordan@apexbank.com"
-                  className="rounded-lg border border-border bg-surface px-3 py-2 text-xs text-text-primary outline-none focus:border-brand-blue"
+                  className="border-border bg-surface text-text-primary focus:border-brand-blue rounded-lg border px-3 py-2 text-xs outline-none"
                 />
               </div>
 
@@ -879,7 +934,7 @@ export default function AdminClient({
                 <select
                   value={inviteRole}
                   onChange={(e) => setInviteRole(e.target.value)}
-                  className="rounded-lg border border-border bg-surface px-3 py-2 text-xs text-text-primary outline-none cursor-pointer focus:border-brand-blue"
+                  className="border-border bg-surface text-text-primary focus:border-brand-blue cursor-pointer rounded-lg border px-3 py-2 text-xs outline-none"
                 >
                   <option value="aml_analyst">
                     AML Analyst (Alerts, Investigations, Risk Profiling)
@@ -891,11 +946,14 @@ export default function AdminClient({
                     Administrator (Max 2 per organization)
                   </option>
                 </select>
-                {inviteRole === "administrator" && orgStats && orgStats.admin_count >= 2 && (
-                  <p className="text-rose-600 dark:text-rose-400 text-[11px] font-medium">
-                    ⚠️ Organization currently has 2 active administrators. You cannot add a third.
-                  </p>
-                )}
+                {inviteRole === "administrator" &&
+                  orgStats &&
+                  orgStats.admin_count >= 2 && (
+                    <p className="text-[11px] font-medium text-rose-600 dark:text-rose-400">
+                      ⚠️ Organization currently has 2 active administrators. You
+                      cannot add a third.
+                    </p>
+                  )}
               </div>
 
               <div className="flex flex-col gap-1">
@@ -907,11 +965,11 @@ export default function AdminClient({
                   value={invitePassword}
                   onChange={(e) => setInvitePassword(e.target.value)}
                   placeholder="Leave empty for auto-generated password"
-                  className="rounded-lg border border-border bg-surface px-3 py-2 text-xs text-text-primary outline-none focus:border-brand-blue"
+                  className="border-border bg-surface text-text-primary focus:border-brand-blue rounded-lg border px-3 py-2 text-xs outline-none"
                 />
               </div>
 
-              <div className="border-border flex justify-end gap-2.5 border-t pt-3 mt-2">
+              <div className="border-border mt-2 flex justify-end gap-2.5 border-t pt-3">
                 <button
                   type="button"
                   onClick={() => setIsInviteModalOpen(false)}
@@ -1010,15 +1068,16 @@ export default function AdminClient({
                 confirmModal.user.is_active ? (
                   <>
                     Are you sure you want to deactivate{" "}
-                    <span className="font-semibold text-text-primary">
+                    <span className="text-text-primary font-semibold">
                       {confirmModal.user.email}
                     </span>
-                    ? They will immediately lose access to all organization workflows.
+                    ? They will immediately lose access to all organization
+                    workflows.
                   </>
                 ) : (
                   <>
                     Reactivate account for{" "}
-                    <span className="font-semibold text-text-primary">
+                    <span className="text-text-primary font-semibold">
                       {confirmModal.user.email}
                     </span>
                     ? They will regain access according to their role.
@@ -1027,7 +1086,7 @@ export default function AdminClient({
               ) : (
                 <>
                   Are you sure you want to revoke access and delete{" "}
-                  <span className="font-semibold text-text-primary">
+                  <span className="text-text-primary font-semibold">
                     {confirmModal.user.email}
                   </span>
                   ? This action is recorded in the immutable audit log.

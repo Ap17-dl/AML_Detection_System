@@ -43,7 +43,9 @@ class UserInviteRequest(BaseModel):
     email: EmailStr
     full_name: str | None = None
     role: str = Field(description="One of: administrator, aml_analyst, data_operator")
-    password: str | None = Field(default=None, min_length=6, description="Optional direct password provision")
+    password: str | None = Field(
+        default=None, min_length=6, description="Optional direct password provision"
+    )
 
 
 class UserRoleUpdateRequest(BaseModel):

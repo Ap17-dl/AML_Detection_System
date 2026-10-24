@@ -28,9 +28,7 @@ async def get_compliance_summary(
     org_id = current_user.organization_id
 
     total_alerts = (
-        await db.execute(
-            select(func.count(Alert.alert_id)).where(Alert.organization_id == org_id)
-        )
+        await db.execute(select(func.count(Alert.alert_id)).where(Alert.organization_id == org_id))
     ).scalar() or 0
 
     closed_alerts = (
@@ -86,9 +84,7 @@ async def export_alerts_csv(
             ["alert_id", "risk_category", "status", "outcome", "created_at", "closed_at"]
         )
         res = await db.execute(
-            select(Alert)
-            .where(Alert.organization_id == org_id)
-            .order_by(Alert.created_at.desc())
+            select(Alert).where(Alert.organization_id == org_id).order_by(Alert.created_at.desc())
         )
         for a in res.scalars().all():
             writer.writerow(

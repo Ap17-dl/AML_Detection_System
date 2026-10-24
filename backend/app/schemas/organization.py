@@ -22,9 +22,13 @@ class OrganizationOut(BaseModel):
 
 class OrganizationRegisterIn(BaseModel):
     name: str = Field(..., min_length=2, max_length=120, description="Organization name")
-    slug: str | None = Field(None, min_length=2, max_length=120, description="Custom slug or auto-generated")
+    slug: str | None = Field(
+        None, min_length=2, max_length=120, description="Custom slug or auto-generated"
+    )
     admin_email: EmailStr = Field(..., description="Email for the primary administrator")
-    admin_name: str = Field(..., min_length=2, max_length=120, description="Full name of primary administrator")
+    admin_name: str = Field(
+        ..., min_length=2, max_length=120, description="Full name of primary administrator"
+    )
     admin_password: str = Field(..., min_length=6, description="Initial administrator password")
 
 
