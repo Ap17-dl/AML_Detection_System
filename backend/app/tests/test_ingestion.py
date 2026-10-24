@@ -159,3 +159,56 @@ async def test_initial_batch_rejects_more_than_3_files(fake_session):
         assert res.status_code == 422
         data = res.json()
         assert data["error"]["code"] == "too_many_files"
+
+
+async def test_ingest_csv_disambiguates_duplicate_external_ref(fake_session):
+    import uuid
+
+    from app.models.transaction import Transaction
+    from app.services.ingestion import ingest_csv
+    from app.tests.conftest import FakeResult
+
+    csv_bytes = (
+        b"external_ref,origin_account,destination_account,amount,occurred_at,origin_customer_name,destination_customer_name\n"
+        b"TXN-DUP-1,ACC-1,ACC-2,500.00,2026-03-15T12:00:00Z,Alice,Bob\n"
+        b"TXN-DUP-1,ACC-1,ACC-3,750.00,2026-03-15T12:01:00Z,Alice,Charlie\n"
+    )
+
+    # 1. candidate external_refs lookup -> TXN-DUP-1 already exists in DB
+    fake_session.execute_results.append(FakeResult(rows=["TXN-DUP-1"]))
+    # 2. row 1 origin account lookup -> None
+    fake_session.execute_results.append(FakeResult(scalar=None))
+    # 3. row 1 origin customer lookup -> empty
+    fake_session.execute_results.append(FakeResult(rows=[]))
+    # 4. row 1 dest account lookup -> None
+    fake_session.execute_results.append(FakeResult(scalar=None))
+    # 5. row 1 dest customer lookup -> empty
+    fake_session.execute_results.append(FakeResult(rows=[]))
+    # 6. row 1 model_metadata lookup -> found
+    fake_session.execute_results.append(FakeResult(scalar="xgb_v1.0.0"))
+    # 7. row 1 alert check -> None
+    fake_session.execute_results.append(FakeResult(scalar=None))
+    # (row 2 origin account ACC-1 is cached in account_cache)
+    # 8. row 2 dest account ACC-3 lookup -> None
+    fake_session.execute_results.append(FakeResult(scalar=None))
+    # 9. row 2 dest customer Charlie lookup -> empty
+    fake_session.execute_results.append(FakeResult(rows=[]))
+    # 10. row 2 model_metadata lookup -> found
+    fake_session.execute_results.append(FakeResult(scalar="xgb_v1.0.0"))
+    # 11. row 2 alert check -> None
+    fake_session.execute_results.append(FakeResult(scalar=None))
+
+    batch, errors = await ingest_csv(
+        db=fake_session,
+        csv_bytes=csv_bytes,
+        filename="test_dup_ref.csv",
+        uploaded_by=uuid.uuid4(),
+    )
+
+    assert len(errors) == 0
+    assert batch.accepted_rows == 2
+    inserted_txns = [obj for obj in fake_session.added if isinstance(obj, Transaction)]
+    assert len(inserted_txns) == 2
+    refs = [t.external_ref for t in inserted_txns]
+    assert refs[0] != refs[1]
+    assert "TXN-DUP-1" in refs[0]

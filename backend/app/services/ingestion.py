@@ -44,6 +44,15 @@ from app.services.risk_profile import recalculate_customer_risk
 
 logger = logging.getLogger(__name__)
 
+
+class _NullAsyncContext:
+    async def __aenter__(self):
+        return None
+
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        return None
+
+
 # Columns we expect in an uploaded CSV. The CSV header names are normalised to lowercase
 # before lookup so the user can supply any casing they like.
 REQUIRED_COLUMNS = {
@@ -414,8 +423,25 @@ async def ingest_csv(
     customer_cache: dict[str, uuid.UUID] = {}
     touched_account_ids: set[uuid.UUID] = set()
     touched_customer_ids: set[uuid.UUID] = set()
+    seen_refs_in_batch: set[str] = set()
 
-    for row_number, raw_row in enumerate(reader, start=2):  # row 1 = header
+    raw_rows = list(reader)
+    candidate_refs = [
+        raw_row.get("external_ref", "").strip()
+        for raw_row in raw_rows
+        if raw_row.get("external_ref", "").strip()
+    ]
+    existing_refs: set[str] = set()
+    if candidate_refs:
+        try:
+            res = await db.execute(
+                select(Transaction.external_ref).where(Transaction.external_ref.in_(candidate_refs))
+            )
+            existing_refs = set(res.scalars().all())
+        except Exception as e_ref:
+            logger.debug("Existing refs lookup note: %s", e_ref)
+
+    for row_number, raw_row in enumerate(raw_rows, start=2):  # row 1 = header
         total += 1
         normalised_row = {_normalise_header(k): v for k, v in raw_row.items()}
         parsed, row_errors = _validate_row(normalised_row, row_number)
@@ -426,47 +452,57 @@ async def ingest_csv(
 
         assert parsed is not None  # guaranteed by _validate_row
 
+        ext_ref = parsed.get("external_ref")
+        if ext_ref:
+            if ext_ref in existing_refs or ext_ref in seen_refs_in_batch:
+                # Disambiguate duplicate ref so the batch can still be ingested and analyzed
+                ext_ref = f"{ext_ref}-{str(batch.batch_id)[:8]}"
+                if ext_ref in seen_refs_in_batch:
+                    ext_ref = f"{ext_ref}-{uuid.uuid4().hex[:4]}"
+            seen_refs_in_batch.add(ext_ref)
+
         try:
-            # 1. Resolve or create accounts & customers (accounts + customers tables)
-            origin_id, origin_cust_id = await _resolve_or_create_account(
-                db,
-                parsed["origin_account"],
-                parsed.get("origin_customer_name"),
-                parsed.get("origin_customer_country"),
-                account_cache,
-                customer_cache,
-            )
-            dest_id, dest_cust_id = await _resolve_or_create_account(
-                db,
-                parsed["destination_account"],
-                parsed.get("destination_customer_name"),
-                parsed.get("destination_customer_country"),
-                account_cache,
-                customer_cache,
-            )
+            async with db.begin_nested() if hasattr(db, "begin_nested") else _NullAsyncContext():
+                # 1. Resolve or create accounts & customers (accounts + customers tables)
+                origin_id, origin_cust_id = await _resolve_or_create_account(
+                    db,
+                    parsed["origin_account"],
+                    parsed.get("origin_customer_name"),
+                    parsed.get("origin_customer_country"),
+                    account_cache,
+                    customer_cache,
+                )
+                dest_id, dest_cust_id = await _resolve_or_create_account(
+                    db,
+                    parsed["destination_account"],
+                    parsed.get("destination_customer_name"),
+                    parsed.get("destination_customer_country"),
+                    account_cache,
+                    customer_cache,
+                )
 
-            touched_account_ids.add(origin_id)
-            touched_account_ids.add(dest_id)
-            if origin_cust_id:
-                touched_customer_ids.add(origin_cust_id)
-            if dest_cust_id:
-                touched_customer_ids.add(dest_cust_id)
+                touched_account_ids.add(origin_id)
+                touched_account_ids.add(dest_id)
+                if origin_cust_id:
+                    touched_customer_ids.add(origin_cust_id)
+                if dest_cust_id:
+                    touched_customer_ids.add(dest_cust_id)
 
-            # 2. Insert transaction (transactions table)
-            txn = Transaction(
-                external_ref=parsed["external_ref"],
-                origin_account_id=origin_id,
-                destination_account_id=dest_id,
-                amount=parsed["amount"],
-                currency=parsed["currency"],
-                transaction_type=parsed["transaction_type"],
-                channel=parsed["channel"],
-                occurred_at=parsed["occurred_at"],
-                ingestion_batch_id=batch.batch_id,
-                ingestion_status="accepted",
-            )
-            db.add(txn)
-            await db.flush()
+                # 2. Insert transaction (transactions table)
+                txn = Transaction(
+                    external_ref=ext_ref,
+                    origin_account_id=origin_id,
+                    destination_account_id=dest_id,
+                    amount=parsed["amount"],
+                    currency=parsed["currency"],
+                    transaction_type=parsed["transaction_type"],
+                    channel=parsed["channel"],
+                    occurred_at=parsed["occurred_at"],
+                    ingestion_batch_id=batch.batch_id,
+                    ingestion_status="accepted",
+                )
+                db.add(txn)
+                await db.flush()
 
             # 3. ML Risk Inference & Scoring (predictions table)
             try:

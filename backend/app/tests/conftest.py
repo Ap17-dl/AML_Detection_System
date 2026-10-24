@@ -94,6 +94,10 @@ class FakeSession:
     async def refresh(self, _obj) -> None:
         pass
 
+    @asynccontextmanager
+    async def begin_nested(self):
+        yield self
+
 
 @pytest.fixture
 def fake_session() -> FakeSession:
