@@ -49,6 +49,7 @@ async def test_prediction_endpoint_allows_analyst_and_returns_prediction(fake_se
     txn_id = uuid.uuid4()
     txn = Transaction(
         transaction_id=txn_id,
+        organization_id=ANALYST.organization_id,
         origin_account_id=uuid.uuid4(),
         destination_account_id=uuid.uuid4(),
         amount=Decimal("500.00"),
@@ -107,3 +108,31 @@ async def test_list_models_allows_admin(fake_session):
         assert data[0]["model_version"] == "xgb_v1.0.0"
         assert data[0]["algorithm"] == "XGBoost"
         assert data[0]["f1_score"] == 0.95
+
+
+async def test_prediction_cross_org_access_logged_and_rejected(fake_session):
+    txn_id = uuid.uuid4()
+    other_org_id = uuid.uuid4()
+    txn = Transaction(
+        transaction_id=txn_id,
+        organization_id=other_org_id,
+        origin_account_id=uuid.uuid4(),
+        destination_account_id=uuid.uuid4(),
+        amount=Decimal("2000.00"),
+        currency="USD",
+        occurred_at=datetime.now(UTC),
+    )
+    fake_session.execute_results.append(FakeResult(scalar=txn))
+
+    async with api_client(current_user=ANALYST, fake_session=fake_session) as client:
+        res = await client.get(f"/api/v1/transactions/{txn_id}/prediction")
+        assert res.status_code == 404
+
+    audit_logs = [obj for obj in fake_session.added if getattr(obj, "action", None) == "failed_cross_org_access"]
+    assert len(audit_logs) == 1
+    assert audit_logs[0].entity_type == "transaction"
+    assert audit_logs[0].entity_id == txn_id
+    assert audit_logs[0].user_id == ANALYST.user_id
+    assert audit_logs[0].organization_id == ANALYST.organization_id
+    assert fake_session.committed is True
+

@@ -19,6 +19,9 @@ class User(Base):
     __tablename__ = "users"
 
     user_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), primary_key=True)
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True), ForeignKey("organizations.id"), nullable=False, index=True
+    )
     email: Mapped[str] = mapped_column(String(160), unique=True, nullable=False)
     full_name: Mapped[str | None] = mapped_column(String(120))
     role_id: Mapped[int] = mapped_column(

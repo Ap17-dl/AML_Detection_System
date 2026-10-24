@@ -14,10 +14,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import get_settings
 from app.core.errors import ApiError
 from app.db.session import get_db
+from app.models.organization import Organization
 from app.models.role import Role
 from app.models.user import User
 
 _bearer_scheme = HTTPBearer(auto_error=False)
+
+DEFAULT_ORG_ID = uuid.UUID("a0000000-0000-0000-0000-000000000001")
 
 
 def is_demo_user(email: str | None) -> bool:
@@ -37,6 +40,9 @@ class CurrentUser:
     role_name: str
     full_name: str | None
     is_active: bool
+    organization_id: uuid.UUID = DEFAULT_ORG_ID
+    organization_name: str = "Apex Global Bank"
+    organization_status: str = "active"
 
     @property
     def is_demo(self) -> bool:
@@ -91,15 +97,17 @@ async def get_current_user(
     email = claims.get("email") or ""
 
     result = await db.execute(
-        select(User, Role.role_name)
+        select(User, Role.role_name, Organization.name, Organization.status)
         .join(Role, User.role_id == Role.role_id)
+        .outerjoin(Organization, User.organization_id == Organization.id)
         .where(User.user_id == user_id)
     )
     row = result.first()
     if row is None and email:
         result = await db.execute(
-            select(User, Role.role_name)
+            select(User, Role.role_name, Organization.name, Organization.status)
             .join(Role, User.role_id == Role.role_id)
+            .outerjoin(Organization, User.organization_id == Organization.id)
             .where(User.email == email)
         )
         row = result.first()
@@ -116,6 +124,18 @@ async def get_current_user(
         # Disallow role 1 (administrator) via signup; only analyst (2) or operator (3) allowed.
         if role_id not in (2, 3):
             role_id = 2
+
+        # Organization scoping on auto-provision
+        org_id_str = metadata.get("organization_id")
+        target_org_id = DEFAULT_ORG_ID
+        if org_id_str:
+            try:
+                candidate_org_id = uuid.UUID(org_id_str)
+                org_check = await db.get(Organization, candidate_org_id)
+                if org_check and org_check.status == "active":
+                    target_org_id = candidate_org_id
+            except (ValueError, TypeError):
+                pass
 
         try:
             from sqlalchemy import text
@@ -145,20 +165,28 @@ async def get_current_user(
             await db.execute(
                 text(
                     """
-                    INSERT INTO public.users (user_id, email, full_name, role_id)
-                    VALUES (:uid, :email, :full_name, :role_id)
+                    INSERT INTO public.users (user_id, email, full_name, role_id, organization_id)
+                    VALUES (:uid, :email, :full_name, :role_id, :org_id)
                     ON CONFLICT (user_id) DO UPDATE SET
                         email = EXCLUDED.email,
-                        full_name = COALESCE(EXCLUDED.full_name, public.users.full_name)
+                        full_name = COALESCE(EXCLUDED.full_name, public.users.full_name),
+                        organization_id = COALESCE(public.users.organization_id, EXCLUDED.organization_id)
                 """
                 ),
-                {"uid": actual_uid, "email": email, "full_name": full_name, "role_id": role_id},
+                {
+                    "uid": actual_uid,
+                    "email": email,
+                    "full_name": full_name,
+                    "role_id": role_id,
+                    "org_id": target_org_id,
+                },
             )
             await db.commit()
 
             result = await db.execute(
-                select(User, Role.role_name)
+                select(User, Role.role_name, Organization.name, Organization.status)
                 .join(Role, User.role_id == Role.role_id)
+                .outerjoin(Organization, User.organization_id == Organization.id)
                 .where((User.user_id == actual_uid) | (User.email == email))
             )
             row = result.first()
@@ -171,9 +199,17 @@ async def get_current_user(
                 401, "unknown_user", "Token is valid but no matching user profile was found."
             )
 
-    user, role_name = row
+    user, role_name, org_name, org_status = row
     if not user.is_active:
         raise ApiError(403, "inactive_user", "This account has been deactivated.")
+
+    org_status = org_status or "active"
+    if org_status != "active":
+        raise ApiError(
+            403,
+            "suspended_organization",
+            f"Organization '{org_name or 'Current'}' is suspended or inactive.",
+        )
 
     return CurrentUser(
         user_id=user.user_id,
@@ -181,6 +217,9 @@ async def get_current_user(
         role_name=role_name,
         full_name=user.full_name,
         is_active=user.is_active,
+        organization_id=user.organization_id,
+        organization_name=org_name or "Apex Global Bank",
+        organization_status=org_status,
     )
 
 

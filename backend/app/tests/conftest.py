@@ -27,13 +27,27 @@ from app.main import app  # noqa: E402
 from app.models.role import RoleName  # noqa: E402
 
 
-def make_current_user(role_name: str, *, email: str | None = None) -> CurrentUser:
+DEFAULT_ORG_ID = uuid.UUID("a0000000-0000-0000-0000-000000000001")
+
+
+def make_current_user(
+    role_name: str,
+    *,
+    email: str | None = None,
+    organization_id: uuid.UUID | None = None,
+    organization_name: str | None = "Apex Global Bank",
+    organization_status: str | None = "active",
+    is_active: bool = True,
+) -> CurrentUser:
     return CurrentUser(
         user_id=uuid.uuid4(),
         email=email or f"{role_name}@example.com",
         role_name=role_name,
         full_name=None,
-        is_active=True,
+        is_active=is_active,
+        organization_id=organization_id or DEFAULT_ORG_ID,
+        organization_name=organization_name,
+        organization_status=organization_status,
     )
 
 

@@ -34,6 +34,8 @@ async def build_account_subgraph(
     topological indicators, and returns nodes + edges for UI rendering.
     """
     target_str = str(account_id)
+    target_acct = await db.get(Account, account_id)
+    org_id = target_acct.organization_id if target_acct else uuid.UUID("a0000000-0000-0000-0000-000000000001")
 
     # 1. Fetch relevant transactions touching account_id or its direct neighbors
     txn_res = await db.execute(
@@ -42,7 +44,8 @@ async def build_account_subgraph(
             or_(
                 Transaction.origin_account_id == account_id,
                 Transaction.destination_account_id == account_id,
-            )
+            ),
+            Transaction.organization_id == org_id,
         )
         .order_by(Transaction.occurred_at.desc())
         .limit(max_transactions)
@@ -63,7 +66,8 @@ async def build_account_subgraph(
                 or_(
                     Transaction.origin_account_id.in_(neighbor_ids),
                     Transaction.destination_account_id.in_(neighbor_ids),
-                )
+                ),
+                Transaction.organization_id == org_id,
             )
             .order_by(Transaction.occurred_at.desc())
             .limit(max_transactions)
@@ -158,6 +162,7 @@ async def build_account_subgraph(
     if not ind:
         ind = GraphIndicator(
             account_id=account_id,
+            organization_id=org_id,
             in_degree=in_degree,
             out_degree=out_degree,
             fan_in_ratio=Decimal(str(fan_in_ratio)),

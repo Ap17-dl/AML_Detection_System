@@ -23,7 +23,62 @@ export function SignUpForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [confirmationRequired, setConfirmationRequired] = useState(false);
 
+  const [mode, setMode] = useState<"staff" | "organization">("staff");
+  const [orgName, setOrgName] = useState("");
+  const [orgSlug, setOrgSlug] = useState("");
+  const [orgSuccess, setOrgSuccess] = useState(false);
+
+  async function handleOrgSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setError(null);
+
+    if (!orgName.trim()) {
+      setError("Organization name is required.");
+      return;
+    }
+
+    if (password.length < 6) {
+      setError("Password must be at least 6 characters.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const res = await fetch("/api/v1/organizations/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: orgName.trim(),
+          slug: orgSlug.trim() || undefined,
+          admin_name: fullName.trim(),
+          admin_email: email.trim(),
+        }),
+      });
+
+      if (!res.ok) {
+        const err = await res.json();
+        setIsSubmitting(false);
+        setError(err.message || err.detail || "Failed to register organization.");
+        return;
+      }
+
+      setIsSubmitting(false);
+      setOrgSuccess(true);
+    } catch {
+      setIsSubmitting(false);
+      setError("Unable to connect to server. Please try again.");
+    }
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    if (mode === "organization") {
+      return handleOrgSubmit(event);
+    }
     event.preventDefault();
     setError(null);
 
@@ -75,6 +130,31 @@ export function SignUpForm() {
     }
   }
 
+  if (orgSuccess) {
+    return (
+      <div className="flex flex-col gap-4 py-4 text-center">
+        <div className="bg-emerald-500/10 text-emerald-600 ring-emerald-500/20 mx-auto flex size-14 items-center justify-center rounded-2xl ring-1">
+          <span className="material-symbols-outlined text-3xl">
+            verified
+          </span>
+        </div>
+        <h2 className="text-text-primary text-xl font-bold">
+          Organization Registered
+        </h2>
+        <p className="text-text-secondary mx-auto max-w-sm text-sm leading-relaxed">
+          <span className="text-text-primary font-semibold">{orgName}</span> has been successfully provisioned with administrator{" "}
+          <span className="text-text-primary font-semibold">{email}</span>. You can now log in to manage your organization.
+        </p>
+        <Link
+          href="/login"
+          className="bg-brand-blue hover:bg-brand-blueLight mt-3 inline-flex items-center justify-center rounded-lg px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150"
+        >
+          Sign in to Organization
+        </Link>
+      </div>
+    );
+  }
+
   if (confirmationRequired) {
     return (
       <div className="flex flex-col gap-4 py-4 text-center">
@@ -104,6 +184,38 @@ export function SignUpForm() {
 
   return (
     <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
+      {/* Onboarding Mode Selector */}
+      <div className="flex rounded-lg border border-border bg-surface-hover p-1 gap-1">
+        <button
+          type="button"
+          onClick={() => {
+            setMode("staff");
+            setError(null);
+          }}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            mode === "staff"
+              ? "bg-surface text-text-primary shadow-xs"
+              : "text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          Staff Sign Up
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            setMode("organization");
+            setError(null);
+          }}
+          className={`flex-1 py-1.5 text-xs font-semibold rounded-md transition-all ${
+            mode === "organization"
+              ? "bg-surface text-text-primary shadow-xs"
+              : "text-text-secondary hover:text-text-primary"
+          }`}
+        >
+          Register New Organization
+        </button>
+      </div>
+
       {error && (
         <div
           role="alert"
@@ -111,6 +223,47 @@ export function SignUpForm() {
         >
           {error}
         </div>
+      )}
+
+      {mode === "organization" && (
+        <>
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="orgName"
+              className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+            >
+              Organization name
+            </label>
+            <input
+              id="orgName"
+              name="orgName"
+              type="text"
+              required
+              value={orgName}
+              onChange={(event) => setOrgName(event.target.value)}
+              placeholder="e.g. Apex Global Bank"
+              className={INPUT_CLASSES}
+            />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <label
+              htmlFor="orgSlug"
+              className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+            >
+              Organization slug (optional)
+            </label>
+            <input
+              id="orgSlug"
+              name="orgSlug"
+              type="text"
+              value={orgSlug}
+              onChange={(event) => setOrgSlug(event.target.value)}
+              placeholder="e.g. apex-global-bank"
+              className={INPUT_CLASSES}
+            />
+          </div>
+        </>
       )}
 
       <div className="flex flex-col gap-1.5">
@@ -153,28 +306,30 @@ export function SignUpForm() {
         />
       </div>
 
-      <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor="roleId"
-          className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
-        >
-          Platform role
-        </label>
-        <select
-          id="roleId"
-          name="roleId"
-          value={roleId}
-          onChange={(event) => setRoleId(event.target.value)}
-          className={`${INPUT_CLASSES} cursor-pointer`}
-        >
-          <option value="2">AML Compliance Analyst (Alerts & Cases)</option>
-          <option value="3">Data Operator (Batch Ingestion)</option>
-        </select>
-        <p className="text-text-secondary text-[11px]">
-          Need Administrator access? You can request it from the host after
-          signing in.
-        </p>
-      </div>
+      {mode === "staff" && (
+        <div className="flex flex-col gap-1.5">
+          <label
+            htmlFor="roleId"
+            className="text-text-secondary text-xs font-semibold tracking-wider uppercase"
+          >
+            Platform role
+          </label>
+          <select
+            id="roleId"
+            name="roleId"
+            value={roleId}
+            onChange={(event) => setRoleId(event.target.value)}
+            className={`${INPUT_CLASSES} cursor-pointer`}
+          >
+            <option value="2">AML Compliance Analyst (Alerts & Cases)</option>
+            <option value="3">Data Operator (Batch Ingestion)</option>
+          </select>
+          <p className="text-text-secondary text-[11px]">
+            Need Administrator access? You can request it from the host after
+            signing in.
+          </p>
+        </div>
+      )}
 
       <div className="flex flex-col gap-1.5">
         <label
@@ -254,7 +409,13 @@ export function SignUpForm() {
         className="bg-brand-blue hover:bg-brand-blueLight mt-2 flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-all duration-150 active:scale-[0.99] disabled:opacity-60"
       >
         {isSubmitting && <Spinner className="size-4" />}
-        {isSubmitting ? "Creating account…" : "Create account"}
+        {isSubmitting
+          ? mode === "organization"
+            ? "Registering organization…"
+            : "Creating account…"
+          : mode === "organization"
+          ? "Register organization"
+          : "Create account"}
       </button>
 
       <p className="text-text-secondary pt-1 text-center text-xs">

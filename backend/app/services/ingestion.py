@@ -178,15 +178,20 @@ async def _resolve_or_create_account(
     customer_country: str | None,
     account_cache: dict[str, tuple[uuid.UUID, uuid.UUID]],
     customer_cache: dict[str, uuid.UUID],
+    organization_id: uuid.UUID,
 ) -> tuple[uuid.UUID, uuid.UUID]:
     """Returns (account_id, customer_id) for *account_number*, resolving or creating
-    the account and customer records in the database. Uses in-memory caches to avoid duplicate
-    lookups within the same batch.
+    the account and customer records scoped to *organization_id*.
     """
     if account_number in account_cache:
         return account_cache[account_number]
 
-    result = await db.execute(select(Account).where(Account.account_number == account_number))
+    result = await db.execute(
+        select(Account).where(
+            Account.account_number == account_number,
+            Account.organization_id == organization_id,
+        )
+    )
     existing_account = result.scalar_one_or_none()
     if existing_account:
         # If customer details provided, update stub name or country if needed
@@ -208,13 +213,18 @@ async def _resolve_or_create_account(
         account_cache[account_number] = pair
         return pair
 
-    # Resolve or create customer
+    # Resolve or create customer within the same organization
     customer: Customer | None = None
     if customer_name:
         if customer_name in customer_cache:
             customer = await db.get(Customer, customer_cache[customer_name])
         if not customer:
-            c_res = await db.execute(select(Customer).where(Customer.full_name == customer_name))
+            c_res = await db.execute(
+                select(Customer).where(
+                    Customer.full_name == customer_name,
+                    Customer.organization_id == organization_id,
+                )
+            )
             customer = c_res.scalars().first()
 
     now = datetime.now(UTC)
@@ -222,7 +232,10 @@ async def _resolve_or_create_account(
         ext_ref = f"CUST-{account_number}"
         try:
             ref_check = await db.execute(
-                select(Customer.customer_id).where(Customer.external_ref == ext_ref)
+                select(Customer.customer_id).where(
+                    Customer.external_ref == ext_ref,
+                    Customer.organization_id == organization_id,
+                )
             )
             if ref_check.scalar_one_or_none():
                 ext_ref = f"CUST-{uuid.uuid4().hex[:10].upper()}"
@@ -230,6 +243,7 @@ async def _resolve_or_create_account(
             ext_ref = f"CUST-{uuid.uuid4().hex[:10].upper()}"
 
         customer = Customer(
+            organization_id=organization_id,
             external_ref=ext_ref,
             full_name=customer_name or f"Customer ({account_number})",
             country=customer_country or "US",
@@ -246,6 +260,7 @@ async def _resolve_or_create_account(
         customer_cache[customer_name] = customer.customer_id
 
     account = Account(
+        organization_id=organization_id,
         customer_id=customer.customer_id,
         account_number=account_number,
         account_type="checking",
@@ -372,24 +387,25 @@ async def ingest_csv(
     csv_bytes: bytes,
     filename: str | None,
     uploaded_by: uuid.UUID,
+    organization_id: uuid.UUID | None = None,
 ) -> tuple[IngestionBatch, list[IngestionRowError]]:
     """Parses and validates a CSV file, inserting valid rows as transactions and
-    completely persisting/updating data across all respective database tables:
-    - ingestion_batches (batch status & metrics)
-    - customers (customer profile & KYC)
-    - accounts (banking accounts)
-    - transactions (accepted ledger records)
-    - predictions (ML risk scoring & categories)
-    - explanations (SHAP feature contributions & narratives)
-    - alerts (triage queue for high/medium risks)
-    - customer_risk_history (dynamic risk recalculation snapshot)
-    - graph_indicators (network topology metrics)
-    - audit_logs (immutable regulatory trail)
-
-    Returns the IngestionBatch record and a flat list of per-row errors.
+    completely persisting/updating data across all respective database tables scoped to organization.
     """
+    if organization_id is None:
+        from app.models.user import User
+
+        uploader = await db.get(User, uploaded_by)
+        organization_id = (
+            uploader.organization_id
+            if uploader and getattr(uploader, "organization_id", None)
+            else uuid.UUID("a0000000-0000-0000-0000-000000000001")
+        )
+
     batch = IngestionBatch(
+        batch_id=uuid.uuid4(),
         uploaded_by=uploaded_by,
+        organization_id=organization_id,
         source_type="csv",
         filename=filename,
     )
@@ -443,7 +459,10 @@ async def ingest_csv(
     if candidate_refs:
         try:
             res = await db.execute(
-                select(Transaction.external_ref).where(Transaction.external_ref.in_(candidate_refs))
+                select(Transaction.external_ref).where(
+                    Transaction.external_ref.in_(candidate_refs),
+                    Transaction.organization_id == organization_id,
+                )
             )
             existing_refs = set(res.scalars().all())
         except Exception as e_ref:
@@ -459,7 +478,8 @@ async def ingest_csv(
             try:
                 acct_res = await db.execute(
                     select(Account.account_number, Account.account_id, Account.customer_id).where(
-                        Account.account_number.in_(all_account_numbers)
+                        Account.account_number.in_(all_account_numbers),
+                        Account.organization_id == organization_id,
                     )
                 )
                 for acc_num, acc_id, cust_id in acct_res.all():
@@ -500,6 +520,7 @@ async def ingest_csv(
                     parsed.get("origin_customer_country"),
                     account_cache,
                     customer_cache,
+                    organization_id,
                 )
                 dest_id, dest_cust_id = await _resolve_or_create_account(
                     db,
@@ -508,6 +529,7 @@ async def ingest_csv(
                     parsed.get("destination_customer_country"),
                     account_cache,
                     customer_cache,
+                    organization_id,
                 )
 
                 touched_account_ids.add(origin_id)
@@ -520,6 +542,7 @@ async def ingest_csv(
                 # 2. Insert transaction (transactions table)
                 txn = Transaction(
                     transaction_id=txn_id,
+                    organization_id=organization_id,
                     external_ref=ext_ref,
                     origin_account_id=origin_id,
                     destination_account_id=dest_id,
@@ -544,6 +567,7 @@ async def ingest_csv(
 
                     pred = Prediction(
                         prediction_id=pred_id,
+                        organization_id=organization_id,
                         transaction_id=txn_id,
                         model_version=version,
                         risk_probability=Decimal(f"{prob:.5f}"),
@@ -574,6 +598,7 @@ async def ingest_csv(
                         alerted_account_ids.add(origin_id)
                         alert = Alert(
                             customer_id=origin_cust_id,
+                            organization_id=organization_id,
                             triggering_transaction_id=txn_id,
                             prediction_id=pred_id,
                             risk_category=cat,
@@ -631,6 +656,7 @@ async def ingest_csv(
         await record_audit_log(
             db,
             actor_user_id=uploaded_by,
+            organization_id=organization_id,
             action="csv_batch_imported",
             entity_type="ingestion_batch",
             entity_id=batch.batch_id,
@@ -641,6 +667,7 @@ async def ingest_csv(
                 "rejected_rows": total - accepted,
                 "accounts_updated": len(touched_account_ids),
                 "customers_updated": len(touched_customer_ids),
+                "organization_id": str(organization_id),
             },
         )
     except Exception as e_audit:

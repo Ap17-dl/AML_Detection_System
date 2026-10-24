@@ -59,11 +59,13 @@ async def import_csv(
         csv_bytes=csv_bytes,
         filename=file.filename,
         uploaded_by=current_user.user_id,
+        organization_id=current_user.organization_id,
     )
 
     await record_audit_log(
         db,
         actor_user_id=current_user.user_id,
+        organization_id=current_user.organization_id,
         action="csv_import",
         entity_type="ingestion_batch",
         entity_id=batch.batch_id,
@@ -72,6 +74,7 @@ async def import_csv(
             "total_rows": batch.total_rows,
             "accepted_rows": batch.accepted_rows,
             "rejected_rows": batch.rejected_rows,
+            "organization_id": str(current_user.organization_id),
         },
     )
     await db.commit()
@@ -127,11 +130,13 @@ async def upload_initial_batch(
             csv_bytes=csv_bytes,
             filename=upload.filename,
             uploaded_by=current_user.user_id,
+            organization_id=current_user.organization_id,
         )
 
         await record_audit_log(
             db,
             actor_user_id=current_user.user_id,
+            organization_id=current_user.organization_id,
             action="csv_import",
             entity_type="ingestion_batch",
             entity_id=batch.batch_id,
@@ -140,6 +145,7 @@ async def upload_initial_batch(
                 "total_rows": batch.total_rows,
                 "accepted_rows": batch.accepted_rows,
                 "rejected_rows": batch.rejected_rows,
+                "organization_id": str(current_user.organization_id),
             },
         )
         reports.append(
@@ -200,15 +206,21 @@ async def load_sample_batch(
         csv_bytes=csv_bytes,
         filename=filename,
         uploaded_by=current_user.user_id,
+        organization_id=current_user.organization_id,
     )
 
     await record_audit_log(
         db,
         actor_user_id=current_user.user_id,
+        organization_id=current_user.organization_id,
         action="load_sample_batch",
         entity_type="ingestion_batch",
         entity_id=batch.batch_id,
-        details={"filename": filename, "sample_type": sample_type},
+        details={
+            "filename": filename,
+            "sample_type": sample_type,
+            "organization_id": str(current_user.organization_id),
+        },
     )
     await db.commit()
 
@@ -228,11 +240,12 @@ async def list_batches(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_READ_ROLES),
 ) -> BatchListOut:
-    """Lists uploaded ingestion batches for the current profile (or all for demo/admin)."""
-    stmt = select(IngestionBatch)
-    if not current_user.is_demo and current_user.role_name != RoleName.ADMINISTRATOR:
-        stmt = stmt.where(IngestionBatch.uploaded_by == current_user.user_id)
-    stmt = stmt.order_by(IngestionBatch.started_at.desc())
+    """Lists uploaded ingestion batches for caller's organization."""
+    stmt = (
+        select(IngestionBatch)
+        .where(IngestionBatch.organization_id == current_user.organization_id)
+        .order_by(IngestionBatch.started_at.desc())
+    )
     res = await db.execute(stmt)
     batches = res.scalars().all()
     return BatchListOut(
@@ -261,17 +274,21 @@ async def delete_batch(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_READ_ROLES),
 ) -> dict[str, Any]:
-    """Removes an uploaded batch and its associated transactions, alerts, and predictions."""
+    """Removes an uploaded batch and its associated transactions, alerts, and predictions within organization."""
     batch = await db.get(IngestionBatch, batch_id)
-    if not batch:
+    if not batch or batch.organization_id != current_user.organization_id:
+        if batch is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="ingestion_batch",
+                entity_id=batch_id,
+                details={"target_organization_id": str(batch.organization_id)},
+            )
+            await db.commit()
         raise ApiError(404, "batch_not_found", f"Batch {batch_id} not found.")
-
-    if (
-        not current_user.is_demo
-        and batch.uploaded_by != current_user.user_id
-        and current_user.role_name != RoleName.ADMINISTRATOR
-    ):
-        raise ApiError(403, "forbidden", "You cannot delete batches belonging to other profiles.")
 
     # 1. Find all transactions in this batch
     txn_res = await db.execute(
@@ -320,26 +337,10 @@ async def list_transactions(
     order: str = Query("desc", description="Sort order: asc or desc"),
 ) -> TransactionListOut:
     """Lists transactions with search, sort, filter, and pagination (AML-FR-06)."""
-    # For non-demo users, only list transactions belonging to batches they uploaded
-    user_batch_ids = None
-    if not current_user.is_demo:
-        from app.models.ingestion_batch import IngestionBatch
-
-        batch_res = await db.execute(
-            select(IngestionBatch.batch_id).where(
-                IngestionBatch.uploaded_by == current_user.user_id
-            )
-        )
-        user_batch_ids = batch_res.scalars().all()
-        if not user_batch_ids:
-            return TransactionListOut(items=[], total=0, page=page, page_size=page_size, pages=0)
-
-    query = select(Transaction)
-    count_query = select(func.count(Transaction.transaction_id))
-
-    if not current_user.is_demo and user_batch_ids is not None:
-        query = query.where(Transaction.ingestion_batch_id.in_(user_batch_ids))
-        count_query = count_query.where(Transaction.ingestion_batch_id.in_(user_batch_ids))
+    query = select(Transaction).where(Transaction.organization_id == current_user.organization_id)
+    count_query = select(func.count(Transaction.transaction_id)).where(
+        Transaction.organization_id == current_user.organization_id
+    )
 
     # --- filters ---
     if search:
@@ -460,14 +461,25 @@ async def list_transactions(
 async def get_transaction(
     transaction_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: CurrentUser = Depends(_READ_ROLES),
+    current_user: CurrentUser = Depends(_READ_ROLES),
 ) -> TransactionDetailOut:
     """Returns a single transaction with linked account numbers."""
     result = await db.execute(
         select(Transaction).where(Transaction.transaction_id == transaction_id)
     )
     txn = result.scalar_one_or_none()
-    if txn is None:
+    if txn is None or txn.organization_id != current_user.organization_id:
+        if txn is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="transaction",
+                entity_id=transaction_id,
+                details={"target_organization_id": str(txn.organization_id)},
+            )
+            await db.commit()
         raise ApiError(404, "transaction_not_found", f"No transaction with id {transaction_id}.")
 
     # Fetch account numbers

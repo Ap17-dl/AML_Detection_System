@@ -41,26 +41,10 @@ async def list_alerts(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ) -> AlertListOut:
-    query = select(Alert)
-    count_query = select(func.count(Alert.alert_id))
-
-    if not current_user.is_demo:
-        from app.models.ingestion_batch import IngestionBatch
-
-        batch_res = await db.execute(
-            select(IngestionBatch.batch_id).where(
-                IngestionBatch.uploaded_by == current_user.user_id
-            )
-        )
-        user_batch_ids = batch_res.scalars().all()
-        if not user_batch_ids:
-            return AlertListOut(items=[], total=0, page=page, page_size=page_size)
-
-        user_txns_subq = select(Transaction.transaction_id).where(
-            Transaction.ingestion_batch_id.in_(user_batch_ids)
-        )
-        query = query.where(Alert.triggering_transaction_id.in_(user_txns_subq))
-        count_query = count_query.where(Alert.triggering_transaction_id.in_(user_txns_subq))
+    query = select(Alert).where(Alert.organization_id == current_user.organization_id)
+    count_query = select(func.count(Alert.alert_id)).where(
+        Alert.organization_id == current_user.organization_id
+    )
 
     if status:
         query = query.where(Alert.status == status)
@@ -129,7 +113,18 @@ async def get_alert(
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ) -> AlertOut:
     alert = await db.get(Alert, alert_id)
-    if not alert:
+    if not alert or alert.organization_id != current_user.organization_id:
+        if alert is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="alert",
+                entity_id=alert_id,
+                details={"target_organization_id": str(alert.organization_id)},
+            )
+            await db.commit()
         raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
 
     cust_name = None
@@ -173,7 +168,18 @@ async def update_alert(
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ) -> AlertOut:
     alert = await db.get(Alert, alert_id)
-    if not alert:
+    if not alert or alert.organization_id != current_user.organization_id:
+        if alert is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="alert",
+                entity_id=alert_id,
+                details={"target_organization_id": str(alert.organization_id)},
+            )
+            await db.commit()
         raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
 
     if body.status is not None:
@@ -186,6 +192,7 @@ async def update_alert(
     await record_audit_log(
         db=db,
         actor_user_id=current_user.user_id,
+        organization_id=current_user.organization_id,
         action="update_alert",
         entity_type="alert",
         entity_id=alert.alert_id,
@@ -202,6 +209,21 @@ async def list_case_notes(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ) -> list[CaseNoteOut]:
+    alert = await db.get(Alert, alert_id)
+    if not alert or alert.organization_id != current_user.organization_id:
+        if alert is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="alert",
+                entity_id=alert_id,
+                details={"target_organization_id": str(alert.organization_id)},
+            )
+            await db.commit()
+        raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
+
     res = await db.execute(
         select(CaseNote).where(CaseNote.alert_id == alert_id).order_by(CaseNote.created_at.asc())
     )
@@ -230,7 +252,18 @@ async def add_case_note(
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ) -> CaseNoteOut:
     alert = await db.get(Alert, alert_id)
-    if not alert:
+    if not alert or alert.organization_id != current_user.organization_id:
+        if alert is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="alert",
+                entity_id=alert_id,
+                details={"target_organization_id": str(alert.organization_id)},
+            )
+            await db.commit()
         raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
 
     note = await record_case_note(
@@ -238,6 +271,15 @@ async def add_case_note(
         alert_id=alert_id,
         author_id=current_user.user_id,
         note_text=body.note_text,
+    )
+    await record_audit_log(
+        db,
+        actor_user_id=current_user.user_id,
+        organization_id=current_user.organization_id,
+        action="add_case_note",
+        entity_type="case_note",
+        entity_id=note.note_id,
+        details={"alert_id": str(alert_id)},
     )
     await db.commit()
 
@@ -258,6 +300,21 @@ async def submit_feedback(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ) -> AnalystFeedbackOut:
+    alert = await db.get(Alert, alert_id)
+    if not alert or alert.organization_id != current_user.organization_id:
+        if alert is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="alert",
+                entity_id=alert_id,
+                details={"target_organization_id": str(alert.organization_id)},
+            )
+            await db.commit()
+        raise HTTPException(status_code=404, detail=f"Alert {alert_id} not found")
+
     feedback = await submit_disposition_feedback(
         db=db,
         alert_id=alert_id,
@@ -265,6 +322,15 @@ async def submit_feedback(
         outcome_label=body.outcome_label,
         feedback_notes=body.feedback_notes,
         quality_rating=body.explanation_quality_rating,
+    )
+    await record_audit_log(
+        db,
+        actor_user_id=current_user.user_id,
+        organization_id=current_user.organization_id,
+        action="submit_feedback",
+        entity_type="analyst_feedback",
+        entity_id=feedback.feedback_id,
+        details={"alert_id": str(alert_id), "outcome_label": body.outcome_label},
     )
     await db.commit()
 

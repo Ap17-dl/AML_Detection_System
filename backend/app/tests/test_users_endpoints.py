@@ -14,9 +14,13 @@ from app.models.user import User
 from app.tests.conftest import ADMIN, ANALYST, FakeResult, api_client
 
 
+from app.tests.conftest import DEFAULT_ORG_ID
+
+
 def _make_user(**overrides) -> User:
     defaults = dict(
         user_id=uuid.uuid4(),
+        organization_id=DEFAULT_ORG_ID,
         email="user@example.com",
         full_name="Test User",
         role_id=2,
@@ -68,9 +72,11 @@ async def test_invite_user_allows_administrator(fake_session):
         app.dependency_overrides.pop(get_supabase_admin_client, None)
 
     assert response.status_code == 201
-    assert response.json() == {"invited_email": "new.operator@example.com", "role": "data_operator"}
+    body = response.json()
+    assert body["invited_email"] == "new.operator@example.com"
+    assert body["role"] == "data_operator"
     assert fake_session.committed
-    assert len(fake_session.added) == 1  # the audit_logs row
+    assert len(fake_session.added) == 2  # user row + audit_logs row
 
 
 async def test_invite_user_denies_non_administrator(fake_session):

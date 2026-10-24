@@ -148,8 +148,8 @@ async def predict_and_persist(
         pred.risk_probability = Decimal(f"{prob:.5f}")
         pred.risk_category = cat
         pred.combined_risk_score = Decimal(f"{prob:.5f}")
-    else:
         pred = Prediction(
+            organization_id=transaction.organization_id,
             transaction_id=transaction.transaction_id,
             model_version=version,
             risk_probability=Decimal(f"{prob:.5f}"),

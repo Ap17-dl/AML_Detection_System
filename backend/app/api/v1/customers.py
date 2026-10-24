@@ -3,9 +3,10 @@
 import uuid
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.audit import record_audit_log
 from app.core.errors import ApiError
 from app.core.security import CurrentUser, require_role
 from app.db.session import get_db
@@ -32,36 +33,14 @@ async def list_customers(
     sort: str = Query("created_at", description="Sort column"),
     order: str = Query("desc", description="Sort order: asc or desc"),
 ) -> CustomerListOut:
-    """Lists customers with search, filter, and pagination."""
-    if not current_user.is_demo:
-        from app.models.ingestion_batch import IngestionBatch
-        from app.models.transaction import Transaction
-
-        batch_res = await db.execute(
-            select(IngestionBatch.batch_id).where(
-                IngestionBatch.uploaded_by == current_user.user_id
-            )
-        )
-        user_batch_ids = batch_res.scalars().all()
-        if not user_batch_ids:
-            return CustomerListOut(items=[], total=0, page=page, page_size=page_size)
-
-        user_accts_subq = select(Transaction.origin_account_id).where(
-            Transaction.ingestion_batch_id.in_(user_batch_ids)
-        )
-        user_cust_subq = select(Account.customer_id).where(Account.account_id.in_(user_accts_subq))
-        query = select(Customer).where(Customer.customer_id.in_(user_cust_subq))
-        count_query = select(func.count(Customer.customer_id)).where(
-            Customer.customer_id.in_(user_cust_subq)
-        )
-    else:
-        query = select(Customer)
-        count_query = select(func.count(Customer.customer_id))
+    """Lists customers for caller's organization with search, filter, and pagination."""
+    query = select(Customer).where(Customer.organization_id == current_user.organization_id)
+    count_query = select(func.count(Customer.customer_id)).where(
+        Customer.organization_id == current_user.organization_id
+    )
 
     if search:
         pattern = f"%{search}%"
-        from sqlalchemy import or_
-
         filter_cond = or_(
             Customer.full_name.ilike(pattern),
             Customer.external_ref.ilike(pattern),
@@ -101,11 +80,22 @@ async def list_customers(
 async def get_customer(
     customer_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: CurrentUser = Depends(_READ_ROLES),
+    current_user: CurrentUser = Depends(_READ_ROLES),
 ) -> CustomerOut:
     """Returns a single customer profile."""
     customer = await db.get(Customer, customer_id)
-    if customer is None:
+    if customer is None or customer.organization_id != current_user.organization_id:
+        if customer is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="customer",
+                entity_id=customer_id,
+                details={"target_organization_id": str(customer.organization_id)},
+            )
+            await db.commit()
         raise ApiError(404, "customer_not_found", f"No customer with id {customer_id}.")
     return CustomerOut.model_validate(customer)
 
@@ -114,15 +104,31 @@ async def get_customer(
 async def list_customer_accounts(
     customer_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: CurrentUser = Depends(_READ_ROLES),
+    current_user: CurrentUser = Depends(_READ_ROLES),
 ) -> list[AccountOut]:
-    """Returns all accounts belonging to a customer."""
+    """Returns all accounts belonging to a customer within caller's organization."""
     customer = await db.get(Customer, customer_id)
-    if customer is None:
+    if customer is None or customer.organization_id != current_user.organization_id:
+        if customer is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="customer",
+                entity_id=customer_id,
+                details={"target_organization_id": str(customer.organization_id)},
+            )
+            await db.commit()
         raise ApiError(404, "customer_not_found", f"No customer with id {customer_id}.")
 
     result = await db.execute(
-        select(Account).where(Account.customer_id == customer_id).order_by(Account.created_at)
+        select(Account)
+        .where(
+            Account.customer_id == customer_id,
+            Account.organization_id == current_user.organization_id,
+        )
+        .order_by(Account.created_at)
     )
     accounts = result.scalars().all()
     return [AccountOut.model_validate(a) for a in accounts]
@@ -132,11 +138,22 @@ async def list_customer_accounts(
 async def get_customer_risk_profile(
     customer_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: CurrentUser = Depends(_READ_ROLES),
+    current_user: CurrentUser = Depends(_READ_ROLES),
 ) -> CustomerRiskProfileOut:
     """Returns dynamic risk score, category, and historical risk timeline for a customer."""
     customer = await db.get(Customer, customer_id)
-    if customer is None:
+    if customer is None or customer.organization_id != current_user.organization_id:
+        if customer is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="customer",
+                entity_id=customer_id,
+                details={"target_organization_id": str(customer.organization_id)},
+            )
+            await db.commit()
         raise ApiError(404, "customer_not_found", f"No customer with id {customer_id}.")
 
     # Fetch risk history
@@ -173,12 +190,27 @@ async def get_customer_risk_profile(
 async def trigger_recalculate_risk(
     customer_id: uuid.UUID,
     db: AsyncSession = Depends(get_db),
-    _: CurrentUser = Depends(_READ_ROLES),
+    current_user: CurrentUser = Depends(_READ_ROLES),
 ) -> CustomerRiskProfileOut:
     """Triggers on-demand customer risk recomputation across all linked accounts and transactions."""
+    customer = await db.get(Customer, customer_id)
+    if customer is None or customer.organization_id != current_user.organization_id:
+        if customer is not None:
+            await record_audit_log(
+                db,
+                actor_user_id=current_user.user_id,
+                organization_id=current_user.organization_id,
+                action="failed_cross_org_access",
+                entity_type="customer",
+                entity_id=customer_id,
+                details={"target_organization_id": str(customer.organization_id)},
+            )
+            await db.commit()
+        raise ApiError(404, "customer_not_found", f"No customer with id {customer_id}.")
+
     from app.services.risk_profile import recalculate_customer_risk
 
     await recalculate_customer_risk(db=db, customer_id=customer_id, reason="manual_request")
     await db.commit()
 
-    return await get_customer_risk_profile(customer_id=customer_id, db=db, _=_)
+    return await get_customer_risk_profile(customer_id=customer_id, db=db, current_user=current_user)

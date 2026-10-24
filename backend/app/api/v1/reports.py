@@ -1,4 +1,4 @@
-"""Compliance reporting and audit export endpoints (AML-FR-24)."""
+"""Compliance reporting and audit export endpoints (AML-FR-24) — strictly organization-scoped."""
 
 import csv
 import io
@@ -24,19 +24,39 @@ async def get_compliance_summary(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ):
-    """Returns aggregated AML compliance metrics."""
-    total_alerts = (await db.execute(select(func.count(Alert.alert_id)))).scalar() or 0
-    closed_alerts = (
-        await db.execute(select(func.count(Alert.alert_id)).where(Alert.status == "closed"))
-    ).scalar() or 0
-    confirmed = (
+    """Returns aggregated AML compliance metrics scoped to caller's organization."""
+    org_id = current_user.organization_id
+
+    total_alerts = (
         await db.execute(
-            select(func.count(Alert.alert_id)).where(Alert.outcome == "confirmed_suspicious")
+            select(func.count(Alert.alert_id)).where(Alert.organization_id == org_id)
         )
     ).scalar() or 0
+
+    closed_alerts = (
+        await db.execute(
+            select(func.count(Alert.alert_id)).where(
+                Alert.organization_id == org_id,
+                Alert.status == "closed",
+            )
+        )
+    ).scalar() or 0
+
+    confirmed = (
+        await db.execute(
+            select(func.count(Alert.alert_id)).where(
+                Alert.organization_id == org_id,
+                Alert.outcome == "confirmed_suspicious",
+            )
+        )
+    ).scalar() or 0
+
     false_positives = (
         await db.execute(
-            select(func.count(Alert.alert_id)).where(Alert.outcome == "false_positive")
+            select(func.count(Alert.alert_id)).where(
+                Alert.organization_id == org_id,
+                Alert.outcome == "false_positive",
+            )
         )
     ).scalar() or 0
 
@@ -56,7 +76,8 @@ async def export_alerts_csv(
     db: AsyncSession = Depends(get_db),
     current_user: CurrentUser = Depends(_ANALYST_OR_ADMIN),
 ):
-    """Exports alerts or flagged transactions as a CSV spreadsheet."""
+    """Exports organization alerts or flagged transactions as a CSV spreadsheet."""
+    org_id = current_user.organization_id
     output = io.StringIO()
     writer = csv.writer(output)
 
@@ -64,7 +85,11 @@ async def export_alerts_csv(
         writer.writerow(
             ["alert_id", "risk_category", "status", "outcome", "created_at", "closed_at"]
         )
-        res = await db.execute(select(Alert).order_by(Alert.created_at.desc()))
+        res = await db.execute(
+            select(Alert)
+            .where(Alert.organization_id == org_id)
+            .order_by(Alert.created_at.desc())
+        )
         for a in res.scalars().all():
             writer.writerow(
                 [
@@ -80,7 +105,10 @@ async def export_alerts_csv(
     else:
         writer.writerow(["transaction_id", "amount", "currency", "channel", "occurred_at"])
         res = await db.execute(
-            select(Transaction).order_by(Transaction.occurred_at.desc()).limit(1000)
+            select(Transaction)
+            .where(Transaction.organization_id == org_id)
+            .order_by(Transaction.occurred_at.desc())
+            .limit(1000)
         )
         for t in res.scalars().all():
             writer.writerow(
@@ -97,9 +125,14 @@ async def export_alerts_csv(
     await record_audit_log(
         db=db,
         actor_user_id=current_user.user_id,
+        organization_id=org_id,
         action="export_report",
         entity_type="report",
-        details={"report_type": report_type, "filename": filename},
+        details={
+            "report_type": report_type,
+            "filename": filename,
+            "organization_id": str(org_id),
+        },
     )
     await db.commit()
 

@@ -7,6 +7,7 @@ from app.api.v1.customers import router as customers_router
 from app.api.v1.dashboard import router as dashboard_router
 from app.api.v1.explanations import router as explanations_router
 from app.api.v1.graph import router as graph_router
+from app.api.v1.organizations import router as organizations_router
 from app.api.v1.predictions import router as predictions_router
 from app.api.v1.reports import router as reports_router
 from app.api.v1.transactions import router as transactions_router
@@ -14,6 +15,7 @@ from app.api.v1.users import router as users_router
 
 api_v1_router = APIRouter(prefix="/api/v1")
 api_v1_router.include_router(auth_router)
+api_v1_router.include_router(organizations_router)
 api_v1_router.include_router(users_router)
 api_v1_router.include_router(transactions_router)
 api_v1_router.include_router(customers_router)

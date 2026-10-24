@@ -44,6 +44,24 @@ async def get_transaction_prediction(
             detail=f"Transaction {transaction_id} not found",
         )
 
+    if txn.organization_id != current_user.organization_id:
+        from app.core.audit import record_audit_log
+
+        await record_audit_log(
+            db,
+            actor_user_id=current_user.user_id,
+            organization_id=current_user.organization_id,
+            action="failed_cross_org_access",
+            entity_type="transaction",
+            entity_id=transaction_id,
+            details={"target_organization_id": str(txn.organization_id)},
+        )
+        await db.commit()
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Transaction {transaction_id} not found",
+        )
+
     # Fetch latest prediction
     pred_res = await db.execute(
         select(Prediction)

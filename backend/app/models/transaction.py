@@ -30,6 +30,12 @@ class Transaction(Base):
     transaction_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, default=uuid.uuid4
     )
+    organization_id: Mapped[uuid.UUID] = mapped_column(
+        UUID(as_uuid=True),
+        ForeignKey("organizations.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     external_ref: Mapped[str | None] = mapped_column(String(80))
     origin_account_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),

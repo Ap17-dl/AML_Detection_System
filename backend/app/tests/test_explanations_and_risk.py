@@ -45,6 +45,7 @@ async def test_explanation_endpoint_allows_analyst(fake_session):
     pred_id = uuid.uuid4()
     txn = Transaction(
         transaction_id=txn_id,
+        organization_id=ANALYST.organization_id,
         origin_account_id=uuid.uuid4(),
         destination_account_id=uuid.uuid4(),
         amount=Decimal("15000.00"),
@@ -91,6 +92,7 @@ async def test_customer_risk_profile_endpoint(fake_session):
     cust_id = uuid.uuid4()
     customer = Customer(
         customer_id=cust_id,
+        organization_id=ANALYST.organization_id,
         full_name="Jane Doe",
         current_risk_score=Decimal("0.7800"),
         current_risk_category="high",

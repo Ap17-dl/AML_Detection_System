@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.core.errors import ApiError
 from app.core.security import CurrentUser, get_current_user
 from app.db.session import get_db
+from app.models.organization import Organization
 from app.models.role import Role
 from app.models.user import User
 from app.schemas.user import CurrentUserOut
@@ -37,6 +38,9 @@ async def read_current_user(
         email=current_user.email,
         full_name=current_user.full_name,
         role=current_user.role_name,
+        organization_id=current_user.organization_id,
+        organization_name=current_user.organization_name,
+        organization_status=current_user.organization_status,
     )
 
 
@@ -48,15 +52,25 @@ async def dev_login(
     """Issues a signed JWT for local development/demo personas (Admin, Analyst, Operator)."""
     settings = get_settings()
     result = await db.execute(
-        select(User, Role.role_name)
+        select(User, Role.role_name, Organization.name, Organization.status)
         .join(Role, User.role_id == Role.role_id)
+        .outerjoin(Organization, User.organization_id == Organization.id)
         .where(User.email == payload.email)
     )
     row = result.first()
     if not row:
         raise ApiError(404, "user_not_found", f"User {payload.email} not found in database.")
 
-    user, role_name = row
+    user, role_name, org_name, org_status = row
+    if not user.is_active:
+        raise ApiError(403, "inactive_user", "This account has been deactivated.")
+    if org_status and org_status != "active":
+        raise ApiError(
+            403,
+            "suspended_organization",
+            f"Organization '{org_name or 'Current'}' is {org_status}.",
+        )
+
     now = int(time.time())
     token_payload = {
         "sub": str(user.user_id),
@@ -76,5 +90,8 @@ async def dev_login(
             email=user.email,
             full_name=user.full_name,
             role=role_name,
+            organization_id=user.organization_id,
+            organization_name=org_name or "Apex Global Bank",
+            organization_status=org_status or "active",
         ),
     )

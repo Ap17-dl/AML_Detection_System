@@ -171,7 +171,7 @@ describe("SignUpForm", () => {
     );
   });
 
-  it("does not offer Administrator as a selectable signup role", () => {
+  it("does not offer Administrator as a selectable signup role in staff mode", () => {
     render(<SignUpForm />);
     const roleSelect = screen.getByLabelText(/Platform role/i);
     const options = Array.from(roleSelect.querySelectorAll("option")).map(
@@ -184,4 +184,53 @@ describe("SignUpForm", () => {
       ),
     ).toBeInTheDocument();
   });
+
+  it("allows switching to organization onboarding mode and registers organization", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        id: "org-123",
+        name: "Pacific Rim Trust",
+        slug: "pacific-rim-trust",
+        status: "active",
+      }),
+    });
+    global.fetch = fetchMock;
+
+    render(<SignUpForm />);
+
+    // Switch to Register New Organization tab
+    fireEvent.click(screen.getByRole("button", { name: "Register New Organization" }));
+
+    expect(screen.getByLabelText(/Organization name/i)).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/Organization name/i), {
+      target: { value: "Pacific Rim Trust" },
+    });
+    fireEvent.change(screen.getByLabelText(/Full name/i), {
+      target: { value: "Sarah Connor" },
+    });
+    fireEvent.change(screen.getByLabelText(/Email address/i), {
+      target: { value: "sarah@pacificrim.com" },
+    });
+    fireEvent.change(screen.getByLabelText(/^Password/i), {
+      target: { value: "securepass123" },
+    });
+    fireEvent.change(screen.getByLabelText(/Confirm password/i), {
+      target: { value: "securepass123" },
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Register organization" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Organization Registered")).toBeInTheDocument();
+    });
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/v1/organizations/register",
+      expect.objectContaining({
+        method: "POST",
+      }),
+    );
+  });
 });
+

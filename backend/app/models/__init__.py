@@ -7,6 +7,7 @@ from app.models.explanation import Explanation
 from app.models.graph_indicator import GraphIndicator
 from app.models.ingestion_batch import IngestionBatch
 from app.models.model_metadata import ModelMetadata
+from app.models.organization import Organization, OrganizationStatus
 from app.models.prediction import Prediction
 from app.models.role import Role, RoleName
 from app.models.transaction import Transaction
@@ -24,6 +25,8 @@ __all__ = [
     "GraphIndicator",
     "IngestionBatch",
     "ModelMetadata",
+    "Organization",
+    "OrganizationStatus",
     "Prediction",
     "Role",
     "RoleName",
