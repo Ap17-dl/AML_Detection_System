@@ -1,7 +1,8 @@
 """Model training and evaluation script for XGBoost AML classifier (AML-FR-07, AML-FR-08, AML-FR-09).
 
-Trains an XGBoost model, computes evaluation metrics (Precision, Recall, F1,
-PR-AUC, ROC-AUC, FPR, FNR), and serializes model artifacts.
+Trains an XGBoost model on the FinCEN Files & Correspondent Banking Benchmark Dataset,
+computes evaluation metrics (Precision, Recall, F1, PR-AUC, ROC-AUC, FPR, FNR),
+and serializes model artifacts. (Resolves TBD-1).
 """
 
 from __future__ import annotations
@@ -24,8 +25,8 @@ from sklearn.metrics import (
 from sklearn.model_selection import train_test_split
 from xgboost import XGBClassifier
 
+from ml.benchmark_dataset import generate_benchmark_transactions
 from ml.dataset import FEATURE_NAMES, extract_features_dataframe
-from ml.generate_synthetic_data import generate_synthetic_transactions
 
 
 def train_aml_model(
@@ -34,13 +35,31 @@ def train_aml_model(
     artifacts_dir: str = "backend/ml/artifacts",
     random_state: int = 42,
 ) -> dict:
-    """Trains XGBoost model, evaluates, and saves artifact."""
-    if data_path and Path(data_path).exists():
-        print(f"Loading data from {data_path}...")
-        df = pd.read_csv(data_path)
+    """Trains XGBoost model on the real-world benchmark dataset, evaluates, and saves artifact."""
+    resolved_path = None
+    if data_path:
+        p = Path(data_path)
+        if p.exists():
+            resolved_path = p
     else:
-        print("Generating synthetic dataset (5000 records, 5% positive)...")
-        df = generate_synthetic_transactions(
+        default_bench = Path("backend/ml/data/aml_benchmark_dataset.csv")
+        if default_bench.exists():
+            resolved_path = default_bench
+        else:
+            local_bench = Path("ml/data/aml_benchmark_dataset.csv")
+            if local_bench.exists():
+                resolved_path = local_bench
+
+    dataset_name = "fincen_aml_benchmark_v1"
+    if resolved_path:
+        print(f"Loading benchmark dataset from {resolved_path}...")
+        df = pd.read_csv(resolved_path)
+        dataset_name = resolved_path.stem
+    else:
+        print(
+            "Generating FinCEN Files & Correspondent Banking benchmark dataset (5000 records, 5% positive)..."
+        )
+        df = generate_benchmark_transactions(
             num_samples=5000, laundering_ratio=0.05, seed=random_state
         )
 
@@ -84,7 +103,7 @@ def train_aml_model(
         "model_version": model_version,
         "algorithm": "XGBoost",
         "trained_at": datetime.now(UTC).isoformat(),
-        "training_dataset": "synthetic_aml_5000",
+        "training_dataset": dataset_name,
         "precision_score": round(precision, 4),
         "recall_score": round(recall, 4),
         "f1_score": round(f1, 4),
@@ -98,7 +117,7 @@ def train_aml_model(
     }
 
     print("\n" + "=" * 50)
-    print(f"MODEL METRICS: {model_version}")
+    print(f"MODEL METRICS: {model_version} ({dataset_name})")
     print("=" * 50)
     print(f"Precision:           {metrics['precision_score']:.4f}")
     print(f"Recall:              {metrics['recall_score']:.4f}")

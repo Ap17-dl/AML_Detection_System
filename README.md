@@ -93,8 +93,8 @@ npm run build
    - **/dashboard**: Real-time triage KPIs, risk distribution donut, open alerts feed.
    - **/transactions**: Search, filter by date/channel/risk, sort, view drawer details.
    - **/transactions/import**: Drag-and-drop CSV importer with error reporting. Sample files are provided in [`sample_data/`](./sample_data):
-     - `sample_data/transactions_standard_batch.csv`: 60 valid transactions.
-     - `sample_data/transactions_aml_suspicious.csv`: Structuring, circular flows, night wires, rapid movement.
+     - `sample_data/transactions_standard_batch.csv`: 120 valid interbank clearing transactions.
+     - `sample_data/transactions_aml_suspicious.csv`: 40 curated transactions based on real-world ICIJ FinCEN Files SAR cases and classic typologies (structuring, circular flows, night wires, rapid movement).
      - `sample_data/transactions_validation_errors.csv`: Edge cases for ingestion error reporting validation.
    - **/alerts & /alerts/[id]**: Analyst investigation case manager with SHAP feature importance, disposition notes, and feedback.
    - **/customers & /customers/[id]**: Customer risk scoring with trend chart history and recalculation.

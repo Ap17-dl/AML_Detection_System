@@ -16,23 +16,51 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
+from ml.benchmark_dataset import generate_benchmark_transactions
 from ml.dataset import extract_features_dataframe
-from ml.generate_synthetic_data import generate_synthetic_transactions
+
+
+def _resolve_file(path_str: str) -> Path | None:
+    p = Path(path_str)
+    if p.exists():
+        return p
+    # Try stripping leading 'backend/' if running inside backend dir
+    if path_str.startswith("backend/"):
+        sub = Path(path_str.replace("backend/", "", 1))
+        if sub.exists():
+            return sub
+    # Try prepending 'backend/' if running from repository root
+    prep = Path("backend") / path_str
+    if prep.exists():
+        return prep
+    return None
 
 
 def evaluate_model(
-    artifact_path: str,
+    artifact_path: str = "backend/ml/artifacts/xgb_v1.0.0.joblib",
     test_data_path: str | None = None,
     samples: int = 1000,
 ) -> dict:
-    """Loads saved model artifact and computes full evaluation suite."""
-    artifact = joblib.load(artifact_path)
+    """Loads saved model artifact and computes full evaluation suite on benchmark data."""
+    resolved_artifact = _resolve_file(artifact_path)
+    if not resolved_artifact:
+        resolved_artifact = _resolve_file("ml/artifacts/xgb_v1.0.0.joblib")
+    if not resolved_artifact:
+        raise FileNotFoundError(f"Model artifact not found at {artifact_path}")
+
+    artifact = joblib.load(resolved_artifact)
     model = artifact["model"]
 
-    if test_data_path and Path(test_data_path).exists():
-        df = pd.read_csv(test_data_path)
+    resolved_data = _resolve_file(test_data_path) if test_data_path else None
+    if not resolved_data:
+        resolved_data = _resolve_file("ml/data/aml_benchmark_dataset.csv")
+
+    if resolved_data:
+        print(f"Evaluating against benchmark data: {resolved_data}")
+        df = pd.read_csv(resolved_data)
     else:
-        df = generate_synthetic_transactions(num_samples=samples, laundering_ratio=0.05, seed=999)
+        print(f"Generating benchmark evaluation slice ({samples} records)...")
+        df = generate_benchmark_transactions(num_samples=samples, laundering_ratio=0.05, seed=999)
 
     X = extract_features_dataframe(df)
     y = df["is_laundering"].astype(int).to_numpy()
@@ -61,7 +89,7 @@ def evaluate_model(
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Evaluate AML Model Artifact")
-    parser.add_argument("--artifact", type=str, default="backend/ml/artifacts/xgb_v1.0.0.joblib")
+    parser.add_argument("--artifact", type=str, default="ml/artifacts/xgb_v1.0.0.joblib")
     parser.add_argument("--test-data", type=str, default=None)
     args = parser.parse_args()
 

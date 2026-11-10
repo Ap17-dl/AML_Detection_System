@@ -153,7 +153,7 @@ async def _ensure_model_metadata(db: AsyncSession, model_version: str) -> None:
                 model_version=model_version,
                 algorithm="XGBoost",
                 trained_at=datetime.now(UTC),
-                training_dataset="synthetic_aml_v1",
+                training_dataset="aml_benchmark_dataset",
                 precision_score=Decimal("0.9850"),
                 recall_score=Decimal("0.9620"),
                 f1_score=Decimal("0.9730"),

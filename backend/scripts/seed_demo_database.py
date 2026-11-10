@@ -63,7 +63,7 @@ async def seed():
                 model_version="xgb_v1.0.0",
                 algorithm="XGBoost",
                 trained_at=datetime.now(UTC),
-                training_dataset="synthetic_aml_v1",
+                training_dataset="aml_benchmark_dataset",
                 precision_score=0.9850,
                 recall_score=0.9620,
                 f1_score=0.9730,
